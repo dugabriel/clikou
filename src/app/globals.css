@@ -1,0 +1,20 @@
+@import "tailwindcss";
+
+@theme inline {
+  --font-sans: var(--font-geist);
+  --font-display: var(--font-grotesk);
+}
+
+:root {
+  color-scheme: dark;
+}
+
+body {
+  background: #0a0a0a;
+  color: #e4e4e7;
+}
+
+::selection {
+  background: #facc15;
+  color: #0a0a0a;
+}
