@@ -16,7 +16,7 @@ export async function sendEmail({ to, subject, html, text }) {
     },
     body: JSON.stringify({
       from: {
-        email: process.env.EMAIL_FROM || "nao-responda@clicou.online",
+        email: process.env.EMAIL_FROM || "nao-responda@clikou.click",
         name: "clikou",
       },
       to: [{ email: to }],

@@ -31,8 +31,8 @@ steps:
       - --region=us-central1
       - --allow-unauthenticated
       - --service-account=clikou-production@$PROJECT_ID.iam.gserviceaccount.com
-      # APP_URL: troque pelo domínio (https://clikou.click) quando mapear
-      - --set-env-vars=APP_URL=https://clikou-production-405960783124.us-central1.run.app,GCS_BUCKET=clikou-fotos-production,COMMISSION_PERCENT=20,ADMIN_EMAILS=eduardofranciscogabriel@gmail.com,EMAIL_FROM=nao-responda@clicou.online,GOOGLE_CLIENT_ID=405960783124-05d98dgpkdp9cfbdj2o5hmt9s34qolt3.apps.googleusercontent.com
+      # Domínio mapeado no Cloud Run (domain mapping em us-central1)
+      - --set-env-vars=APP_URL=https://clikou.click,GCS_BUCKET=clikou-fotos-production,COMMISSION_PERCENT=20,ADMIN_EMAILS=eduardofranciscogabriel@gmail.com,EMAIL_FROM=nao-responda@clikou.click,GOOGLE_CLIENT_ID=405960783124-05d98dgpkdp9cfbdj2o5hmt9s34qolt3.apps.googleusercontent.com
       - --set-secrets=MONGODB_URI=clikou-production-mongodb-uri:latest,AUTH_SECRET=clikou-production-auth-secret:latest,MAILERSEND_TOKEN=clikou-production-mailersend-token:latest,GOOGLE_CLIENT_SECRET=clikou-production-google-client-secret:latest,MP_ACCESS_TOKEN=clikou-production-mp-access-token:latest,MP_CLIENT_ID=clikou-production-mp-client-id:latest,MP_CLIENT_SECRET=clikou-production-mp-client-secret:latest
 
 images:

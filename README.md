@@ -49,7 +49,7 @@ string em `MONGODB_URI`.
 
 ### Google Cloud Storage
 ```bash
-gcloud storage buckets create gs://clikou-fotos --location=southamerica-east1 \
+gcloud storage buckets create gs://clikou-fotos --location=us-central1 \
   --uniform-bucket-level-access
 ```
 Defina `GCS_BUCKET=clikou-fotos`. No Cloud Run a autenticação é automática
@@ -63,7 +63,7 @@ por link enviado no e-mail (contas Google já entram confirmadas). Com o token
 configurado, o clikou também avisa por e-mail: compra confirmada (cliente) e
 saque pago/recusado (fotógrafo).
 1. Crie uma conta em https://www.mailersend.com, verifique o domínio
-   (`clicou.online`) e gere um token de API (começa com `mlsn.`).
+   (`clikou.click`) e gere um token de API (começa com `mlsn.`).
 2. Defina `MAILERSEND_TOKEN` e `EMAIL_FROM` (remetente no domínio verificado).
 
 Sem o token, a conta ativa direto e nenhum e-mail é enviado (modo dev).
@@ -89,11 +89,11 @@ conectado) continuam no fluxo de carteira + saque Pix.
 ```bash
 gcloud run deploy clikou \
   --source . \
-  --region southamerica-east1 \
+  --region us-central1 \
   --allow-unauthenticated \
-  --set-env-vars "MONGODB_URI=...,AUTH_SECRET=...,APP_URL=https://SEU-DOMINIO,GCS_BUCKET=clikou-fotos,MP_ACCESS_TOKEN=...,COMMISSION_PERCENT=20,ADMIN_EMAILS=voce@exemplo.com,MAILERSEND_TOKEN=mlsn....,EMAIL_FROM=nao-responda@clicou.online"
+  --set-env-vars "MONGODB_URI=...,AUTH_SECRET=...,APP_URL=https://SEU-DOMINIO,GCS_BUCKET=clikou-fotos,MP_ACCESS_TOKEN=...,COMMISSION_PERCENT=20,ADMIN_EMAILS=voce@exemplo.com,MAILERSEND_TOKEN=mlsn....,EMAIL_FROM=nao-responda@clikou.click"
 ```
-Depois aponte o domínio `clicou.online` no mapeamento de domínios do Cloud
+Depois aponte o domínio `clikou.click` no mapeamento de domínios do Cloud
 Run e atualize `APP_URL`.
 
 > Dica: para segredos, prefira `--set-secrets` com o Secret Manager em vez de
