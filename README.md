@@ -11,14 +11,14 @@ Cloud Storage · Mercado Pago · Cloud Run.
 ## Como funciona o dinheiro
 
 1. Cliente compra fotos → paga via Mercado Pago (Pix/cartão).
-2. O webhook confirma o pagamento → o pedido vira `pago`, o download é
+2. O webhook confirma o pagamento → o pedido vira `paid`, o download é
    liberado e a parte do fotógrafo (preço − comissão) é creditada na carteira
-   (`Usuario.saldoCentavos`).
+   (`User.balanceCents`).
 3. O fotógrafo solicita saque via Pix no painel (mínimo R$ 20). O saque fica
-   `pendente` — você paga manualmente pelo seu banco e marca como pago no
-   painel admin (`/admin/saques`); recusar devolve o valor à carteira.
-4. Comissão configurável via `COMISSAO_PORCENTO` (padrão 20%), com taxa
-   individual por fotógrafo ajustável em `/admin/fotografos`.
+   `pending` — você paga manualmente pelo seu banco e marca como pago no
+   painel admin (`/admin/withdrawals`); recusar devolve o valor à carteira.
+4. Comissão configurável via `COMMISSION_PERCENT` (padrão 20%), com taxa
+   individual por fotógrafo ajustável em `/admin/photographers`.
 
 O painel admin (`/admin`) mostra vendas e faturamento; o acesso é liberado
 para os e-mails listados em `ADMIN_EMAILS` (separados por vírgula).
@@ -81,7 +81,7 @@ gcloud run deploy clikou \
   --source . \
   --region southamerica-east1 \
   --allow-unauthenticated \
-  --set-env-vars "MONGODB_URI=...,AUTH_SECRET=...,APP_URL=https://SEU-DOMINIO,GCS_BUCKET=clikou-fotos,MP_ACCESS_TOKEN=...,COMISSAO_PORCENTO=20,ADMIN_EMAILS=voce@exemplo.com,MAILERSEND_TOKEN=mlsn....,EMAIL_FROM=nao-responda@clicou.online"
+  --set-env-vars "MONGODB_URI=...,AUTH_SECRET=...,APP_URL=https://SEU-DOMINIO,GCS_BUCKET=clikou-fotos,MP_ACCESS_TOKEN=...,COMMISSION_PERCENT=20,ADMIN_EMAILS=voce@exemplo.com,MAILERSEND_TOKEN=mlsn....,EMAIL_FROM=nao-responda@clicou.online"
 ```
 Depois aponte o domínio `clicou.online` no mapeamento de domínios do Cloud
 Run e atualize `APP_URL`.
@@ -93,16 +93,16 @@ Run e atualize `APP_URL`.
 
 ```
 src/
-  models/        Usuario, Evento, Foto, Pedido, Saque (Mongoose)
+  models/        User, Event, Photo, Order, Withdrawal (Mongoose)
   lib/           db, auth (JWT em cookie), storage (GCS ou disco local),
-                 watermark (sharp), mp (Mercado Pago), pedidos, moeda
+                 watermark (sharp), mp (Mercado Pago), orders, currency
   app/
-    api/         auth, eventos, fotos (upload/preview/download),
-                 checkout, webhooks/mercadopago, saques
-    eventos/     vitrine pública + galeria de compra
-    painel/      área do fotógrafo (eventos, upload, saque)
+    api/         auth, events, photos (upload/preview/download),
+                 checkout, webhooks/mercadopago, withdrawals
+    events/      vitrine pública + galeria de compra
+    dashboard/   área do fotógrafo (eventos, upload, saque)
     admin/       painel admin (vendas, saques, taxa por fotógrafo)
-    minhas-compras/  downloads do cliente
+    my-purchases/  downloads do cliente
 ```
 
 ## Próximos passos sugeridos

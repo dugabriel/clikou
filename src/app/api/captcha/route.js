@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import { gerarDesafio } from "@/lib/captcha";
+import { generateChallenge } from "@/lib/captcha";
 
 export async function GET() {
-  return NextResponse.json(await gerarDesafio());
+  return NextResponse.json(await generateChallenge());
 }
