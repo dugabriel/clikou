@@ -1,10 +1,10 @@
 import Link from "next/link";
 
-export function MarcaIcone({ tamanho = 28 }) {
+export function BrandIcon({ size = 28 }) {
   return (
     <svg
-      width={tamanho}
-      height={tamanho}
+      width={size}
+      height={size}
       viewBox="0 0 96 96"
       aria-hidden="true"
     >
@@ -25,14 +25,14 @@ export function MarcaIcone({ tamanho = 28 }) {
   );
 }
 
-export default function Logo({ tamanho = 28, className = "" }) {
+export default function Logo({ size = 28, className = "" }) {
   return (
     <Link
       href="/"
       className={`flex items-center gap-2.5 ${className}`}
       aria-label="Clikou — página inicial"
     >
-      <MarcaIcone tamanho={tamanho} />
+      <BrandIcon size={size} />
       <span className="font-display text-xl font-bold lowercase tracking-tight">
         clik<span className="text-yellow-400">ou</span>
       </span>

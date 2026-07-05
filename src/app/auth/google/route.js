@@ -2,8 +2,8 @@ import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import crypto from "crypto";
 import { dbConnect } from "@/lib/db";
-import Usuario from "@/models/Usuario";
-import { criarSessao } from "@/lib/auth";
+import User from "@/models/User";
+import { createSession } from "@/lib/auth";
 
 const AUTH_URL = "https://accounts.google.com/o/oauth2/v2/auth";
 const TOKEN_URL = "https://oauth2.googleapis.com/token";
@@ -19,11 +19,11 @@ export async function GET(req) {
   const redirectUri = `${appUrl}/auth/google`;
 
   if (!code) {
-    const estado = {
+    const state = {
       n: crypto.randomBytes(16).toString("hex"),
-      voltar: url.searchParams.get("voltar") || "",
+      next: url.searchParams.get("next") || "",
     };
-    jar.set("google_oauth", JSON.stringify(estado), {
+    jar.set("google_oauth", JSON.stringify(state), {
       httpOnly: true,
       sameSite: "lax",
       maxAge: 600,
@@ -35,21 +35,21 @@ export async function GET(req) {
       redirect_uri: redirectUri,
       response_type: "code",
       scope: "openid email profile",
-      state: estado.n,
+      state: state.n,
       prompt: "select_account",
     });
     return NextResponse.redirect(`${AUTH_URL}?${params}`);
   }
 
   // ----- Callback -----
-  let estado = null;
+  let state = null;
   try {
-    estado = JSON.parse(jar.get("google_oauth")?.value || "");
+    state = JSON.parse(jar.get("google_oauth")?.value || "");
   } catch {}
   jar.delete("google_oauth");
 
-  const erroLogin = NextResponse.redirect(new URL("/login?erro=google", appUrl));
-  if (!estado || estado.n !== url.searchParams.get("state")) return erroLogin;
+  const loginError = NextResponse.redirect(new URL("/login?error=google", appUrl));
+  if (!state || state.n !== url.searchParams.get("state")) return loginError;
 
   const tokenRes = await fetch(TOKEN_URL, {
     method: "POST",
@@ -65,33 +65,33 @@ export async function GET(req) {
   const tokens = await tokenRes.json();
   if (!tokens.access_token) {
     console.error("Google OAuth: falha ao trocar código", tokens);
-    return erroLogin;
+    return loginError;
   }
 
-  const perfilRes = await fetch(USERINFO_URL, {
+  const profileRes = await fetch(USERINFO_URL, {
     headers: { Authorization: `Bearer ${tokens.access_token}` },
   });
-  const perfil = await perfilRes.json(); // { sub, email, name, picture }
-  if (!perfil.email) return erroLogin;
+  const profile = await profileRes.json(); // { sub, email, name, picture }
+  if (!profile.email) return loginError;
 
   await dbConnect();
-  let usuario = await Usuario.findOne({ email: perfil.email.toLowerCase() });
-  if (!usuario) {
-    usuario = await Usuario.create({
-      nome: perfil.name || perfil.email.split("@")[0],
-      email: perfil.email,
-      googleId: perfil.sub,
-      avatarUrl: perfil.picture || "",
+  let user = await User.findOne({ email: profile.email.toLowerCase() });
+  if (!user) {
+    user = await User.create({
+      name: profile.name || profile.email.split("@")[0],
+      email: profile.email,
+      googleId: profile.sub,
+      avatarUrl: profile.picture || "",
     });
-  } else if (!usuario.googleId) {
+  } else if (!user.googleId) {
     // Conta criada por e-mail/senha: vincula o Google a ela.
     // O Google comprovou a posse do e-mail, então a conta fica confirmada.
-    usuario.googleId = perfil.sub;
-    usuario.emailVerificado = true;
-    if (!usuario.avatarUrl) usuario.avatarUrl = perfil.picture || "";
-    await usuario.save();
+    user.googleId = profile.sub;
+    user.emailVerified = true;
+    if (!user.avatarUrl) user.avatarUrl = profile.picture || "";
+    await user.save();
   }
 
-  await criarSessao(usuario);
-  return NextResponse.redirect(new URL(estado.voltar || "/eventos", appUrl));
+  await createSession(user);
+  return NextResponse.redirect(new URL(state.next || "/events", appUrl));
 }

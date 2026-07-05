@@ -1,25 +1,25 @@
 import Link from "next/link";
 import { dbConnect } from "@/lib/db";
-import Evento from "@/models/Evento";
-import "@/models/Foto";
-import "@/models/Usuario";
-import CardEvento from "@/components/CardEvento";
+import Event from "@/models/Event";
+import "@/models/Photo";
+import "@/models/User";
+import EventCard from "@/components/EventCard";
 import {
-  IconeCamera,
-  IconeCarrinho,
-  IconeCarteira,
-  IconeDownload,
-  IconeSeta,
-} from "@/components/Icones";
+  CameraIcon,
+  CartIcon,
+  WalletIcon,
+  DownloadIcon,
+  ArrowIcon,
+} from "@/components/Icons";
 
 export const dynamic = "force-dynamic";
 
 export default async function Home() {
   await dbConnect();
-  const eventos = await Evento.find({ publicado: true })
+  const events = await Event.find({ published: true })
     .sort({ createdAt: -1 })
     .limit(8)
-    .populate("fotografo", "nome")
+    .populate("photographer", "name")
     .lean();
 
   return (
@@ -52,17 +52,17 @@ export default async function Home() {
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <Link
-                href="/eventos"
+                href="/events"
                 className="group flex items-center gap-2 rounded-full bg-yellow-400 px-7 py-3.5 font-semibold text-zinc-950 transition hover:bg-yellow-300"
               >
                 Encontrar minhas fotos
-                <IconeSeta
-                  tamanho={18}
+                <ArrowIcon
+                  size={18}
                   className="transition-transform group-hover:translate-x-1"
                 />
               </Link>
               <Link
-                href="/painel"
+                href="/dashboard"
                 className="rounded-full border border-white/30 bg-black/30 px-7 py-3.5 font-semibold text-white backdrop-blur transition hover:border-yellow-400 hover:text-yellow-400"
               >
                 Quero vender fotos
@@ -76,22 +76,22 @@ export default async function Home() {
       <section className="mx-auto max-w-6xl px-4 py-16">
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
           {[
-            [IconeCarteira, "80%", "da venda fica com quem fotografou"],
-            [IconeDownload, "Na hora", "download em alta liberado após o pagamento"],
-            [IconeCamera, "Pra todos", "não precisa ser fotógrafo profissional"],
-          ].map(([Icone, numero, texto]) => (
+            [WalletIcon, "80%", "da venda fica com quem fotografou"],
+            [DownloadIcon, "Na hora", "download em alta liberado após o pagamento"],
+            [CameraIcon, "Pra todos", "não precisa ser fotógrafo profissional"],
+          ].map(([Icon, number, text]) => (
             <div
-              key={numero}
+              key={number}
               className="flex items-center gap-4 rounded-2xl border border-white/5 bg-zinc-900/60 p-6"
             >
               <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-yellow-400 text-zinc-950">
-                <Icone tamanho={22} />
+                <Icon size={22} />
               </div>
               <div>
                 <p className="font-display text-2xl font-bold text-white">
-                  {numero}
+                  {number}
                 </p>
-                <p className="text-sm text-zinc-400">{texto}</p>
+                <p className="text-sm text-zinc-400">{text}</p>
               </div>
             </div>
           ))}
@@ -99,7 +99,7 @@ export default async function Home() {
       </section>
 
       {/* Eventos recentes */}
-      {eventos.length > 0 && (
+      {events.length > 0 && (
         <section className="mx-auto max-w-6xl px-4 pb-16">
           <div className="mb-8 flex items-end justify-between">
             <div>
@@ -111,15 +111,15 @@ export default async function Home() {
               </p>
             </div>
             <Link
-              href="/eventos"
+              href="/events"
               className="hidden items-center gap-1.5 text-sm font-medium text-yellow-400 hover:text-yellow-300 sm:flex"
             >
-              Ver todos <IconeSeta tamanho={16} />
+              Ver todos <ArrowIcon size={16} />
             </Link>
           </div>
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            {eventos.map((e) => (
-              <CardEvento key={e._id.toString()} evento={e} />
+            {events.map((e) => (
+              <EventCard key={e._id.toString()} event={e} />
             ))}
           </div>
         </section>
@@ -138,34 +138,34 @@ export default async function Home() {
           <div className="mt-12 grid gap-6 sm:grid-cols-3">
             {[
               [
-                IconeCamera,
+                CameraIcon,
                 "Crie o evento e suba as fotos",
                 "A marca d'água é aplicada automaticamente nos previews. Você define o preço de cada foto.",
               ],
               [
-                IconeCarrinho,
+                CartIcon,
                 "Compartilhe o link",
                 "Mande o link do evento no grupo, no story, onde quiser. Quem estava lá encontra as próprias fotos.",
               ],
               [
-                IconeCarteira,
+                WalletIcon,
                 "Receba na carteira",
                 "A cada venda, sua parte cai na carteira. Saque via Pix quando quiser.",
               ],
-            ].map(([Icone, titulo, texto], i) => (
+            ].map(([Icon, title, text], i) => (
               <div
-                key={titulo}
+                key={title}
                 className="relative rounded-2xl border border-white/5 bg-zinc-950 p-7"
               >
                 <span className="font-display absolute right-6 top-5 text-5xl font-bold text-zinc-800">
                   {i + 1}
                 </span>
                 <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-yellow-400/10 text-yellow-400">
-                  <Icone tamanho={22} />
+                  <Icon size={22} />
                 </div>
-                <h3 className="mt-5 text-lg font-semibold">{titulo}</h3>
+                <h3 className="mt-5 text-lg font-semibold">{title}</h3>
                 <p className="mt-2 text-sm leading-relaxed text-zinc-400">
-                  {texto}
+                  {text}
                 </p>
               </div>
             ))}
@@ -186,7 +186,7 @@ export default async function Home() {
             </p>
           </div>
           <Link
-            href="/painel"
+            href="/dashboard"
             className="shrink-0 rounded-full bg-zinc-950 px-8 py-4 font-semibold text-yellow-400 transition hover:bg-zinc-800"
           >
             Começar agora

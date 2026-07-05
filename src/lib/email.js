@@ -3,9 +3,9 @@
 const API_URL =
   process.env.MAILERSEND_API_URL || "https://api.mailersend.com/v1/email";
 
-export const emailAtivo = !!process.env.MAILERSEND_TOKEN;
+export const emailEnabled = !!process.env.MAILERSEND_TOKEN;
 
-export async function enviarEmail({ para, assunto, html, texto }) {
+export async function sendEmail({ to, subject, html, text }) {
   const res = await fetch(API_URL, {
     method: "POST",
     headers: {
@@ -17,10 +17,10 @@ export async function enviarEmail({ para, assunto, html, texto }) {
         email: process.env.EMAIL_FROM || "nao-responda@clicou.online",
         name: "clikou",
       },
-      to: [{ email: para }],
-      subject: assunto,
+      to: [{ email: to }],
+      subject,
       html,
-      text: texto || html.replace(/<[^>]+>/g, " "),
+      text: text || html.replace(/<[^>]+>/g, " "),
     }),
   });
   if (!res.ok) {
@@ -30,15 +30,15 @@ export async function enviarEmail({ para, assunto, html, texto }) {
   return true;
 }
 
-export async function enviarEmailVerificacao(email, nome, token, appUrl) {
-  const link = `${appUrl}/verificar-email?token=${encodeURIComponent(token)}`;
-  const primeiroNome = (nome || "").split(" ")[0];
-  return enviarEmail({
-    para: email,
-    assunto: "Confirme sua conta no clikou 📸",
+export async function sendVerificationEmail(email, name, token, appUrl) {
+  const link = `${appUrl}/verify-email?token=${encodeURIComponent(token)}`;
+  const firstName = (name || "").split(" ")[0];
+  return sendEmail({
+    to: email,
+    subject: "Confirme sua conta no clikou 📸",
     html: `
       <div style="font-family:sans-serif;max-width:480px;margin:0 auto;padding:24px">
-        <h2 style="margin:0 0 16px">Olá${primeiroNome ? `, ${primeiroNome}` : ""}!</h2>
+        <h2 style="margin:0 0 16px">Olá${firstName ? `, ${firstName}` : ""}!</h2>
         <p>Falta só um passo: confirme seu e-mail para ativar sua conta no
         <strong>clikou</strong>.</p>
         <p style="margin:28px 0">

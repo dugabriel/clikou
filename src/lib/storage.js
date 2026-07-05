@@ -4,9 +4,9 @@ import path from "path";
 // Se GCS_BUCKET estiver definido usa o Google Cloud Storage;
 // senão salva em .data/uploads (modo desenvolvimento local).
 const BUCKET = process.env.GCS_BUCKET;
-const DIR_LOCAL = path.join(process.cwd(), ".data", "uploads");
+const LOCAL_DIR = path.join(process.cwd(), ".data", "uploads");
 
-export const usandoGCS = !!BUCKET;
+export const usingGCS = !!BUCKET;
 
 let _bucket = null;
 async function bucket() {
@@ -17,50 +17,50 @@ async function bucket() {
   return _bucket;
 }
 
-export async function salvarArquivo(chave, buffer, contentType) {
+export async function saveFile(key, buffer, contentType) {
   if (BUCKET) {
     const b = await bucket();
-    await b.file(chave).save(buffer, { contentType, resumable: false });
+    await b.file(key).save(buffer, { contentType, resumable: false });
   } else {
-    const destino = path.join(DIR_LOCAL, chave);
-    await fs.mkdir(path.dirname(destino), { recursive: true });
-    await fs.writeFile(destino, buffer);
+    const target = path.join(LOCAL_DIR, key);
+    await fs.mkdir(path.dirname(target), { recursive: true });
+    await fs.writeFile(target, buffer);
   }
 }
 
-export async function removerArquivo(chave) {
+export async function deleteFile(key) {
   try {
     if (BUCKET) {
       const b = await bucket();
-      await b.file(chave).delete();
+      await b.file(key).delete();
     } else {
-      await fs.unlink(path.join(DIR_LOCAL, chave));
+      await fs.unlink(path.join(LOCAL_DIR, key));
     }
   } catch {
     // arquivo já removido ou inexistente — ignora
   }
 }
 
-export async function lerArquivo(chave) {
+export async function readFile(key) {
   if (BUCKET) {
     const b = await bucket();
-    const [buf] = await b.file(chave).download();
+    const [buf] = await b.file(key).download();
     return buf;
   }
-  return fs.readFile(path.join(DIR_LOCAL, chave));
+  return fs.readFile(path.join(LOCAL_DIR, key));
 }
 
 // URL assinada para download do original. Se não der para assinar
 // (ex.: dev com credenciais de usuário, sem chave privada), retorna null
 // e a rota de download faz o streaming do arquivo.
-export async function urlDownloadAssinada(chave, nomeArquivo) {
+export async function signedDownloadUrl(key, fileName) {
   if (!BUCKET) return null;
   try {
     const b = await bucket();
-    const [url] = await b.file(chave).getSignedUrl({
+    const [url] = await b.file(key).getSignedUrl({
       action: "read",
       expires: Date.now() + 15 * 60 * 1000,
-      responseDisposition: `attachment; filename="${nomeArquivo}"`,
+      responseDisposition: `attachment; filename="${fileName}"`,
     });
     return url;
   } catch {

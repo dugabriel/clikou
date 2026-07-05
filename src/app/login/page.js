@@ -1,12 +1,12 @@
 import { Suspense } from "react";
-import FormLogin from "@/components/FormLogin";
+import LoginForm from "@/components/LoginForm";
 
 export const metadata = { title: "Entrar — Clikou" };
 
 export default function Login() {
   return (
     <Suspense>
-      <FormLogin />
+      <LoginForm />
     </Suspense>
   );
 }

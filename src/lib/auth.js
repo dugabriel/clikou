@@ -1,20 +1,20 @@
 import { SignJWT, jwtVerify } from "jose";
 import { cookies } from "next/headers";
 
-const segredo = new TextEncoder().encode(
-  process.env.AUTH_SECRET || "dev-segredo-troque-em-producao"
+const secret = new TextEncoder().encode(
+  process.env.AUTH_SECRET || "dev-secret-change-in-production"
 );
-const COOKIE = "clikou_sessao";
+const COOKIE = "clikou_session";
 
-export async function criarSessao(usuario) {
+export async function createSession(user) {
   const token = await new SignJWT({
-    id: usuario._id.toString(),
-    nome: usuario.nome,
-    email: usuario.email,
+    id: user._id.toString(),
+    name: user.name,
+    email: user.email,
   })
     .setProtectedHeader({ alg: "HS256" })
     .setExpirationTime("7d")
-    .sign(segredo);
+    .sign(secret);
 
   const jar = await cookies();
   jar.set(COOKIE, token, {
@@ -26,35 +26,35 @@ export async function criarSessao(usuario) {
   });
 }
 
-export async function obterSessao() {
+export async function getSession() {
   const jar = await cookies();
   const token = jar.get(COOKIE)?.value;
   if (!token) return null;
   try {
-    const { payload } = await jwtVerify(token, segredo);
-    return payload; // { id, nome, email }
+    const { payload } = await jwtVerify(token, secret);
+    return payload; // { id, name, email }
   } catch {
     return null;
   }
 }
 
-export async function encerrarSessao() {
+export async function destroySession() {
   const jar = await cookies();
   jar.delete(COOKIE);
 }
 
 // Token de uso único (por prazo) para confirmar o e-mail da conta.
-export async function criarTokenVerificacao(usuarioId) {
-  return new SignJWT({ id: usuarioId.toString(), uso: "verificar-email" })
+export async function createVerificationToken(userId) {
+  return new SignJWT({ id: userId.toString(), purpose: "verify-email" })
     .setProtectedHeader({ alg: "HS256" })
     .setExpirationTime("48h")
-    .sign(segredo);
+    .sign(secret);
 }
 
-export async function lerTokenVerificacao(token) {
+export async function readVerificationToken(token) {
   try {
-    const { payload } = await jwtVerify(token, segredo);
-    return payload.uso === "verificar-email" ? payload.id : null;
+    const { payload } = await jwtVerify(token, secret);
+    return payload.purpose === "verify-email" ? payload.id : null;
   } catch {
     return null;
   }
@@ -66,6 +66,6 @@ const adminEmails = (process.env.ADMIN_EMAILS || "")
   .map((e) => e.trim().toLowerCase())
   .filter(Boolean);
 
-export function ehAdmin(sessao) {
-  return !!sessao?.email && adminEmails.includes(sessao.email.toLowerCase());
+export function isAdmin(session) {
+  return !!session?.email && adminEmails.includes(session.email.toLowerCase());
 }

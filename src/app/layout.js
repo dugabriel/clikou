@@ -37,13 +37,13 @@ export default function RootLayout({ children }) {
             <div className="flex gap-16 text-sm">
               <div className="space-y-2.5">
                 <p className="font-semibold text-zinc-300">Navegue</p>
-                <Link href="/eventos" className="block text-zinc-500 hover:text-yellow-400">
+                <Link href="/events" className="block text-zinc-500 hover:text-yellow-400">
                   Eventos
                 </Link>
-                <Link href="/painel" className="block text-zinc-500 hover:text-yellow-400">
+                <Link href="/dashboard" className="block text-zinc-500 hover:text-yellow-400">
                   Vender fotos
                 </Link>
-                <Link href="/minhas-compras" className="block text-zinc-500 hover:text-yellow-400">
+                <Link href="/my-purchases" className="block text-zinc-500 hover:text-yellow-400">
                   Minhas compras
                 </Link>
               </div>
@@ -52,7 +52,7 @@ export default function RootLayout({ children }) {
                 <Link href="/login" className="block text-zinc-500 hover:text-yellow-400">
                   Entrar
                 </Link>
-                <Link href="/cadastro" className="block text-zinc-500 hover:text-yellow-400">
+                <Link href="/signup" className="block text-zinc-500 hover:text-yellow-400">
                   Criar conta
                 </Link>
               </div>

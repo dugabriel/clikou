@@ -3,49 +3,49 @@ import { SignJWT, jwtVerify } from "jose";
 
 // Captcha próprio, sem serviço externo: uma continha simples cuja resposta
 // vai hasheada num token assinado — o cliente devolve token + resposta.
-const chave = process.env.AUTH_SECRET || "dev-segredo-troque-em-producao";
-const segredo = new TextEncoder().encode(chave);
+const key = process.env.AUTH_SECRET || "dev-secret-change-in-production";
+const secret = new TextEncoder().encode(key);
 
-const NUMEROS = [
+const NUMBER_WORDS = [
   "zero", "um", "dois", "três", "quatro",
   "cinco", "seis", "sete", "oito", "nove",
 ];
 
 // Tokens já usados (anti-replay); por instância, suficiente contra spam bobo.
-const usados = new Map(); // jti -> expiraEm (ms)
-function limparUsados() {
-  const agora = Date.now();
-  for (const [jti, exp] of usados) if (exp < agora) usados.delete(jti);
+const used = new Map(); // jti -> expiresAt (ms)
+function pruneUsed() {
+  const now = Date.now();
+  for (const [jti, exp] of used) if (exp < now) used.delete(jti);
 }
 
-function hashResposta(resposta) {
+function hashAnswer(answer) {
   return crypto
     .createHash("sha256")
-    .update(`captcha:${chave}:${String(resposta).trim()}`)
+    .update(`captcha:${key}:${String(answer).trim()}`)
     .digest("hex");
 }
 
-export async function gerarDesafio() {
+export async function generateChallenge() {
   const a = 1 + Math.floor(Math.random() * 9);
   const b = 1 + Math.floor(Math.random() * 9);
-  const token = await new SignJWT({ uso: "captcha", h: hashResposta(a + b) })
+  const token = await new SignJWT({ purpose: "captcha", h: hashAnswer(a + b) })
     .setProtectedHeader({ alg: "HS256" })
     .setJti(crypto.randomUUID())
     .setExpirationTime("15m")
-    .sign(segredo);
+    .sign(secret);
   // Mistura número por extenso e algarismo pra dificultar parse automático.
-  return { pergunta: `Quanto é ${NUMEROS[a]} + ${b}?`, token };
+  return { question: `Quanto é ${NUMBER_WORDS[a]} + ${b}?`, token };
 }
 
-export async function conferirDesafio(token, resposta) {
-  if (!token || resposta == null || resposta === "") return false;
+export async function verifyChallenge(token, answer) {
+  if (!token || answer == null || answer === "") return false;
   try {
-    const { payload } = await jwtVerify(token, segredo);
-    if (payload.uso !== "captcha") return false;
-    if (usados.has(payload.jti)) return false;
-    if (payload.h !== hashResposta(resposta)) return false;
-    limparUsados();
-    usados.set(payload.jti, payload.exp * 1000);
+    const { payload } = await jwtVerify(token, secret);
+    if (payload.purpose !== "captcha") return false;
+    if (used.has(payload.jti)) return false;
+    if (payload.h !== hashAnswer(answer)) return false;
+    pruneUsed();
+    used.set(payload.jti, payload.exp * 1000);
     return true;
   } catch {
     return false;

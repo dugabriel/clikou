@@ -1,74 +1,74 @@
 import { NextResponse } from "next/server";
 import { dbConnect } from "@/lib/db";
-import Foto from "@/models/Foto";
-import Pedido from "@/models/Pedido";
-import { obterSessao } from "@/lib/auth";
-import { mpAtivo, preferencias } from "@/lib/mp";
-import { aprovarPedido } from "@/lib/pedidos";
+import Photo from "@/models/Photo";
+import Order from "@/models/Order";
+import { getSession } from "@/lib/auth";
+import { mpEnabled, preferences } from "@/lib/mp";
+import { approveOrder } from "@/lib/orders";
 
 export async function POST(req) {
-  const sessao = await obterSessao();
-  if (!sessao) {
-    return NextResponse.json({ erro: "Faça login para comprar." }, { status: 401 });
+  const session = await getSession();
+  if (!session) {
+    return NextResponse.json({ error: "Faça login para comprar." }, { status: 401 });
   }
 
-  const { fotoIds } = await req.json();
-  if (!Array.isArray(fotoIds) || fotoIds.length === 0) {
-    return NextResponse.json({ erro: "Selecione ao menos uma foto." }, { status: 400 });
+  const { photoIds } = await req.json();
+  if (!Array.isArray(photoIds) || photoIds.length === 0) {
+    return NextResponse.json({ error: "Selecione ao menos uma foto." }, { status: 400 });
   }
 
   await dbConnect();
-  const fotos = await Foto.find({ _id: { $in: fotoIds } }).populate(
-    "evento",
-    "titulo"
+  const photos = await Photo.find({ _id: { $in: photoIds } }).populate(
+    "event",
+    "title"
   );
-  if (fotos.length === 0) {
-    return NextResponse.json({ erro: "Fotos não encontradas." }, { status: 404 });
+  if (photos.length === 0) {
+    return NextResponse.json({ error: "Fotos não encontradas." }, { status: 404 });
   }
 
-  const total = fotos.reduce((s, f) => s + f.precoCentavos, 0);
-  const pedido = await Pedido.create({
-    cliente: sessao.id,
-    itens: fotos.map((f) => ({
-      foto: f._id,
-      fotografo: f.fotografo,
-      precoCentavos: f.precoCentavos,
+  const total = photos.reduce((s, p) => s + p.priceCents, 0);
+  const order = await Order.create({
+    customer: session.id,
+    items: photos.map((p) => ({
+      photo: p._id,
+      photographer: p.photographer,
+      priceCents: p.priceCents,
     })),
-    totalCentavos: total,
+    totalCents: total,
   });
 
   // Sem token do Mercado Pago: modo dev, aprova na hora.
-  if (!mpAtivo) {
-    await aprovarPedido(pedido._id);
-    return NextResponse.json({ url: "/compra/sucesso?dev=1" });
+  if (!mpEnabled) {
+    await approveOrder(order._id);
+    return NextResponse.json({ url: "/purchase/success?dev=1" });
   }
 
   const appUrl = process.env.APP_URL || new URL(req.url).origin;
-  const tituloEvento = fotos[0].evento?.titulo || "evento";
-  const pref = await preferencias().create({
+  const eventTitle = photos[0].event?.title || "evento";
+  const pref = await preferences().create({
     body: {
       items: [
         {
-          id: pedido._id.toString(),
-          title: `${fotos.length} foto(s) — ${tituloEvento} (clikou)`,
+          id: order._id.toString(),
+          title: `${photos.length} foto(s) — ${eventTitle} (clikou)`,
           quantity: 1,
           currency_id: "BRL",
           unit_price: total / 100,
         },
       ],
-      external_reference: pedido._id.toString(),
+      external_reference: order._id.toString(),
       notification_url: `${appUrl}/api/webhooks/mercadopago`,
       back_urls: {
-        success: `${appUrl}/compra/sucesso`,
-        failure: `${appUrl}/compra/erro`,
-        pending: `${appUrl}/compra/sucesso?pendente=1`,
+        success: `${appUrl}/purchase/success`,
+        failure: `${appUrl}/purchase/error`,
+        pending: `${appUrl}/purchase/success?pending=1`,
       },
       auto_return: "approved",
     },
   });
 
-  pedido.mpPreferenceId = pref.id;
-  await pedido.save();
+  order.mpPreferenceId = pref.id;
+  await order.save();
 
   return NextResponse.json({ url: pref.init_point });
 }

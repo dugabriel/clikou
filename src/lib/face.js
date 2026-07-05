@@ -1,37 +1,37 @@
 // Reconhecimento facial no NAVEGADOR (client components apenas).
-// Os modelos (~6 MB) são carregados uma única vez, de /modelos-face.
+// Os modelos (~6 MB) são carregados uma única vez, de /face-models.
 
-let carregando = null;
+let loading = null;
 
-async function carregarFaceApi() {
+async function loadFaceApi() {
   const faceapi = await import("@vladmandic/face-api");
-  if (!carregando) {
-    carregando = Promise.all([
-      faceapi.nets.tinyFaceDetector.loadFromUri("/modelos-face"),
-      faceapi.nets.faceLandmark68Net.loadFromUri("/modelos-face"),
-      faceapi.nets.faceRecognitionNet.loadFromUri("/modelos-face"),
+  if (!loading) {
+    loading = Promise.all([
+      faceapi.nets.tinyFaceDetector.loadFromUri("/face-models"),
+      faceapi.nets.faceLandmark68Net.loadFromUri("/face-models"),
+      faceapi.nets.faceRecognitionNet.loadFromUri("/face-models"),
     ]);
   }
-  await carregando;
+  await loading;
   return faceapi;
 }
 
-function carregarImagem(arquivo) {
-  return new Promise((resolver, rejeitar) => {
+function loadImage(file) {
+  return new Promise((resolve, reject) => {
     const img = new Image();
-    img.onload = () => resolver(img);
-    img.onerror = rejeitar;
-    img.src = URL.createObjectURL(arquivo);
+    img.onload = () => resolve(img);
+    img.onerror = reject;
+    img.src = URL.createObjectURL(file);
   });
 }
 
 // Retorna um descritor (array de 128 números) por rosto encontrado,
 // ordenados do rosto maior para o menor.
-export async function extrairDescritores(arquivo) {
-  const faceapi = await carregarFaceApi();
-  const img = await carregarImagem(arquivo);
+export async function extractDescriptors(file) {
+  const faceapi = await loadFaceApi();
+  const img = await loadImage(file);
   try {
-    const deteccoes = await faceapi
+    const detections = await faceapi
       .detectAllFaces(
         img,
         new faceapi.TinyFaceDetectorOptions({
@@ -42,7 +42,7 @@ export async function extrairDescritores(arquivo) {
       .withFaceLandmarks()
       .withFaceDescriptors();
 
-    return deteccoes
+    return detections
       .sort(
         (a, b) =>
           b.detection.box.width * b.detection.box.height -
