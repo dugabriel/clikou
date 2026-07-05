@@ -18,6 +18,11 @@ const UserSchema = new mongoose.Schema(
     avatarUrl: { type: String, default: "" },
     balanceCents: { type: Number, default: 0 },
     pixKey: { type: String, default: "" },
+    // Conta Mercado Pago conectada via OAuth (split automático nas vendas)
+    mpUserId: { type: String },
+    mpAccessToken: { type: String },
+    mpRefreshToken: { type: String },
+    mpTokenExpiresAt: { type: Date },
     // Taxa da plataforma para este fotógrafo; null usa COMMISSION_PERCENT
     commissionPercent: { type: Number, default: null, min: 0, max: 100 },
     // Perfil público (/f/[username])

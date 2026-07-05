@@ -3,6 +3,11 @@ import { dbConnect } from "@/lib/db";
 import Withdrawal from "@/models/Withdrawal";
 import User from "@/models/User";
 import { getSession, isAdmin } from "@/lib/auth";
+import {
+  emailEnabled,
+  sendWithdrawalPaidEmail,
+  sendWithdrawalRejectedEmail,
+} from "@/lib/email";
 
 export async function PATCH(req, { params }) {
   const session = await getSession();
@@ -36,6 +41,29 @@ export async function PATCH(req, { params }) {
       { _id: withdrawal.photographer },
       { $inc: { balanceCents: withdrawal.amountCents } }
     );
+  }
+
+  // Avisa o fotógrafo por e-mail; falha no envio não desfaz o saque.
+  if (emailEnabled) {
+    try {
+      const photographer = await User.findById(withdrawal.photographer)
+        .select("name email")
+        .lean();
+      if (photographer) {
+        const payload = {
+          to: photographer.email,
+          name: photographer.name,
+          amountCents: withdrawal.amountCents,
+        };
+        if (action === "pay") {
+          await sendWithdrawalPaidEmail({ ...payload, pixKey: withdrawal.pixKey });
+        } else {
+          await sendWithdrawalRejectedEmail(payload);
+        }
+      }
+    } catch (e) {
+      console.error("E-mail de saque:", e.message);
+    }
   }
 
   return NextResponse.json({ ok: true, status: withdrawal.status });

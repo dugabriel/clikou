@@ -3,7 +3,14 @@ import { dbConnect } from "@/lib/db";
 import Photo from "@/models/Photo";
 import Order from "@/models/Order";
 import { getSession } from "@/lib/auth";
-import { mpEnabled, preferences } from "@/lib/mp";
+import {
+  mpEnabled,
+  splitEnabled,
+  preferences,
+  sellerPreferences,
+  getConnectedSeller,
+  COMMISSION_PERCENT,
+} from "@/lib/mp";
 import { approveOrder } from "@/lib/orders";
 
 export async function POST(req) {
@@ -37,35 +44,68 @@ export async function POST(req) {
     totalCents: total,
   });
 
+  const appUrl = process.env.APP_URL || new URL(req.url).origin;
+
   // Sem token do Mercado Pago: modo dev, aprova na hora.
   if (!mpEnabled) {
-    await approveOrder(order._id);
+    await approveOrder(order._id, null, { appUrl });
     return NextResponse.json({ url: "/purchase/success?dev=1" });
   }
-
-  const appUrl = process.env.APP_URL || new URL(req.url).origin;
   const eventTitle = photos[0].event?.title || "evento";
-  const pref = await preferences().create({
-    body: {
-      items: [
-        {
-          id: order._id.toString(),
-          title: `${photos.length} foto(s) — ${eventTitle} (clikou)`,
-          quantity: 1,
-          currency_id: "BRL",
-          unit_price: total / 100,
-        },
-      ],
-      external_reference: order._id.toString(),
-      notification_url: `${appUrl}/api/webhooks/mercadopago`,
-      back_urls: {
-        success: `${appUrl}/purchase/success`,
-        failure: `${appUrl}/purchase/error`,
-        pending: `${appUrl}/purchase/success?pending=1`,
+  const prefBody = {
+    items: [
+      {
+        id: order._id.toString(),
+        title: `${photos.length} foto(s) — ${eventTitle} (clikou)`,
+        quantity: 1,
+        currency_id: "BRL",
+        unit_price: total / 100,
       },
-      auto_return: "approved",
+    ],
+    external_reference: order._id.toString(),
+    notification_url: `${appUrl}/api/webhooks/mercadopago`,
+    back_urls: {
+      success: `${appUrl}/purchase/success`,
+      failure: `${appUrl}/purchase/error`,
+      pending: `${appUrl}/purchase/success?pending=1`,
     },
-  });
+    auto_return: "approved",
+  };
+
+  // Split automático: pedido de um único fotógrafo com conta MP conectada.
+  // O pagamento entra direto na conta dele e a comissão fica retida no
+  // gateway (marketplace_fee) — a carteira não entra no fluxo. Qualquer
+  // falha aqui cai no fluxo normal (carteira + saque).
+  const photographerIds = [
+    ...new Set(photos.map((p) => p.photographer.toString())),
+  ];
+  if (splitEnabled && photographerIds.length === 1) {
+    try {
+      const seller = await getConnectedSeller(photographerIds[0]);
+      if (seller) {
+        const percent = seller.commissionPercent ?? COMMISSION_PERCENT;
+        const feeCents = Math.round((total * percent) / 100);
+        const pref = await sellerPreferences(seller.mpAccessToken).create({
+          body: {
+            ...prefBody,
+            // O webhook chega em nome do vendedor; o pedido na query permite
+            // achar o token certo para consultar o pagamento.
+            notification_url: `${appUrl}/api/webhooks/mercadopago?order=${order._id}`,
+            marketplace_fee: feeCents / 100,
+          },
+        });
+        order.split = true;
+        order.commissionCents = feeCents;
+        order.mpPreferenceId = pref.id;
+        await order.save();
+        return NextResponse.json({ url: pref.init_point });
+      }
+    } catch (e) {
+      console.error("Checkout split MP:", e.message);
+    }
+  }
+
+  const pref = await preferences().create({ body: prefBody });
 
   order.mpPreferenceId = pref.id;
   await order.save();

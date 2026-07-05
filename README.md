@@ -57,14 +57,16 @@ pela service account (dê a ela o papel `roles/storage.objectAdmin` no bucket).
 O bucket fica privado: previews são servidos pela API e downloads usam URL
 assinada de 15 minutos.
 
-### MailerSend (confirmação de conta por e-mail)
+### MailerSend (confirmação de conta e e-mails transacionais)
 O cadastro por senha tem confirmação de senha, captcha anti-spam e ativação
-por link enviado no e-mail (contas Google já entram confirmadas).
+por link enviado no e-mail (contas Google já entram confirmadas). Com o token
+configurado, o clikou também avisa por e-mail: compra confirmada (cliente) e
+saque pago/recusado (fotógrafo).
 1. Crie uma conta em https://www.mailersend.com, verifique o domínio
    (`clicou.online`) e gere um token de API (começa com `mlsn.`).
 2. Defina `MAILERSEND_TOKEN` e `EMAIL_FROM` (remetente no domínio verificado).
 
-Sem o token, o fluxo cai no modo dev (conta ativa direto, sem e-mail).
+Sem o token, a conta ativa direto e nenhum e-mail é enviado (modo dev).
 
 ### Mercado Pago
 1. Crie uma aplicação em https://www.mercadopago.com.br/developers
@@ -74,6 +76,14 @@ Sem o token, o fluxo cai no modo dev (conta ativa direto, sem e-mail).
    (`APP_URL/api/webhooks/mercadopago`) — por isso `APP_URL` precisa ser a URL
    pública. Para testar webhook localmente, use um túnel
    (ex.: `cloudflared tunnel --url http://localhost:3000`).
+
+### Split automático (opcional)
+Com `MP_CLIENT_ID` e `MP_CLIENT_SECRET` da aplicação (tipo marketplace,
+redirect URI `APP_URL/api/mp/callback`), o fotógrafo conecta a própria conta
+Mercado Pago em **Dashboard → Sacar** e cada venda cai direto nela, já com a
+comissão da plataforma retida no gateway (`marketplace_fee`) — sem carteira
+nem saque. Compras com fotos de mais de um fotógrafo (ou de fotógrafo não
+conectado) continuam no fluxo de carteira + saque Pix.
 
 ### Deploy no Cloud Run
 ```bash
@@ -109,7 +119,7 @@ src/
 
 - [x] Painel admin (aprovar saques, ver vendas, taxa por fotógrafo)
 - [x] Reconhecimento facial ("ache minhas fotos com uma selfie")
-- [ ] E-mail transacional (compra confirmada, saque pago) — a base de envio
-      (`lib/email.js`, MailerSend) e a confirmação de conta já existem
-- [ ] Split automático no gateway (dispensa a carteira manual)
+- [x] E-mail transacional (compra confirmada, saque pago/recusado)
+- [x] Split automático no gateway (conta MP conectada via OAuth +
+      `marketplace_fee`; carteira segue como fallback)
 - [x] Página pública de perfil do fotógrafo + contratação (como na Banlek)

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { dbConnect } from "@/lib/db";
-import { mpEnabled, payments } from "@/lib/mp";
+import Order from "@/models/Order";
+import { mpEnabled, payments, sellerPayments, getConnectedSeller } from "@/lib/mp";
 import { approveOrder } from "@/lib/orders";
 
 export async function POST(req) {
@@ -22,10 +23,29 @@ export async function POST(req) {
   }
 
   try {
-    const payment = await payments().get({ id: paymentId });
+    await dbConnect();
+
+    // Pedido split: o pagamento mora na conta do fotógrafo, então a
+    // consulta precisa do token dele (o pedido vem na query do
+    // notification_url gerado no checkout).
+    let payment = null;
+    const orderId = url.searchParams.get("order");
+    if (orderId) {
+      const order = await Order.findById(orderId).select("items.photographer");
+      const seller = order?.items[0]?.photographer
+        ? await getConnectedSeller(order.items[0].photographer)
+        : null;
+      if (seller) {
+        payment = await sellerPayments(seller.mpAccessToken).get({ id: paymentId });
+      }
+    }
+    if (!payment) {
+      payment = await payments().get({ id: paymentId });
+    }
+
     if (payment.status === "approved" && payment.external_reference) {
-      await dbConnect();
-      await approveOrder(payment.external_reference, String(paymentId));
+      const appUrl = process.env.APP_URL || url.origin;
+      await approveOrder(payment.external_reference, String(paymentId), { appUrl });
     }
   } catch (e) {
     console.error("Webhook MP:", e.message);

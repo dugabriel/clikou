@@ -60,6 +60,24 @@ export async function readVerificationToken(token) {
   }
 }
 
+// State do OAuth do Mercado Pago: prova no callback que o fluxo começou
+// aqui, logado como este usuário (anti-CSRF).
+export async function createMpStateToken(userId) {
+  return new SignJWT({ id: userId.toString(), purpose: "mp-oauth" })
+    .setProtectedHeader({ alg: "HS256" })
+    .setExpirationTime("1h")
+    .sign(secret);
+}
+
+export async function readMpStateToken(token) {
+  try {
+    const { payload } = await jwtVerify(token, secret);
+    return payload.purpose === "mp-oauth" ? payload.id : null;
+  } catch {
+    return null;
+  }
+}
+
 // Admins são definidos por e-mail em ADMIN_EMAILS (separados por vírgula).
 const adminEmails = (process.env.ADMIN_EMAILS || "")
   .split(",")

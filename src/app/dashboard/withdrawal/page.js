@@ -3,18 +3,21 @@ import User from "@/models/User";
 import Withdrawal from "@/models/Withdrawal";
 import { getSession } from "@/lib/auth";
 import { formatPrice } from "@/lib/currency";
+import { splitEnabled } from "@/lib/mp";
 import WithdrawalForm from "@/components/WithdrawalForm";
+import MpConnect from "@/components/MpConnect";
 
 export const dynamic = "force-dynamic";
 
 export const metadata = { title: "Sacar — Clikou" };
 
-export default async function WithdrawalPage() {
+export default async function WithdrawalPage({ searchParams }) {
   const session = await getSession();
+  const { mp } = await searchParams;
   await dbConnect();
 
   const [user, withdrawals] = await Promise.all([
-    User.findById(session.id).select("balanceCents pixKey").lean(),
+    User.findById(session.id).select("balanceCents pixKey mpUserId").lean(),
     Withdrawal.find({ photographer: session.id }).sort({ createdAt: -1 }).lean(),
   ]);
 
@@ -26,6 +29,8 @@ export default async function WithdrawalPage() {
           {formatPrice(user?.balanceCents || 0)}
         </p>
       </div>
+
+      {splitEnabled && <MpConnect connected={!!user?.mpUserId} result={mp} />}
 
       <WithdrawalForm savedPixKey={user?.pixKey || ""} />
 

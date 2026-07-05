@@ -1,3 +1,5 @@
+import { formatPrice } from "@/lib/currency";
+
 // Envio de e-mail via MailerSend. Sem MAILERSEND_TOKEN o envio fica
 // desativado e o cadastro por senha entra sem confirmação (modo dev).
 const API_URL =
@@ -51,6 +53,63 @@ export async function sendVerificationEmail(email, name, token, appUrl) {
         Se você não criou essa conta, ignore este e-mail.</p>
         <p style="color:#71717a;font-size:13px">Se o botão não funcionar,
         copie e cole no navegador:<br>${link}</p>
+      </div>`,
+  });
+}
+
+export async function sendPurchaseEmail({ to, name, photoCount, totalCents, appUrl }) {
+  const firstName = (name || "").split(" ")[0];
+  return sendEmail({
+    to,
+    subject: "Compra confirmada no clikou 🎉",
+    html: `
+      <div style="font-family:sans-serif;max-width:480px;margin:0 auto;padding:24px">
+        <h2 style="margin:0 0 16px">Compra confirmada${firstName ? `, ${firstName}` : ""}!</h2>
+        <p>Recebemos o pagamento de <strong>${formatPrice(totalCents)}</strong>
+        por <strong>${photoCount} foto${photoCount > 1 ? "s" : ""}</strong>.
+        Elas já estão liberadas para download, sem marca d'água.</p>
+        <p style="margin:28px 0">
+          <a href="${appUrl}/my-purchases"
+             style="background:#facc15;color:#18181b;text-decoration:none;font-weight:bold;padding:12px 28px;border-radius:999px;display:inline-block">
+            Baixar minhas fotos
+          </a>
+        </p>
+        <p style="color:#71717a;font-size:13px">Suas fotos ficam disponíveis
+        em "Minhas compras" sempre que você precisar baixar de novo.</p>
+      </div>`,
+  });
+}
+
+export async function sendWithdrawalPaidEmail({ to, name, amountCents, pixKey }) {
+  const firstName = (name || "").split(" ")[0];
+  return sendEmail({
+    to,
+    subject: "Seu saque foi pago 💸",
+    html: `
+      <div style="font-family:sans-serif;max-width:480px;margin:0 auto;padding:24px">
+        <h2 style="margin:0 0 16px">Saque pago${firstName ? `, ${firstName}` : ""}!</h2>
+        <p>Enviamos <strong>${formatPrice(amountCents)}</strong> via Pix para a
+        chave <strong>${pixKey}</strong>.</p>
+        <p style="color:#71717a;font-size:13px">O valor pode levar alguns
+        minutos para aparecer no seu banco. Qualquer dúvida, responda este
+        e-mail.</p>
+      </div>`,
+  });
+}
+
+export async function sendWithdrawalRejectedEmail({ to, name, amountCents }) {
+  const firstName = (name || "").split(" ")[0];
+  return sendEmail({
+    to,
+    subject: "Seu saque foi recusado",
+    html: `
+      <div style="font-family:sans-serif;max-width:480px;margin:0 auto;padding:24px">
+        <h2 style="margin:0 0 16px">Saque recusado${firstName ? `, ${firstName}` : ""}</h2>
+        <p>Não foi possível pagar seu saque de
+        <strong>${formatPrice(amountCents)}</strong>. O valor voltou para o seu
+        saldo no clikou.</p>
+        <p style="color:#71717a;font-size:13px">Confira se a chave Pix está
+        correta e solicite de novo. Qualquer dúvida, responda este e-mail.</p>
       </div>`,
   });
 }

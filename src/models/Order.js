@@ -17,6 +17,9 @@ const OrderSchema = new mongoose.Schema(
     ],
     totalCents: { type: Number, required: true },
     commissionCents: { type: Number, default: 0 },
+    // true: pago na conta MP do fotógrafo com a comissão retida no gateway
+    // (marketplace_fee); a carteira não entra no fluxo.
+    split: { type: Boolean, default: false },
     status: {
       type: String,
       enum: ["pending", "paid", "canceled"],
