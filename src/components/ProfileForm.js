@@ -287,7 +287,7 @@ export default function ProfileForm({ profile }) {
               >
                 Ver minha página
               </a>
-              <CopyLinkButton path={`/f/${slug}`} />
+              <CopyLinkButton path={`/f/${slug}`} label="Copiar link do perfil" />
             </>
           )}
         </div>

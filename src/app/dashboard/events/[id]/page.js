@@ -42,7 +42,7 @@ export default async function ManageEvent({ params }) {
           >
             Ver página pública
           </Link>
-          <CopyLinkButton path={`/events/${id}`} />
+          <CopyLinkButton path={`/events/${id}`} label="Copiar link do evento" />
         </div>
       </div>
 

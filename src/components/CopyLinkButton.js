@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { CheckIcon } from "@/components/Icons";
 
-export default function CopyLinkButton({ path }) {
+export default function CopyLinkButton({ path, label = "Copiar link" }) {
   const [copied, setCopied] = useState(false);
 
   async function copy() {
@@ -37,7 +37,7 @@ export default function CopyLinkButton({ path }) {
           <CheckIcon size={16} /> Link copiado!
         </>
       ) : (
-        "Copiar link do evento"
+        label
       )}
     </button>
   );
