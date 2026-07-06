@@ -15,6 +15,7 @@ const UserSchema = new mongoose.Schema(
     // false só para cadastro por senha aguardando o link de confirmação
     emailVerified: { type: Boolean, default: true },
     verificationSentAt: { type: Date },
+    resetSentAt: { type: Date }, // cooldown do "esqueci minha senha"
     avatarUrl: { type: String, default: "" },
     balanceCents: { type: Number, default: 0 },
     pixKey: { type: String, default: "" },

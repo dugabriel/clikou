@@ -1,3 +1,4 @@
+import crypto from "crypto";
 import { SignJWT, jwtVerify } from "jose";
 import { cookies } from "next/headers";
 
@@ -55,6 +56,39 @@ export async function readVerificationToken(token) {
   try {
     const { payload } = await jwtVerify(token, secret);
     return payload.purpose === "verify-email" ? payload.id : null;
+  } catch {
+    return null;
+  }
+}
+
+// Token de redefinição de senha. Carrega uma impressão digital do hash
+// atual: trocada a senha, todos os links antigos invalidam sozinhos
+// (uso único na prática, sem precisar guardar estado).
+export function passwordFingerprint(passwordHash) {
+  return crypto
+    .createHash("sha256")
+    .update(`reset:${passwordHash || ""}`)
+    .digest("hex")
+    .slice(0, 16);
+}
+
+export async function createPasswordResetToken(user) {
+  return new SignJWT({
+    id: user._id.toString(),
+    purpose: "reset-password",
+    ph: passwordFingerprint(user.passwordHash),
+  })
+    .setProtectedHeader({ alg: "HS256" })
+    .setExpirationTime("1h")
+    .sign(secret);
+}
+
+export async function readPasswordResetToken(token) {
+  try {
+    const { payload } = await jwtVerify(token, secret);
+    return payload.purpose === "reset-password"
+      ? { id: payload.id, ph: payload.ph }
+      : null;
   } catch {
     return null;
   }

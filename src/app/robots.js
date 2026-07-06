@@ -13,6 +13,7 @@ export default function robots() {
         "/my-purchases",
         "/purchase/",
         "/verify-email",
+        "/reset-password",
         "/auth/",
       ],
     },

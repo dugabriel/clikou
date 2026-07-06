@@ -78,7 +78,15 @@ export default function LoginForm() {
             />
           </div>
           <div>
-            <label className={label}>Senha</label>
+            <div className="flex items-baseline justify-between">
+              <label className={label}>Senha</label>
+              <Link
+                href="/forgot-password"
+                className="text-xs text-zinc-500 hover:text-yellow-400"
+              >
+                Esqueci minha senha
+              </Link>
+            </div>
             <input
               name="password"
               type="password"
