@@ -23,6 +23,11 @@ RUN apt-get update \
 COPY --from=build /app/.next/standalone ./
 COPY --from=build /app/.next/static ./.next/static
 COPY --from=build /app/public ./public
+# O tracer do standalone perde o .so do libvips; sem ele o sharp cai no
+# fallback WASM (sem fontes → marca d'água sem texto). Copia os pacotes
+# nativos completos por cima.
+COPY --from=deps /app/node_modules/@img/sharp-libvips-linux-x64 ./node_modules/@img/sharp-libvips-linux-x64
+COPY --from=deps /app/node_modules/@img/sharp-linux-x64 ./node_modules/@img/sharp-linux-x64
 
 # Cloud Run injeta a PORT (padrão 8080)
 ENV PORT=8080
