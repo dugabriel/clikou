@@ -14,6 +14,9 @@ FROM node:22-alpine
 WORKDIR /app
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
+# Fontes para o texto da marca d'água (SVG via sharp/libvips) — sem elas,
+# o Alpine renderiza <text> como vazio e o preview sai sem marca.
+RUN apk add --no-cache fontconfig ttf-dejavu
 COPY --from=build /app/.next/standalone ./
 COPY --from=build /app/.next/static ./.next/static
 COPY --from=build /app/public ./public
