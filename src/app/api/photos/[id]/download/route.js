@@ -9,7 +9,9 @@ import { readFile, signedDownloadUrl } from "@/lib/storage";
 export async function GET(req, ctx) {
   const session = await getSession();
   if (!session) {
-    return NextResponse.redirect(new URL("/login", req.url));
+    // No Cloud Run, req.url tem origem interna (0.0.0.0) — usa APP_URL.
+    const appUrl = process.env.APP_URL || new URL(req.url).origin;
+    return NextResponse.redirect(new URL("/login", appUrl));
   }
 
   const { id } = await ctx.params;

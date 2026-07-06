@@ -7,8 +7,9 @@ import { splitEnabled, oauth } from "@/lib/mp";
 // Manda o fotógrafo autorizar o clikou na conta Mercado Pago dele.
 export async function GET(req) {
   const session = await getSession();
+  const appUrl = process.env.APP_URL || new URL(req.url).origin;
   if (!session) {
-    return NextResponse.redirect(new URL("/login", req.url));
+    return NextResponse.redirect(new URL("/login", appUrl));
   }
   if (!splitEnabled) {
     return NextResponse.json(
@@ -17,7 +18,6 @@ export async function GET(req) {
     );
   }
 
-  const appUrl = process.env.APP_URL || new URL(req.url).origin;
   const url = oauth().getAuthorizationURL({
     options: {
       client_id: process.env.MP_CLIENT_ID,

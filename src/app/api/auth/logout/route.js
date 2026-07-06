@@ -3,5 +3,7 @@ import { destroySession } from "@/lib/auth";
 
 export async function POST(req) {
   await destroySession();
-  return NextResponse.redirect(new URL("/", req.url));
+  // No Cloud Run, req.url tem origem interna (0.0.0.0) — usa APP_URL.
+  const appUrl = process.env.APP_URL || new URL(req.url).origin;
+  return NextResponse.redirect(new URL("/", appUrl), 303);
 }
