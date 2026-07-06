@@ -24,6 +24,12 @@ export default async function sitemap() {
       priority: 0.9,
     },
     {
+      url: `${APP_URL}/portfolio`,
+      lastModified: new Date(),
+      changeFrequency: "monthly",
+      priority: 0.7,
+    },
+    {
       url: `${APP_URL}/about`,
       lastModified: new Date(),
       changeFrequency: "monthly",

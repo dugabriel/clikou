@@ -222,8 +222,16 @@ export default async function Home() {
                   {text}
                 </p>
                 {badge && (
-                  <p className="mt-4 inline-block rounded-full border border-white/10 bg-zinc-900 px-3.5 py-1.5 font-mono text-xs text-yellow-400">
-                    {badge}
+                  <p className="mt-4 flex flex-wrap items-center gap-3">
+                    <span className="inline-block rounded-full border border-white/10 bg-zinc-900 px-3.5 py-1.5 font-mono text-xs text-yellow-400">
+                      {badge}
+                    </span>
+                    <Link
+                      href="/portfolio"
+                      className="text-xs font-semibold text-yellow-400 hover:underline"
+                    >
+                      Como funciona →
+                    </Link>
                   </p>
                 )}
               </div>
