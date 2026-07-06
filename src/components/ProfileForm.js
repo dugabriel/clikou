@@ -31,6 +31,20 @@ export default function ProfileForm({ profile }) {
         website: form.get("website"),
         instagram: form.get("instagram"),
         whatsapp: form.get("whatsapp"),
+        seller: {
+          cpf: form.get("cpf"),
+          birthDate: form.get("birthDate"),
+          phone: form.get("phone"),
+          address: {
+            cep: form.get("cep"),
+            street: form.get("street"),
+            number: form.get("number"),
+            complement: form.get("complement"),
+            district: form.get("district"),
+            city: form.get("addressCity"),
+            state: form.get("addressState"),
+          },
+        },
       }),
     });
     const data = await res.json();
@@ -145,6 +159,115 @@ export default function ProfileForm({ profile }) {
               placeholder="DDD + número"
               className={field}
             />
+          </div>
+        </div>
+
+        <div className="mt-8 border-t border-zinc-800 pt-6">
+          <h3 className="font-display text-xl font-bold tracking-tight">
+            Dados para venda
+          </h3>
+          <p className="mt-1 text-sm text-zinc-400">
+            Exigidos para publicar eventos e sacar — identificam você como
+            vendedor, como pede a lei. Não aparecem no seu perfil público.
+          </p>
+
+          <div className="mt-4 grid grid-cols-2 gap-4">
+            <div>
+              <label className={label}>CPF</label>
+              <input
+                name="cpf"
+                defaultValue={profile.cpf}
+                placeholder="000.000.000-00"
+                inputMode="numeric"
+                className={field}
+              />
+            </div>
+            <div>
+              <label className={label}>Data de nascimento</label>
+              <input
+                name="birthDate"
+                type="date"
+                defaultValue={profile.birthDate}
+                className={field}
+              />
+            </div>
+            <div>
+              <label className={label}>Telefone</label>
+              <input
+                name="phone"
+                defaultValue={profile.phone}
+                placeholder="DDD + número"
+                inputMode="numeric"
+                className={field}
+              />
+            </div>
+            <div>
+              <label className={label}>CEP</label>
+              <input
+                name="cep"
+                defaultValue={profile.address.cep}
+                placeholder="00000-000"
+                inputMode="numeric"
+                className={field}
+              />
+            </div>
+            <div className="col-span-2">
+              <label className={label}>Endereço (rua/avenida)</label>
+              <input
+                name="street"
+                defaultValue={profile.address.street}
+                placeholder="Rua das Fotos"
+                className={field}
+              />
+            </div>
+            <div>
+              <label className={label}>Número</label>
+              <input
+                name="number"
+                defaultValue={profile.address.number}
+                placeholder="123"
+                className={field}
+              />
+            </div>
+            <div>
+              <label className={label}>Complemento (opcional)</label>
+              <input
+                name="complement"
+                defaultValue={profile.address.complement}
+                placeholder="Apto 42"
+                className={field}
+              />
+            </div>
+            <div>
+              <label className={label}>Bairro</label>
+              <input
+                name="district"
+                defaultValue={profile.address.district}
+                placeholder="Centro"
+                className={field}
+              />
+            </div>
+            <div className="grid grid-cols-3 gap-2">
+              <div className="col-span-2">
+                <label className={label}>Cidade</label>
+                <input
+                  name="addressCity"
+                  defaultValue={profile.address.city}
+                  placeholder="Sua cidade"
+                  className={field}
+                />
+              </div>
+              <div>
+                <label className={label}>UF</label>
+                <input
+                  name="addressState"
+                  defaultValue={profile.address.state}
+                  placeholder="SP"
+                  maxLength={2}
+                  className={field}
+                />
+              </div>
+            </div>
           </div>
         </div>
 

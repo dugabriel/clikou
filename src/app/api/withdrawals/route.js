@@ -4,6 +4,7 @@ import User from "@/models/User";
 import Withdrawal from "@/models/Withdrawal";
 import { getSession } from "@/lib/auth";
 import { toCents } from "@/lib/currency";
+import { isSellerProfileComplete, SELLER_PROFILE_MESSAGE } from "@/lib/seller";
 
 const MIN_WITHDRAWAL_CENTS = 2000; // R$ 20,00
 
@@ -26,6 +27,13 @@ export async function POST(req) {
   }
 
   await dbConnect();
+  const seller = await User.findById(session.id)
+    .select("cpf birthDate phone address")
+    .lean();
+  if (!isSellerProfileComplete(seller)) {
+    return NextResponse.json({ error: SELLER_PROFILE_MESSAGE }, { status: 403 });
+  }
+
   // Debita só se houver saldo suficiente (operação atômica).
   const user = await User.findOneAndUpdate(
     { _id: session.id, balanceCents: { $gte: amountCents } },

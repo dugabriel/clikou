@@ -19,6 +19,9 @@ export default async function Navbar() {
           >
             Vender fotos
           </Link>
+          <Link href="/about" className="transition hover:text-white">
+            Sobre
+          </Link>
         </div>
 
         <div className="ml-auto flex items-center gap-3 text-sm">

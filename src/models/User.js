@@ -25,6 +25,20 @@ const UserSchema = new mongoose.Schema(
     mpTokenExpiresAt: { type: Date },
     // Taxa da plataforma para este fotógrafo; null usa COMMISSION_PERCENT
     commissionPercent: { type: Number, default: null, min: 0, max: 100 },
+    // Dados cadastrais exigidos para vender (identificação legal do
+    // vendedor — não aparecem no perfil público)
+    cpf: { type: String, default: "" }, // só dígitos
+    birthDate: { type: Date },
+    phone: { type: String, default: "" },
+    address: {
+      cep: { type: String, default: "" },
+      street: { type: String, default: "" },
+      number: { type: String, default: "" },
+      complement: { type: String, default: "" },
+      district: { type: String, default: "" },
+      city: { type: String, default: "" },
+      state: { type: String, default: "" },
+    },
     // Perfil público (/f/[username])
     username: { type: String, unique: true, sparse: true, lowercase: true },
     bio: { type: String, default: "" },

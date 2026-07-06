@@ -1,14 +1,24 @@
 import { NextResponse } from "next/server";
 import { dbConnect } from "@/lib/db";
 import Event from "@/models/Event";
+import User from "@/models/User";
 import { getSession } from "@/lib/auth";
 import { toCents } from "@/lib/currency";
 import { CATEGORY_VALUES } from "@/lib/categories";
+import { isSellerProfileComplete, SELLER_PROFILE_MESSAGE } from "@/lib/seller";
 
 export async function POST(req) {
   const session = await getSession();
   if (!session) {
     return NextResponse.json({ error: "Faça login para criar um evento." }, { status: 401 });
+  }
+
+  await dbConnect();
+  const seller = await User.findById(session.id)
+    .select("cpf birthDate phone address")
+    .lean();
+  if (!isSellerProfileComplete(seller)) {
+    return NextResponse.json({ error: SELLER_PROFILE_MESSAGE }, { status: 403 });
   }
 
   const { title, description, date, city, state, category, defaultPrice } =

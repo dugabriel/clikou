@@ -85,6 +85,15 @@ export default function RootLayout({ children }) {
                   Criar conta
                 </Link>
               </div>
+              <div className="space-y-2.5">
+                <p className="font-semibold text-zinc-300">clikou</p>
+                <Link href="/about" className="block text-zinc-500 hover:text-yellow-400">
+                  Sobre
+                </Link>
+                <Link href="/privacy" className="block text-zinc-500 hover:text-yellow-400">
+                  Privacidade
+                </Link>
+              </div>
             </div>
           </div>
           <div className="border-t border-white/5 py-5 text-center text-xs text-zinc-600">
