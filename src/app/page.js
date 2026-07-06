@@ -68,6 +68,16 @@ export default async function Home() {
                 Quero vender fotos
               </Link>
             </div>
+            <p className="mt-4 text-sm text-zinc-300">
+              📸 Fotógrafo?{" "}
+              <Link
+                href="/portfolio"
+                className="font-semibold text-yellow-400 underline-offset-2 hover:underline"
+              >
+                Monte seu portfólio grátis
+              </Link>{" "}
+              — pronto em 2 minutos.
+            </p>
           </div>
         </div>
       </section>
@@ -203,13 +213,7 @@ export default async function Home() {
                 "Venda enquanto dorme",
                 "Pagamento aprovado libera o download em alta na hora e sua parte cai na carteira, sem você mover um dedo. Saque via Pix quando quiser.",
               ],
-              [
-                GlobeIcon,
-                "Seu portfólio, pronto pra bio",
-                "Sua página pública reúne seus eventos, melhores fotos e contatos. Compartilhe como portfólio profissional e receba pedidos de contratação.",
-                "clikou.click/f/seunome",
-              ],
-            ].map(([Icon, title, text, badge]) => (
+            ].map(([Icon, title, text]) => (
               <div
                 key={title}
                 className="rounded-2xl border border-white/5 bg-zinc-950 p-7 transition hover:border-yellow-400/30"
@@ -221,21 +225,46 @@ export default async function Home() {
                 <p className="mt-2 text-sm leading-relaxed text-zinc-400">
                   {text}
                 </p>
-                {badge && (
-                  <p className="mt-4 flex flex-wrap items-center gap-3">
-                    <span className="inline-block rounded-full border border-white/10 bg-zinc-900 px-3.5 py-1.5 font-mono text-xs text-yellow-400">
-                      {badge}
-                    </span>
-                    <Link
-                      href="/portfolio"
-                      className="text-xs font-semibold text-yellow-400 hover:underline"
-                    >
-                      Como funciona →
-                    </Link>
-                  </p>
-                )}
               </div>
             ))}
+
+            {/* Card destaque: portfólio (tem landing própria) */}
+            <Link
+              href="/portfolio"
+              className="group flex flex-col rounded-2xl border border-yellow-400/40 bg-yellow-400/5 p-7 transition hover:border-yellow-400 hover:bg-yellow-400/10"
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-yellow-400 text-zinc-950">
+                  <GlobeIcon size={22} />
+                </div>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src="/demo-avatar.jpg"
+                  alt="Exemplo de portfólio na clikou"
+                  className="h-11 w-11 rounded-full object-cover ring-2 ring-yellow-400"
+                />
+              </div>
+              <h3 className="mt-5 text-lg font-semibold">
+                Seu portfólio, pronto pra bio
+              </h3>
+              <p className="mt-2 text-sm leading-relaxed text-zinc-400">
+                Sua página pública reúne seus eventos, melhores fotos e
+                contatos. Compartilhe como portfólio profissional e receba
+                pedidos de contratação.
+              </p>
+              <p className="mt-4 flex flex-wrap items-center gap-3">
+                <span className="inline-block rounded-full border border-yellow-400/30 bg-zinc-950 px-3.5 py-1.5 font-mono text-xs text-yellow-400">
+                  clikou.click/f/seunome
+                </span>
+                <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-yellow-400">
+                  Conhecer o portfólio
+                  <ArrowIcon
+                    size={16}
+                    className="transition-transform group-hover:translate-x-1"
+                  />
+                </span>
+              </p>
+            </Link>
           </div>
           <div className="mt-10 text-center">
             <Link

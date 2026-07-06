@@ -19,6 +19,9 @@ export default async function Navbar() {
           >
             Vender fotos
           </Link>
+          <Link href="/portfolio" className="transition hover:text-white">
+            Portfólio
+          </Link>
           <Link href="/about" className="transition hover:text-white">
             Sobre
           </Link>
