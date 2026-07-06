@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { formatPrice } from "@/lib/currency";
-import FaceSearch from "@/components/FaceSearch";
+import PhotoFinder from "@/components/PhotoFinder";
 import PhotoViewer from "@/components/PhotoViewer";
 
 export default function PurchaseGallery({ photos, purchased, loggedIn, eventId }) {
@@ -11,12 +11,12 @@ export default function PurchaseGallery({ photos, purchased, loggedIn, eventId }
   const [selected, setSelected] = useState(new Set());
   const [buying, setBuying] = useState(false);
   const [error, setError] = useState("");
-  const [faceFilter, setFaceFilter] = useState(null); // null = sem filtro
+  const [filter, setFilter] = useState(null); // null = sem filtro; { ids, kind }
   const [viewer, setViewer] = useState(null); // índice da foto aberta no lightbox
   const alreadyPurchased = useMemo(() => new Set(purchased), [purchased]);
 
-  const visiblePhotos = faceFilter
-    ? photos.filter((p) => faceFilter.has(p.id))
+  const visiblePhotos = filter
+    ? photos.filter((p) => filter.ids.has(p.id))
     : photos;
 
   function toggle(id) {
@@ -63,22 +63,26 @@ export default function PurchaseGallery({ photos, purchased, loggedIn, eventId }
 
   return (
     <div className="pb-24">
-      <FaceSearch
+      <PhotoFinder
         eventId={eventId}
-        filterActive={!!faceFilter}
-        onFilter={(ids) => {
-          setFaceFilter(ids ? new Set(ids) : null);
+        filterActive={!!filter}
+        onFilter={(ids, kind) => {
+          setFilter(ids ? { ids: new Set(ids), kind } : null);
           setViewer(null); // a lista visível muda, fecha o lightbox
         }}
       />
 
-      {faceFilter && (
+      {filter && (
         <p className="mb-4 text-sm text-zinc-300">
           {visiblePhotos.length === 0
-            ? "Nenhuma foto sua encontrada neste evento. Tente outra selfie ou limpe o filtro para ver todas."
-            : `Encontramos você em ${visiblePhotos.length} foto${
-                visiblePhotos.length > 1 ? "s" : ""
-              }:`}
+            ? filter.kind === "print"
+              ? "Nenhuma foto parecida com esse print neste evento. Tente uma imagem mais nítida ou limpe o filtro para ver todas."
+              : "Nenhuma foto sua encontrada neste evento. Tente outra selfie ou limpe o filtro para ver todas."
+            : filter.kind === "print"
+              ? `${visiblePhotos.length === 1 ? "Achamos esta foto" : `Achamos ${visiblePhotos.length} fotos parecidas`} com o seu print:`
+              : `Encontramos você em ${visiblePhotos.length} foto${
+                  visiblePhotos.length > 1 ? "s" : ""
+                }:`}
         </p>
       )}
 

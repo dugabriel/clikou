@@ -4,6 +4,7 @@ import Event from "@/models/Event";
 import Photo from "@/models/Photo";
 import { getSession } from "@/lib/auth";
 import { generatePreview } from "@/lib/watermark";
+import { imageHashes } from "@/lib/imagehash";
 import { saveFile } from "@/lib/storage";
 import { toCents } from "@/lib/currency";
 
@@ -79,6 +80,10 @@ export async function POST(req, ctx) {
     );
   }
 
+  // Hashes do preview: é ele que circula (print) e a marca d'água quase
+  // não muda o hash perceptual.
+  const { dhash, phash } = await imageHashes(derived.preview);
+
   const photo = new Photo({
     event: event._id,
     photographer: session.id,
@@ -87,6 +92,8 @@ export async function POST(req, ctx) {
     width: derived.width,
     height: derived.height,
     faces,
+    dhash,
+    phash,
     originalKey: "",
     previewKey: "",
   });

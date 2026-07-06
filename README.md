@@ -119,6 +119,8 @@ src/
 
 - [x] Painel admin (aprovar saques, ver vendas, taxa por fotógrafo)
 - [x] Reconhecimento facial ("ache minhas fotos com uma selfie")
+- [x] Busca por print (envia a imagem de uma foto que te mandaram e a
+      galeria localiza a foto exata para comprar — hash perceptual)
 - [x] E-mail transacional (compra confirmada, saque pago/recusado)
 - [x] Split automático no gateway (conta MP conectada via OAuth +
       `marketplace_fee`; carteira segue como fallback)

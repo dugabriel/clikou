@@ -23,6 +23,11 @@ const PhotoSchema = new mongoose.Schema(
     // Descritores faciais (128 números por rosto) extraídos no navegador
     // durante o upload — usados na busca por selfie dentro do evento.
     faces: { type: [[Number]], default: [] },
+    // Hashes perceptuais do preview (hex de 64 bits) — usados na busca
+    // por print ("tenho uma imagem dessa foto"). Fotos antigas sem hash
+    // são preenchidas sob demanda pela rota de busca.
+    dhash: { type: String },
+    phash: { type: String },
   },
   { timestamps: true }
 );
