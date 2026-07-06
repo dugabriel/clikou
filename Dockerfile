@@ -1,22 +1,25 @@
-FROM node:22-alpine AS deps
+# Base Debian (glibc), não Alpine: o build musl do sharp vem com resvg
+# sem suporte a texto, e a marca d'água (SVG <text>) sai vazia.
+FROM node:22-slim AS deps
 WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci
 
-FROM node:22-alpine AS build
+FROM node:22-slim AS build
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 ENV NEXT_TELEMETRY_DISABLED=1
 RUN npm run build
 
-FROM node:22-alpine
+FROM node:22-slim
 WORKDIR /app
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
-# Fontes para o texto da marca d'água (SVG via sharp/libvips) — sem elas,
-# o Alpine renderiza <text> como vazio e o preview sai sem marca.
-RUN apk add --no-cache fontconfig ttf-dejavu
+# Fontes para o texto da marca d'água renderizar no sharp
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends fontconfig fonts-dejavu-core \
+  && rm -rf /var/lib/apt/lists/*
 COPY --from=build /app/.next/standalone ./
 COPY --from=build /app/.next/static ./.next/static
 COPY --from=build /app/public ./public

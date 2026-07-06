@@ -21,15 +21,15 @@ function watermarkSvg(w, h) {
       const anchor = `${x + offset} ${y}`;
       texts +=
         row % 2 === 1
-          ? `<text x="${x + offset}" y="${y}" font-size="${warnSize}" fill="rgba(255,255,255,0.34)" stroke="rgba(0,0,0,0.12)" stroke-width="0.6" transform="rotate(-30 ${anchor})" font-family="Arial, sans-serif" font-weight="bold">${TILE_WARNING}</text>`
-          : `<text x="${x + offset}" y="${y}" font-size="${brandSize}" fill="rgba(255,255,255,0.38)" stroke="rgba(0,0,0,0.15)" stroke-width="1" transform="rotate(-30 ${anchor})" font-family="Arial, sans-serif" font-weight="bold">clikou</text>`;
+          ? `<text x="${x + offset}" y="${y}" font-size="${warnSize}" fill="rgba(255,255,255,0.34)" stroke="rgba(0,0,0,0.12)" stroke-width="0.6" transform="rotate(-30 ${anchor})" font-family="DejaVu Sans, Arial, sans-serif" font-weight="bold">${TILE_WARNING}</text>`
+          : `<text x="${x + offset}" y="${y}" font-size="${brandSize}" fill="rgba(255,255,255,0.38)" stroke="rgba(0,0,0,0.15)" stroke-width="1" transform="rotate(-30 ${anchor})" font-family="DejaVu Sans, Arial, sans-serif" font-weight="bold">clikou</text>`;
     }
   }
 
   // Faixa inferior legível com o aviso legal.
   const footSize = Math.max(9, Math.min(20, Math.floor(w / 62)));
   const barHeight = Math.floor(footSize * 2.4);
-  const footer = `<rect x="0" y="${h - barHeight}" width="${w}" height="${barHeight}" fill="rgba(0,0,0,0.55)"/><text x="${w / 2}" y="${h - barHeight / 2 + footSize * 0.35}" text-anchor="middle" font-size="${footSize}" fill="rgba(255,255,255,0.92)" font-family="Arial, sans-serif">${FOOTER_NOTICE}</text>`;
+  const footer = `<rect x="0" y="${h - barHeight}" width="${w}" height="${barHeight}" fill="rgba(0,0,0,0.55)"/><text x="${w / 2}" y="${h - barHeight / 2 + footSize * 0.35}" text-anchor="middle" font-size="${footSize}" fill="rgba(255,255,255,0.92)" font-family="DejaVu Sans, Arial, sans-serif">${FOOTER_NOTICE}</text>`;
 
   return `<svg width="${w}" height="${h}" xmlns="http://www.w3.org/2000/svg">${texts}${footer}</svg>`;
 }
