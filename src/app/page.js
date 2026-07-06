@@ -8,7 +8,6 @@ import {
   CameraIcon,
   CartIcon,
   WalletIcon,
-  DownloadIcon,
   ArrowIcon,
 } from "@/components/Icons";
 
@@ -72,29 +71,71 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* Números */}
+      {/* Diferencial: a foto acha o cliente */}
       <section className="mx-auto max-w-6xl px-4 py-16">
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
-          {[
-            [WalletIcon, "80%", "da venda fica com quem fotografou"],
-            [DownloadIcon, "Na hora", "download em alta liberado após o pagamento"],
-            [CameraIcon, "Pra todos", "não precisa ser fotógrafo profissional"],
-          ].map(([Icon, number, text]) => (
-            <div
-              key={number}
-              className="flex items-center gap-4 rounded-2xl border border-white/5 bg-zinc-900/60 p-6"
+        <div className="grid items-center gap-10 rounded-3xl border border-white/5 bg-zinc-900/60 p-8 sm:p-12 lg:grid-cols-2">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.35em] text-yellow-400">
+              Feito para quem fotografa evento
+            </p>
+            <h2 className="font-display mt-4 text-3xl font-bold tracking-tight sm:text-4xl">
+              Você fotografa.{" "}
+              <span className="text-yellow-400">A foto acha o cliente.</span>
+            </h2>
+            <p className="mt-4 leading-relaxed text-zinc-400">
+              Fotografar nunca foi o problema — é fazer cada participante achar
+              a própria foto no meio de milhares. Aqui, quem estava lá envia uma
+              selfie e o reconhecimento facial mostra só as fotos em que a
+              pessoa aparece. Quem se vê, compra.
+            </p>
+            <ul className="mt-6 flex flex-wrap gap-2 text-sm">
+              {[
+                "Selfie encontra o cliente na hora",
+                "Print localiza a foto exata",
+                "Marca d'água automática",
+                "Sua página de portfólio",
+              ].map((chip) => (
+                <li
+                  key={chip}
+                  className="rounded-full border border-yellow-400/25 bg-yellow-400/5 px-4 py-1.5 text-zinc-300"
+                >
+                  {chip}
+                </li>
+              ))}
+            </ul>
+            <Link
+              href="/dashboard"
+              className="group mt-8 inline-flex items-center gap-2 rounded-full bg-yellow-400 px-7 py-3.5 font-semibold text-zinc-950 transition hover:bg-yellow-300"
             >
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-yellow-400 text-zinc-950">
-                <Icon size={22} />
-              </div>
-              <div>
-                <p className="font-display text-2xl font-bold text-white">
-                  {number}
-                </p>
-                <p className="text-sm text-zinc-400">{text}</p>
-              </div>
+              Publicar meu primeiro evento
+              <ArrowIcon
+                size={18}
+                className="transition-transform group-hover:translate-x-1"
+              />
+            </Link>
+          </div>
+
+          {/* Mock da busca por selfie */}
+          <div className="relative pt-6">
+            <div className="grid grid-cols-4 gap-2">
+              {Array.from({ length: 12 }).map((_, i) => (
+                <div
+                  key={i}
+                  className={`aspect-[4/3] rounded-lg ${
+                    [2, 5, 11].includes(i)
+                      ? "bg-yellow-400/20 ring-2 ring-yellow-400"
+                      : "bg-zinc-800"
+                  }`}
+                />
+              ))}
             </div>
-          ))}
+            <div className="absolute left-1/2 top-0 -translate-x-1/2 whitespace-nowrap rounded-full border border-yellow-400/40 bg-zinc-950 px-4 py-2 text-sm shadow-lg">
+              🤳 Selfie enviada ·{" "}
+              <span className="font-semibold text-yellow-400">
+                3 fotos suas encontradas
+              </span>
+            </div>
+          </div>
         </div>
       </section>
 
