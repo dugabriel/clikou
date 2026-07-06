@@ -115,19 +115,28 @@ export default async function Home() {
             </Link>
           </div>
 
-          {/* Mock da busca por selfie */}
+          {/* Mock da busca por selfie: as fotos "encontradas" acesas */}
           <div className="relative pt-6">
             <div className="grid grid-cols-4 gap-2">
-              {Array.from({ length: 12 }).map((_, i) => (
-                <div
-                  key={i}
-                  className={`aspect-[4/3] rounded-lg ${
-                    [2, 5, 11].includes(i)
-                      ? "bg-yellow-400/20 ring-2 ring-yellow-400"
-                      : "bg-zinc-800"
-                  }`}
-                />
-              ))}
+              {Array.from({ length: 12 }).map((_, i) => {
+                const found = {
+                  2: "/finder/found-1.jpg",
+                  5: "/finder/found-2.jpg",
+                  11: "/finder/found-3.jpg",
+                }[i];
+                return found ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    key={i}
+                    src={found}
+                    alt="Foto do evento encontrada pela busca por selfie"
+                    loading="lazy"
+                    className="aspect-[3/4] w-full rounded-lg object-cover ring-2 ring-yellow-400"
+                  />
+                ) : (
+                  <div key={i} className="aspect-[3/4] rounded-lg bg-zinc-800" />
+                );
+              })}
             </div>
             <div className="absolute left-1/2 top-0 -translate-x-1/2 whitespace-nowrap rounded-full border border-yellow-400/40 bg-zinc-950 px-4 py-2 text-sm shadow-lg">
               🤳 Selfie enviada ·{" "}

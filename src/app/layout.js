@@ -10,10 +10,39 @@ const grotesk = Space_Grotesk({
   variable: "--font-grotesk",
 });
 
+const APP_URL = process.env.APP_URL || "https://clikou.click";
+
 export const metadata = {
-  title: "Clikou — Fotografou um evento? Venda suas fotos.",
+  metadataBase: new URL(APP_URL),
+  title: "Clikou — Fotos de evento direto de quem fotografou",
   description:
-    "Publique as fotos do evento, defina o preço e compartilhe o link. Quem estava lá compra e baixa em alta resolução, sem marca d'água.",
+    "Encontre e compre suas fotos de corridas, formaturas, shows e campeonatos — ache-se com uma selfie. Fotografou? Publique, compartilhe o link e venda.",
+  keywords: [
+    "fotos de evento",
+    "fotos de corrida",
+    "comprar fotos",
+    "vender fotos de evento",
+    "fotógrafo de evento",
+    "achar minhas fotos",
+  ],
+  alternates: { canonical: "/" },
+  openGraph: {
+    type: "website",
+    siteName: "clikou",
+    locale: "pt_BR",
+    url: "/",
+    title: "Clikou — Fotos de evento direto de quem fotografou",
+    description:
+      "Encontre suas fotos de eventos com uma selfie e baixe em alta resolução. Fotografou? Publique e venda.",
+    images: [{ url: "/og.png", width: 1200, height: 630, alt: "clikou" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Clikou — Fotos de evento direto de quem fotografou",
+    description:
+      "Encontre suas fotos de eventos com uma selfie e baixe em alta resolução.",
+    images: ["/og.png"],
+  },
 };
 
 export default function RootLayout({ children }) {
