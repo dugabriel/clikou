@@ -179,33 +179,36 @@ export default async function Home() {
       <section className="border-y border-white/5 bg-zinc-900/40">
         <div className="mx-auto max-w-6xl px-4 py-20">
           <h2 className="font-display text-center text-3xl font-bold tracking-tight sm:text-4xl">
-            Vender suas fotos é <span className="text-yellow-400">1-2-3</span>
+            Do cartão de memória <span className="text-yellow-400">pro Pix</span>
           </h2>
           <p className="mx-auto mt-2 max-w-lg text-center text-zinc-400">
-            Fotografou um evento — de celular, de câmera, tanto faz. Em minutos
-            suas fotos estão à venda.
+            Sem montar site, sem mensalidade, sem planilha de quem comprou.
+            Celular ou câmera, tanto faz — vender é 1-2-3:
           </p>
           <div className="mt-12 grid gap-6 sm:grid-cols-3">
             {[
               [
                 CameraIcon,
-                "Crie o evento e suba as fotos",
-                "A marca d'água é aplicada automaticamente nos previews. Você define o preço de cada foto.",
+                "Publique em minutos",
+                "Crie o evento, arraste as fotos e pronto: preview com marca d'água e proteção contra cópia, tudo automático. O preço é você quem define.",
+                "sem mensalidade — só paga quando vende",
               ],
               [
                 CartIcon,
-                "Compartilhe o link",
-                "Mande o link do evento no grupo, no story, onde quiser. Quem estava lá encontra as próprias fotos.",
+                "Compartilhe um link só",
+                "Story, grupo da prova, bio. Quem estava lá envia uma selfie e vê só as fotos em que aparece — ninguém garimpa álbum, ninguém te pede \"tem foto minha?\".",
+                "o cliente se acha sozinho",
               ],
               [
                 WalletIcon,
-                "Receba na carteira",
-                "A cada venda, sua parte cai na carteira. Saque via Pix quando quiser.",
+                "Venda enquanto dorme",
+                "Pagamento aprovado = download em alta liberado na hora e sua parte na carteira, sem você mover um dedo. Saque via Pix quando quiser.",
+                "Pix direto, sem burocracia",
               ],
-            ].map(([Icon, title, text], i) => (
+            ].map(([Icon, title, text, why], i) => (
               <div
                 key={title}
-                className="relative rounded-2xl border border-white/5 bg-zinc-950 p-7"
+                className="relative rounded-2xl border border-white/5 bg-zinc-950 p-7 transition hover:border-yellow-400/30"
               >
                 <span className="font-display absolute right-6 top-5 text-5xl font-bold text-zinc-800">
                   {i + 1}
@@ -217,8 +220,23 @@ export default async function Home() {
                 <p className="mt-2 text-sm leading-relaxed text-zinc-400">
                   {text}
                 </p>
+                <p className="mt-4 inline-block rounded-full bg-yellow-400/10 px-3 py-1 text-xs font-semibold text-yellow-400">
+                  ✦ {why}
+                </p>
               </div>
             ))}
+          </div>
+          <div className="mt-10 text-center">
+            <Link
+              href="/dashboard/events/new"
+              className="group inline-flex items-center gap-2 rounded-full border border-yellow-400/40 px-7 py-3 font-semibold text-yellow-400 transition hover:bg-yellow-400 hover:text-zinc-950"
+            >
+              Criar meu evento — leva 2 minutos
+              <ArrowIcon
+                size={18}
+                className="transition-transform group-hover:translate-x-1"
+              />
+            </Link>
           </div>
         </div>
       </section>
