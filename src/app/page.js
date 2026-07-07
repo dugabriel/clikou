@@ -33,10 +33,10 @@ export default async function Home() {
             loop
             playsInline
             src="/hero.mp4"
-            className="h-[70svh] min-h-[480px] w-full object-cover"
+            className="absolute inset-0 h-full w-full object-cover"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-black/20" />
-          <div className="absolute inset-0 flex flex-col justify-end p-8 sm:p-14">
+          <div className="relative flex min-h-[70svh] flex-col justify-end p-6 pt-24 sm:p-14">
             <p className="text-xs font-semibold uppercase tracking-[0.35em] text-yellow-400">
               Fotos de evento, direto de quem fotografou
             </p>
