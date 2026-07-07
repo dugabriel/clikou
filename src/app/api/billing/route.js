@@ -52,6 +52,9 @@ export async function POST(req) {
         external_reference: session.id,
         payer_email: user.email,
         back_url: `${appUrl}/dashboard/plan?sub=ok`,
+        // Cada assinatura carrega sua URL de notificação — dispensa configurar
+        // webhook no painel do MP. O handler trata os tópicos de assinatura.
+        notification_url: `${appUrl}/api/webhooks/mercadopago`,
         auto_recurring: autoRecurringFor(cycle),
         status: "pending",
       },
