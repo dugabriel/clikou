@@ -9,8 +9,8 @@ import {
   preferences,
   sellerPreferences,
   getConnectedSeller,
-  COMMISSION_PERCENT,
 } from "@/lib/mp";
+import { effectiveCommissionPercent } from "@/lib/plan";
 import { approveOrder } from "@/lib/orders";
 
 export async function POST(req) {
@@ -83,7 +83,7 @@ export async function POST(req) {
     try {
       const seller = await getConnectedSeller(photographerIds[0]);
       if (seller) {
-        const percent = seller.commissionPercent ?? COMMISSION_PERCENT;
+        const percent = effectiveCommissionPercent(seller);
         const feeCents = Math.round((total * percent) / 100);
         const pref = await sellerPreferences(seller.mpAccessToken).create({
           body: {

@@ -1,4 +1,10 @@
-import { MercadoPagoConfig, Preference, Payment, OAuth } from "mercadopago";
+import {
+  MercadoPagoConfig,
+  Preference,
+  Payment,
+  OAuth,
+  PreApproval,
+} from "mercadopago";
 import User from "@/models/User";
 
 // Sem MP_ACCESS_TOKEN o checkout roda em "modo dev":
@@ -27,6 +33,19 @@ export function oauth() {
   return new OAuth(client());
 }
 
+// Assinaturas recorrentes (Clikou Pro): usam um app do Mercado Pago próprio
+// para assinaturas, com token separado do checkout/split. Cai no MP_ACCESS_TOKEN
+// se o dedicado não estiver definido. A mensalidade entra na conta da clikou.
+export function subscriptionAccessToken() {
+  return process.env.MP_SUBSCRIPTION_ACCESS_TOKEN || process.env.MP_ACCESS_TOKEN;
+}
+
+export function preApprovals() {
+  return new PreApproval(
+    new MercadoPagoConfig({ accessToken: subscriptionAccessToken() })
+  );
+}
+
 // Clientes autenticados como o fotógrafo (token obtido via OAuth).
 export function sellerPreferences(accessToken) {
   return new Preference(new MercadoPagoConfig({ accessToken }));
@@ -41,7 +60,7 @@ export function sellerPayments(accessToken) {
 // caso o chamador cai no fluxo de carteira.
 export async function getConnectedSeller(userId) {
   const user = await User.findById(userId).select(
-    "mpAccessToken mpRefreshToken mpTokenExpiresAt commissionPercent"
+    "mpAccessToken mpRefreshToken mpTokenExpiresAt commissionPercent plan planCurrentPeriodEnd"
   );
   if (!user?.mpAccessToken) return null;
 

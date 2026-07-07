@@ -10,17 +10,11 @@ export default async function Navbar() {
       <nav className="mx-auto flex max-w-6xl items-center gap-8 px-4 py-3.5">
         <Logo />
         <div className="hidden items-center gap-6 text-sm font-medium text-zinc-400 sm:flex">
+          <Link href="/portfolio" className="transition hover:text-white">
+            Para fotógrafos
+          </Link>
           <Link href="/events" className="transition hover:text-white">
             Eventos
-          </Link>
-          <Link
-            href="/dashboard"
-            className="transition hover:text-white"
-          >
-            Vender fotos
-          </Link>
-          <Link href="/portfolio" className="transition hover:text-white">
-            Portfólio
           </Link>
           <Link href="/about" className="transition hover:text-white">
             Sobre

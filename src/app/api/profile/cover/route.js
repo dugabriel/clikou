@@ -6,9 +6,9 @@ import User from "@/models/User";
 import { getSession } from "@/lib/auth";
 import { saveFile, deleteFile } from "@/lib/storage";
 import { isImageInappropriate } from "@/lib/moderation";
+import { isPro } from "@/lib/plan";
 
-const MAX_PHOTOS = 8;
-
+// Imagem de capa da página pública — recurso Pro.
 export async function POST(req) {
   const session = await getSession();
   if (!session) {
@@ -16,11 +16,13 @@ export async function POST(req) {
   }
 
   await dbConnect();
-  const user = await User.findById(session.id).select("portfolio");
-  if (user.portfolio.length >= MAX_PHOTOS) {
+  const user = await User.findById(session.id).select(
+    "coverKey plan planCurrentPeriodEnd"
+  );
+  if (!isPro(user)) {
     return NextResponse.json(
-      { error: `Máximo de ${MAX_PHOTOS} fotos no portfólio.` },
-      { status: 400 }
+      { error: "A capa é um recurso do plano Pro." },
+      { status: 403 }
     );
   }
 
@@ -43,7 +45,7 @@ export async function POST(req) {
   try {
     image = await sharp(original)
       .rotate()
-      .resize({ width: 1600, withoutEnlargement: true })
+      .resize({ width: 2000, height: 700, fit: "cover" })
       .jpeg({ quality: 82 })
       .toBuffer();
   } catch {
@@ -53,26 +55,29 @@ export async function POST(req) {
     );
   }
 
-  const key = `portfolio/${session.id}/${crypto.randomUUID()}.jpg`;
+  const previous = user.coverKey;
+  const key = `portfolio/${session.id}/cover-${crypto.randomUUID()}.jpg`;
   await saveFile(key, image, "image/jpeg");
-  await User.updateOne({ _id: session.id }, { $push: { portfolio: key } });
+  user.coverKey = key;
+  await user.save();
+  if (previous) await deleteFile(previous).catch(() => {});
 
   return NextResponse.json({ ok: true, key });
 }
 
-export async function DELETE(req) {
+export async function DELETE() {
   const session = await getSession();
   if (!session) {
     return NextResponse.json({ error: "Faça login." }, { status: 401 });
   }
 
-  const { key } = await req.json();
   await dbConnect();
-  const result = await User.updateOne(
-    { _id: session.id, portfolio: key },
-    { $pull: { portfolio: key } }
-  );
-  if (result.modifiedCount > 0) await deleteFile(key);
-
+  const user = await User.findById(session.id).select("coverKey");
+  const previous = user.coverKey;
+  if (previous) {
+    user.coverKey = "";
+    await user.save();
+    await deleteFile(previous).catch(() => {});
+  }
   return NextResponse.json({ ok: true });
 }

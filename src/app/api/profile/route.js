@@ -18,7 +18,7 @@ export async function PUT(req) {
     return NextResponse.json({ error: "Faça login." }, { status: 401 });
   }
 
-  let { username, bio, city, website, instagram, whatsapp, seller } =
+  let { username, bio, city, website, instagram, whatsapp, brandColor, seller } =
     await req.json();
 
   username = (username || "").trim().toLowerCase();
@@ -44,6 +44,15 @@ export async function PUT(req) {
   if (website && !/^https?:\/\//.test(website)) website = `https://${website}`;
   instagram = (instagram || "").trim().replace(/^@/, "");
   whatsapp = (whatsapp || "").replace(/\D/g, "");
+
+  // Cor de destaque da página pública (Pro): hex válido ou vazio (usa o padrão).
+  brandColor = (brandColor || "").trim();
+  if (brandColor && !/^#[0-9a-fA-F]{6}$/.test(brandColor)) {
+    return NextResponse.json(
+      { error: "Cor de destaque inválida." },
+      { status: 400 }
+    );
+  }
 
   // Cadastro de vendedor (opcional aqui; obrigatório para vender).
   // Cada campo preenchido é validado; vazios ficam vazios.
@@ -124,6 +133,7 @@ export async function PUT(req) {
       website,
       instagram,
       whatsapp,
+      brandColor,
       ...sellerUpdate,
     }
   );

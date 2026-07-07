@@ -38,45 +38,45 @@ export default async function Home() {
           <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-black/20" />
           <div className="relative flex min-h-[70svh] flex-col justify-end p-6 pt-24 sm:p-14">
             <p className="text-xs font-semibold uppercase tracking-[0.35em] text-yellow-400">
-              Fotos de evento, direto de quem fotografou
+              A ferramenta dos fotógrafos de evento
             </p>
             <h1 className="font-display mt-4 max-w-4xl text-5xl font-bold uppercase leading-[0.95] tracking-tight text-white sm:text-7xl lg:text-8xl">
-              O momento foi seu.
+              Divulgue seu trabalho.
               <br />
-              <span className="text-yellow-400">A foto também.</span>
+              <span className="text-yellow-400">Venda sem comissão.</span>
             </h1>
             <p className="mt-5 max-w-xl text-base text-zinc-300 sm:text-lg">
-              Corrida, formatura, festa, campeonato — alguém fotografou. Aqui
-              você encontra, compra e baixa em alta resolução, sem marca
-              d&apos;água.
+              Uma página profissional pra colar na bio, portfólio por coleções e
+              suas fotos à venda com busca por selfie. Grátis pra começar; no Pro
+              você fica com 100% de cada venda.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <Link
-                href="/events"
+                href="/signup?next=/dashboard/profile"
                 className="group flex items-center gap-2 rounded-full bg-yellow-400 px-7 py-3.5 font-semibold text-zinc-950 transition hover:bg-yellow-300"
               >
-                Encontrar minhas fotos
+                Criar minha página grátis
                 <ArrowIcon
                   size={18}
                   className="transition-transform group-hover:translate-x-1"
                 />
               </Link>
               <Link
-                href="/dashboard"
+                href="/portfolio"
                 className="rounded-full border border-white/30 bg-black/30 px-7 py-3.5 font-semibold text-white backdrop-blur transition hover:border-yellow-400 hover:text-yellow-400"
               >
-                Quero vender fotos
+                Ver planos
               </Link>
             </div>
             <p className="mt-4 text-sm text-zinc-300">
-              📸 Fotógrafo?{" "}
+              🎫 Comprou entrada num evento?{" "}
               <Link
-                href="/portfolio"
+                href="/events"
                 className="font-semibold text-yellow-400 underline-offset-2 hover:underline"
               >
-                Monte seu portfólio grátis
-              </Link>{" "}
-              — pronto em 2 minutos.
+                Ache suas fotos aqui
+              </Link>
+              .
             </p>
           </div>
         </div>
@@ -202,8 +202,8 @@ export default async function Home() {
             Do cartão de memória <span className="text-yellow-400">pro Pix</span>
           </h2>
           <p className="mx-auto mt-2 max-w-lg text-center text-zinc-400">
-            Sem montar site, sem mensalidade, sem correr atrás de comprador.
-            Celular ou câmera, tanto faz.
+            Sem montar site, sem correr atrás de comprador. Grátis pra começar;
+            no Pro, zero comissão. Celular ou câmera, tanto faz.
           </p>
           <div className="mt-12 grid gap-6 sm:grid-cols-2">
             {[
@@ -299,7 +299,7 @@ export default async function Home() {
             </h2>
             <p className="mt-2 max-w-xl text-zinc-800">
               Elas valem dinheiro. Publique na clikou e transforme cada clique
-              em renda — sem mensalidade, você só paga quando vende.
+              em renda — grátis pra começar, e no Pro você fica com 100%.
             </p>
           </div>
           <Link

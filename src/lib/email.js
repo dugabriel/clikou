@@ -123,6 +123,29 @@ export async function sendWithdrawalPaidEmail({ to, name, amountCents, pixKey })
   });
 }
 
+export async function sendLeadEmail({ to, name, lead, appUrl }) {
+  const firstName = (name || "").split(" ")[0];
+  return sendEmail({
+    to,
+    subject: `Novo pedido de orçamento no clikou — ${lead.name}`,
+    html: `
+      <div style="font-family:sans-serif;max-width:480px;margin:0 auto;padding:24px">
+        <h2 style="margin:0 0 16px">Novo contato${firstName ? `, ${firstName}` : ""}! 📩</h2>
+        <p><strong>${lead.name}</strong> pediu um orçamento pela sua página.</p>
+        <p style="margin:8px 0"><strong>Contato:</strong> ${lead.contact}</p>
+        ${lead.message ? `<p style="background:#f4f4f5;border-radius:12px;padding:12px 16px">${lead.message}</p>` : ""}
+        <p style="margin:28px 0">
+          <a href="${appUrl}/dashboard/marketing"
+             style="background:#facc15;color:#18181b;text-decoration:none;font-weight:bold;padding:12px 28px;border-radius:999px;display:inline-block">
+            Ver no painel
+          </a>
+        </p>
+        <p style="color:#71717a;font-size:13px">Responda rápido — quem pede
+        orçamento costuma estar decidindo na hora.</p>
+      </div>`,
+  });
+}
+
 export async function sendWithdrawalRejectedEmail({ to, name, amountCents }) {
   const firstName = (name || "").split(" ")[0];
   return sendEmail({

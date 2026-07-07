@@ -2,12 +2,12 @@ import { NextResponse } from "next/server";
 import { dbConnect } from "@/lib/db";
 import Order from "@/models/Order";
 import { mpEnabled, payments, sellerPayments, getConnectedSeller } from "@/lib/mp";
+import { billingEnabled } from "@/lib/billing";
 import { approveOrder } from "@/lib/orders";
+import { syncSubscription } from "@/lib/subscription";
 
 export async function POST(req) {
-  if (!mpEnabled) return NextResponse.json({ ok: true });
-
-  // O MP envia o id do pagamento no corpo ou na query, dependendo do evento.
+  // O MP envia o id no corpo ou na query, dependendo do evento.
   const url = new URL(req.url);
   let body = {};
   try {
@@ -15,9 +15,30 @@ export async function POST(req) {
   } catch {}
 
   const type = body.type || url.searchParams.get("type") || url.searchParams.get("topic");
-  const paymentId =
+  const dataId =
     body?.data?.id || url.searchParams.get("data.id") || url.searchParams.get("id");
 
+  // Assinatura Pro: reconcilia o plano do fotógrafo pelo estado no MP.
+  // "subscription_preapproval" traz o id da assinatura; o pagamento
+  // recorrente ("subscription_authorized_payment") traz o preapproval_id.
+  // Usa o token do app de assinaturas (billingEnabled), separado do checkout.
+  if (type === "subscription_preapproval" || type === "subscription_authorized_payment") {
+    if (billingEnabled) {
+      try {
+        await dbConnect();
+        const preapprovalId =
+          type === "subscription_preapproval" ? dataId : body?.data?.preapproval_id;
+        await syncSubscription(preapprovalId);
+      } catch (e) {
+        console.error("Webhook assinatura MP:", e.message);
+      }
+    }
+    return NextResponse.json({ ok: true });
+  }
+
+  // Pagamentos (venda de fotos) usam o token do checkout.
+  if (!mpEnabled) return NextResponse.json({ ok: true });
+  const paymentId = dataId;
   if (type !== "payment" || !paymentId) {
     return NextResponse.json({ ok: true });
   }

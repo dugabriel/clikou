@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { CameraIcon, CartIcon, GlobeIcon, WalletIcon, ArrowIcon } from "@/components/Icons";
+import { CameraIcon, CartIcon, GlobeIcon, WalletIcon, ArrowIcon, CheckIcon } from "@/components/Icons";
 
 export const metadata = {
   title: "Portfólio grátis para fotógrafos — link pra bio que vende — Clikou",
@@ -40,8 +40,9 @@ export default function PortfolioLanding() {
             </h1>
             <p className="mt-5 max-w-lg text-lg text-zinc-300">
               Uma página só sua com suas melhores fotos, seus contatos e seus
-              eventos à venda. Grátis, sem código, sem mensalidade — feita para
-              colar na bio do Instagram.
+              eventos à venda. Grátis para começar, sem código — feita para
+              colar na bio do Instagram. No Pro, organize por coleções e venda
+              sem comissão.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <Link
@@ -138,8 +139,8 @@ export default function PortfolioLanding() {
             ],
             [
               WalletIcon,
-              "Grátis de verdade",
-              "Sem mensalidade, sem plano pago, sem marca d'água no seu portfólio. A clikou só ganha quando você vende fotos de evento.",
+              "Comece grátis, cresça no Pro",
+              "Monte a página sem pagar nada. Quando quiser vender sem comissão e separar o trabalho por coleções, o Pro sai por R$ 49/mês.",
             ],
           ].map(([Icon, title, text]) => (
             <div
@@ -153,6 +154,86 @@ export default function PortfolioLanding() {
               <p className="mt-2 text-sm leading-relaxed text-zinc-400">{text}</p>
             </div>
           ))}
+        </div>
+      </section>
+
+      {/* Grátis vs Pro */}
+      <section className="border-y border-white/5 bg-zinc-900/40">
+        <div className="mx-auto max-w-4xl px-4 py-20">
+          <h2 className="font-display text-center text-3xl font-bold tracking-tight sm:text-4xl">
+            Comece grátis. <span className="text-yellow-400">Cresça no Pro.</span>
+          </h2>
+          <p className="mx-auto mt-2 max-w-lg text-center text-zinc-400">
+            No grátis a clikou fica com 20% de cada venda. No Pro você paga uma
+            mensalidade fixa e fica com 100%.
+          </p>
+
+          <div className="mt-12 grid gap-6 sm:grid-cols-2">
+            {/* Grátis */}
+            <div className="rounded-3xl border border-white/10 bg-zinc-950 p-8">
+              <p className="text-sm font-semibold uppercase tracking-widest text-zinc-400">
+                Grátis
+              </p>
+              <p className="font-display mt-1 text-4xl font-bold">R$ 0</p>
+              <ul className="mt-6 space-y-3 text-sm text-zinc-300">
+                {[
+                  "Sua página clikou/f/seunome",
+                  "Até 8 fotos no portfólio",
+                  "Venda de eventos com 20% de comissão",
+                  "Contatos de WhatsApp, Instagram e site",
+                ].map((t) => (
+                  <li key={t} className="flex items-start gap-3">
+                    <CheckIcon size={18} className="mt-0.5 shrink-0 text-zinc-500" />
+                    {t}
+                  </li>
+                ))}
+              </ul>
+              <Link
+                href="/signup?next=/dashboard/profile"
+                className="mt-8 block rounded-full border border-white/15 py-3 text-center font-medium text-zinc-200 transition hover:border-yellow-400/60 hover:text-yellow-400"
+              >
+                Criar página grátis
+              </Link>
+            </div>
+
+            {/* Pro */}
+            <div className="relative rounded-3xl border border-yellow-400/40 bg-yellow-400/5 p-8">
+              <span className="absolute -top-3 right-6 rounded-full bg-yellow-400 px-3 py-1 text-xs font-bold text-zinc-950">
+                MAIS POPULAR
+              </span>
+              <p className="text-sm font-semibold uppercase tracking-widest text-yellow-400">
+                Pro
+              </p>
+              <p className="font-display mt-1 text-4xl font-bold">
+                R$ 49
+                <span className="text-lg font-normal text-zinc-400">/mês</span>
+              </p>
+              <p className="mt-1 text-sm text-zinc-400">
+                ou R$ 490/ano · <span className="text-yellow-400">14 dias grátis</span>
+              </p>
+              <ul className="mt-6 space-y-3 text-sm text-zinc-100">
+                {[
+                  "Tudo do grátis, e mais:",
+                  "Comissão zero — 100% de cada venda é seu",
+                  "Portfólio por coleções (Casamentos, Corridas…)",
+                  "Página com a sua cara: cor e capa, sem marca clikou",
+                  "Métricas de visitas e pedidos de orçamento",
+                ].map((t) => (
+                  <li key={t} className="flex items-start gap-3">
+                    <CheckIcon size={18} className="mt-0.5 shrink-0 text-yellow-400" />
+                    {t}
+                  </li>
+                ))}
+              </ul>
+              <Link
+                href="/signup?next=/dashboard/plan"
+                className="group mt-8 flex items-center justify-center gap-2 rounded-full bg-yellow-400 py-3 font-semibold text-zinc-950 transition hover:bg-yellow-300"
+              >
+                Testar o Pro grátis
+                <ArrowIcon size={16} className="transition-transform group-hover:translate-x-1" />
+              </Link>
+            </div>
+          </div>
         </div>
       </section>
 

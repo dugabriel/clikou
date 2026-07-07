@@ -1,6 +1,6 @@
 import Order from "@/models/Order";
 import User from "@/models/User";
-import { COMMISSION_PERCENT } from "@/lib/mp";
+import { effectiveCommissionPercent } from "@/lib/plan";
 import { emailEnabled, sendPurchaseEmail } from "@/lib/email";
 
 // Marca o pedido como pago e credita a parte de cada fotógrafo na carteira.
@@ -22,19 +22,19 @@ export async function approveOrder(orderId, mpPaymentId = null, { appUrl } = {})
       ...new Set(order.items.map((i) => i.photographer.toString())),
     ];
     const photographers = await User.find({ _id: { $in: photographerIds } })
-      .select("commissionPercent")
+      .select("commissionPercent plan planCurrentPeriodEnd")
       .lean();
     const rates = new Map(
       photographers.map((p) => [
         p._id.toString(),
-        p.commissionPercent ?? COMMISSION_PERCENT,
+        effectiveCommissionPercent(p),
       ])
     );
 
     let totalCommission = 0;
     const credits = new Map();
     for (const item of order.items) {
-      const percent = rates.get(item.photographer.toString()) ?? COMMISSION_PERCENT;
+      const percent = rates.get(item.photographer.toString()) ?? 0;
       const commission = Math.round((item.priceCents * percent) / 100);
       totalCommission += commission;
       const id = item.photographer.toString();

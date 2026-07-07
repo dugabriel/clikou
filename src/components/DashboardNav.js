@@ -7,6 +7,8 @@ const tabs = [
   { href: "/dashboard", label: "Início" },
   { href: "/dashboard/events/new", label: "Criar evento" },
   { href: "/dashboard/profile", label: "Sobre mim" },
+  { href: "/dashboard/marketing", label: "Divulgação" },
+  { href: "/dashboard/plan", label: "Plano" },
   { href: "/dashboard/withdrawal", label: "Carteira" },
 ];
 
