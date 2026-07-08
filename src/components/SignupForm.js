@@ -14,6 +14,7 @@ export default function SignupForm() {
   const [submitting, setSubmitting] = useState(false);
   const [challenge, setChallenge] = useState(null); // { question, token }
   const [sentEmail, setSentEmail] = useState("");
+  const [emailFailed, setEmailFailed] = useState(false);
 
   async function loadCaptcha() {
     setChallenge(null);
@@ -63,6 +64,7 @@ export default function SignupForm() {
     }
     if (data.verify) {
       setSentEmail(email);
+      setEmailFailed(data.emailSent === false);
       return;
     }
     window.location.href = next || "/events";
@@ -73,21 +75,44 @@ export default function SignupForm() {
       <div className="relative mx-auto max-w-md px-4 py-16">
         <div className={card}>
           <BrandIcon size={40} />
-          <h1 className="font-display mt-5 text-3xl font-bold tracking-tight">
-            Confira seu e-mail 📬
-          </h1>
-          <p className="mt-3 text-sm text-zinc-400">
-            Enviamos um link de confirmação para{" "}
-            <strong className="text-zinc-200">{sentEmail}</strong>. Clique
-            nele para ativar sua conta — vale por 48 horas.
-          </p>
-          <p className="mt-3 text-sm text-zinc-500">
-            Não chegou? Olhe a caixa de spam ou tente{" "}
-            <Link href="/login" className="text-yellow-400 hover:underline">
-              entrar
-            </Link>{" "}
-            para receber um novo link.
-          </p>
+          {emailFailed ? (
+            <>
+              <h1 className="font-display mt-5 text-3xl font-bold tracking-tight">
+                Conta criada, mas…
+              </h1>
+              <p className="mt-3 text-sm text-zinc-400">
+                Não conseguimos enviar o e-mail de confirmação para{" "}
+                <strong className="text-zinc-200">{sentEmail}</strong> agora.
+                Sua conta existe, mas ainda precisa ser confirmada.
+              </p>
+              <p className="mt-3 text-sm text-zinc-500">
+                Tente novamente mais tarde pelo{" "}
+                <Link href="/login" className="text-yellow-400 hover:underline">
+                  login
+                </Link>{" "}
+                (ele reenvia o link), ou entre com o Google — não precisa de
+                confirmação.
+              </p>
+            </>
+          ) : (
+            <>
+              <h1 className="font-display mt-5 text-3xl font-bold tracking-tight">
+                Confira seu e-mail 📬
+              </h1>
+              <p className="mt-3 text-sm text-zinc-400">
+                Enviamos um link de confirmação para{" "}
+                <strong className="text-zinc-200">{sentEmail}</strong>. Clique
+                nele para ativar sua conta — vale por 48 horas.
+              </p>
+              <p className="mt-3 text-sm text-zinc-500">
+                Não chegou? Olhe a caixa de spam ou tente{" "}
+                <Link href="/login" className="text-yellow-400 hover:underline">
+                  entrar
+                </Link>{" "}
+                para receber um novo link.
+              </p>
+            </>
+          )}
         </div>
       </div>
     );

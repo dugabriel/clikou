@@ -59,8 +59,15 @@ export async function POST(req) {
   if (emailEnabled) {
     const appUrl = process.env.APP_URL || new URL(req.url).origin;
     const token = await createVerificationToken(user._id);
-    await sendVerificationEmail(user.email, user.name, token, appUrl);
-    return NextResponse.json({ ok: true, verify: true });
+    // sendVerificationEmail retorna false se o provedor recusar (ex.: limite
+    // de conta trial no MailerSend). Avisa o cliente em vez de fingir sucesso.
+    const emailSent = await sendVerificationEmail(
+      user.email,
+      user.name,
+      token,
+      appUrl
+    );
+    return NextResponse.json({ ok: true, verify: true, emailSent });
   }
 
   await createSession(user);
