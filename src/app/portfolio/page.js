@@ -11,6 +11,8 @@ export const metadata = {
     "link para bio fotógrafo",
     "página de fotógrafo",
     "site para fotógrafo grátis",
+    "galeria de entrega de fotos",
+    "entregar fotos para cliente",
   ],
   alternates: { canonical: "/portfolio" },
   openGraph: {
@@ -23,6 +25,38 @@ export const metadata = {
 };
 
 const DEMO_THUMBS = [1, 2, 3, 4, 5, 6].map((n) => `/demo/thumb-${n}.jpg`);
+
+// Depoimentos reais de fotógrafos. Deixe vazio até ter frases de verdade
+// (com autorização de publicar) — a seção só aparece quando há itens.
+// Formato: { quote, name, handle }
+const TESTIMONIALS = [];
+
+const FAQ = [
+  [
+    "É grátis mesmo?",
+    "Sim. Você cria sua conta, monta sua página e recebe clientes sem pagar nada. No plano grátis a clikou fica com 20% de cada venda de foto. O Pro (R$ 49/mês) zera essa comissão e libera coleções, página sem a marca clikou e mais.",
+  ],
+  [
+    "Preciso entender de tecnologia?",
+    "Não. Você escolhe seu endereço (clikou.click/f/seunome), escreve uma bio e arrasta suas fotos. Sem código, sem hospedagem, sem configurar nada.",
+  ],
+  [
+    "Como funciona a entrega para o cliente?",
+    "Você cria uma galeria privada do trabalho, sobe as fotos e manda um link (com PIN opcional). O cliente vê, favorita e baixa em alta — inclusive tudo de uma vez em ZIP — sem precisar criar conta.",
+  ],
+  [
+    "Como eu recebo o dinheiro das vendas?",
+    "As vendas caem na sua carteira dentro da clikou e você saca via Pix. Fotógrafos que conectam a conta do Mercado Pago recebem direto, com o repasse automático.",
+  ],
+  [
+    "Posso cancelar o Pro quando quiser?",
+    "Pode, a qualquer momento, direto no painel. Você continua no Pro até o fim do período já pago e depois volta ao plano grátis — sem multa.",
+  ],
+  [
+    "O cliente precisa ter conta na clikou para comprar ou baixar?",
+    "Não. Quem compra fotos de um evento ou recebe uma galeria de entrega acessa tudo pelo link, sem cadastro.",
+  ],
+];
 
 export default function PortfolioLanding() {
   return (
@@ -157,6 +191,90 @@ export default function PortfolioLanding() {
         </div>
       </section>
 
+      {/* Galeria de entrega */}
+      <section className="border-y border-white/5 bg-zinc-900/40">
+        <div className="mx-auto max-w-6xl px-4 py-20">
+          <div className="grid items-center gap-12 lg:grid-cols-2">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.35em] text-yellow-400">
+                Entrega para o cliente
+              </p>
+              <h2 className="font-display mt-4 text-3xl font-bold tracking-tight sm:text-4xl">
+                Entregue o trabalho num{" "}
+                <span className="text-yellow-400">link bonito</span>, não num
+                WeTransfer que expira
+              </h2>
+              <p className="mt-5 text-zinc-300">
+                Terminou o ensaio ou o casamento? Crie uma galeria privada,
+                suba as fotos e mande um link pro cliente. Ele vê em alta,
+                escolhe as favoritas e baixa — sem instalar nada, sem criar
+                conta.
+              </p>
+              <ul className="mt-6 space-y-3 text-sm text-zinc-200">
+                {[
+                  "Link privado com PIN opcional e data de expiração",
+                  "O cliente favorita as fotos que quer",
+                  "Baixa em alta uma a uma ou tudo de uma vez em ZIP",
+                  "Avise o cliente por e-mail com um clique",
+                ].map((t) => (
+                  <li key={t} className="flex items-start gap-3">
+                    <CheckIcon
+                      size={18}
+                      className="mt-0.5 shrink-0 text-yellow-400"
+                    />
+                    {t}
+                  </li>
+                ))}
+              </ul>
+              <p className="mt-6 text-sm text-zinc-400">
+                Incluído no grátis (1 galeria) e ilimitado no Pro.
+              </p>
+            </div>
+
+            {/* mock da galeria de entrega */}
+            <div className="overflow-hidden rounded-2xl border border-white/10 bg-zinc-950 shadow-2xl">
+              <div className="flex items-center gap-2 border-b border-white/5 bg-zinc-900 px-4 py-3">
+                <span className="h-2.5 w-2.5 rounded-full bg-zinc-700" />
+                <span className="h-2.5 w-2.5 rounded-full bg-zinc-700" />
+                <span className="h-2.5 w-2.5 rounded-full bg-zinc-700" />
+                <span className="ml-3 rounded-full bg-zinc-950 px-4 py-1 font-mono text-xs text-zinc-400">
+                  clikou.click/g/<span className="text-yellow-400">•••</span>
+                </span>
+              </div>
+              <div className="p-5">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="font-semibold">Casamento Ana &amp; João</p>
+                    <p className="text-xs text-zinc-500">248 fotos</p>
+                  </div>
+                  <span className="rounded-full bg-yellow-400 px-3 py-1.5 text-xs font-semibold text-zinc-950">
+                    ⬇️ Baixar todas
+                  </span>
+                </div>
+                <div className="mt-4 grid grid-cols-3 gap-1.5">
+                  {DEMO_THUMBS.map((src, i) => (
+                    <div key={src} className="relative">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={src}
+                        alt=""
+                        loading="lazy"
+                        className="aspect-square w-full rounded-md object-cover"
+                      />
+                      {i % 2 === 0 && (
+                        <span className="absolute left-1 top-1 text-xs">
+                          ❤️
+                        </span>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Grátis vs Pro */}
       <section className="border-y border-white/5 bg-zinc-900/40">
         <div className="mx-auto max-w-4xl px-4 py-20">
@@ -270,6 +388,68 @@ export default function PortfolioLanding() {
               Grátis para sempre · sem cartão de crédito
             </p>
           </div>
+        </div>
+      </section>
+
+      {/* Depoimentos — aparece só quando TESTIMONIALS tiver itens reais */}
+      {TESTIMONIALS.length > 0 && (
+        <section className="mx-auto max-w-6xl px-4 py-20">
+          <h2 className="font-display text-center text-3xl font-bold tracking-tight sm:text-4xl">
+            Quem já usa <span className="text-yellow-400">recomenda</span>
+          </h2>
+          <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {TESTIMONIALS.map((t) => (
+              <figure
+                key={t.name}
+                className="rounded-2xl border border-white/5 bg-zinc-900/60 p-7"
+              >
+                <blockquote className="text-sm leading-relaxed text-zinc-200">
+                  “{t.quote}”
+                </blockquote>
+                <figcaption className="mt-5 text-sm">
+                  <span className="font-semibold">{t.name}</span>
+                  {t.handle && (
+                    <span className="text-zinc-500"> · {t.handle}</span>
+                  )}
+                </figcaption>
+              </figure>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* FAQ */}
+      <section className="mx-auto max-w-3xl px-4 py-20">
+        <h2 className="font-display text-center text-3xl font-bold tracking-tight sm:text-4xl">
+          Perguntas frequentes
+        </h2>
+        <div className="mt-10 divide-y divide-white/5 rounded-2xl border border-white/5 bg-zinc-900/40">
+          {FAQ.map(([q, a]) => (
+            <details key={q} className="group px-6 py-5">
+              <summary className="flex cursor-pointer list-none items-center justify-between gap-4 font-semibold">
+                {q}
+                <span className="text-yellow-400 transition group-open:rotate-45">
+                  +
+                </span>
+              </summary>
+              <p className="mt-3 text-sm leading-relaxed text-zinc-400">{a}</p>
+            </details>
+          ))}
+        </div>
+        <div className="mt-12 text-center">
+          <Link
+            href="/signup?next=/dashboard/profile"
+            className="group inline-flex items-center gap-2 rounded-full bg-yellow-400 px-8 py-4 font-semibold text-zinc-950 transition hover:bg-yellow-300"
+          >
+            Criar minha conta grátis
+            <ArrowIcon
+              size={18}
+              className="transition-transform group-hover:translate-x-1"
+            />
+          </Link>
+          <p className="mt-3 text-sm text-zinc-500">
+            Grátis para sempre · sem cartão de crédito
+          </p>
         </div>
       </section>
     </div>

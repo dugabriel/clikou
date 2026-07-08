@@ -4,8 +4,12 @@ import User from "@/models/User";
 import Event from "@/models/Event";
 import Photo from "@/models/Photo";
 import Order from "@/models/Order";
+import Gallery from "@/models/Gallery";
 import { getSession } from "@/lib/auth";
 import { formatPrice } from "@/lib/currency";
+import { isSellerProfileComplete } from "@/lib/seller";
+import { isPro } from "@/lib/plan";
+import OnboardingChecklist from "@/components/OnboardingChecklist";
 import mongoose from "mongoose";
 
 export const dynamic = "force-dynamic";
@@ -15,9 +19,14 @@ export default async function Dashboard() {
   await dbConnect();
 
   const myId = new mongoose.Types.ObjectId(session.id);
-  const [user, events, sales] = await Promise.all([
-    User.findById(myId).select("balanceCents").lean(),
+  const [user, events, galleryCount, sales] = await Promise.all([
+    User.findById(myId)
+      .select(
+        "balanceCents cpf birthDate phone address collections plan planCurrentPeriodEnd"
+      )
+      .lean(),
     Event.find({ photographer: myId }).sort({ createdAt: -1 }).lean(),
+    Gallery.countDocuments({ photographer: myId }),
     Order.aggregate([
       { $match: { status: "paid" } },
       { $unwind: "$items" },
@@ -42,8 +51,37 @@ export default async function Dashboard() {
 
   const summary = sales[0] || { photosSold: 0, grossTotalCents: 0 };
 
+  const steps = [
+    {
+      label: "Complete seus dados de venda (CPF, telefone, endereço)",
+      done: isSellerProfileComplete(user),
+      href: "/dashboard/profile",
+      cta: "Completar",
+    },
+    {
+      label: "Monte seu portfólio com suas melhores fotos",
+      done: (user?.collections || []).some((c) => (c.photos || []).length > 0),
+      href: "/dashboard/profile",
+      cta: "Adicionar fotos",
+    },
+    {
+      label: "Crie sua primeira galeria de entrega para um cliente",
+      done: galleryCount > 0,
+      href: "/dashboard/galleries",
+      cta: "Criar galeria",
+    },
+    {
+      label: "Ative o Pro: comissão zero e página sem a marca clikou",
+      done: isPro(user),
+      href: "/dashboard/plan",
+      cta: "Ver o Pro",
+    },
+  ];
+
   return (
     <div>
+      <OnboardingChecklist steps={steps} />
+
       <div className="grid gap-4 sm:grid-cols-3">
         {[
           ["Saldo disponível", formatPrice(user?.balanceCents || 0)],
