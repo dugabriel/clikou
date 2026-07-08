@@ -12,6 +12,7 @@
     "@google-cloud/storage": "^7.21.0",
     "@google-cloud/vision": "^5.3.7",
     "@vladmandic/face-api": "^1.7.15",
+    "archiver": "^8.0.0",
     "bcryptjs": "^3.0.3",
     "jose": "^6.2.3",
     "mercadopago": "^3.2.0",

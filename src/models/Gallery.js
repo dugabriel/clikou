@@ -20,6 +20,10 @@ const GallerySchema = new mongoose.Schema(
     },
     title: { type: String, required: true, trim: true },
     clientName: { type: String, default: "" },
+    // E-mail do cliente (para avisar que a galeria chegou). Opcional.
+    clientEmail: { type: String, default: "" },
+    // Quando o link foi enviado ao cliente pela última vez.
+    notifiedAt: { type: Date },
     slug: {
       type: String,
       required: true,

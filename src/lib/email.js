@@ -83,6 +83,41 @@ export async function sendPasswordResetEmail(email, name, token, appUrl) {
   });
 }
 
+export async function sendGalleryReadyEmail({
+  to,
+  clientName,
+  photographerName,
+  galleryTitle,
+  link,
+  pin,
+}) {
+  const firstName = (clientName || "").split(" ")[0];
+  const by = photographerName ? ` por ${photographerName}` : "";
+  return sendEmail({
+    to,
+    subject: `Suas fotos estão prontas — ${galleryTitle} 📸`,
+    html: `
+      <div style="font-family:sans-serif;max-width:480px;margin:0 auto;padding:24px">
+        <h2 style="margin:0 0 16px">Olá${firstName ? `, ${firstName}` : ""}!</h2>
+        <p>Sua galeria <strong>${galleryTitle}</strong> foi preparada${by} e já
+        está disponível. Veja, escolha as favoritas e baixe em alta:</p>
+        <p style="margin:28px 0">
+          <a href="${link}"
+             style="background:#facc15;color:#18181b;text-decoration:none;font-weight:bold;padding:12px 28px;border-radius:999px;display:inline-block">
+            Abrir minha galeria
+          </a>
+        </p>
+        ${
+          pin
+            ? `<p style="color:#71717a;font-size:13px">A galeria pede um PIN de acesso: <strong>${pin}</strong></p>`
+            : ""
+        }
+        <p style="color:#71717a;font-size:13px">Se o botão não funcionar,
+        copie e cole no navegador:<br>${link}</p>
+      </div>`,
+  });
+}
+
 export async function sendPurchaseEmail({ to, name, photoCount, totalCents, appUrl }) {
   const firstName = (name || "").split(" ")[0];
   return sendEmail({

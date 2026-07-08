@@ -70,9 +70,22 @@ export default function GalleryViewer({
             {allowFavorites && favCount > 0 && ` · ${favCount} favorita${favCount === 1 ? "" : "s"} ⭐`}
           </p>
         </div>
-        <Link href="/" className="flex items-center gap-2 text-sm text-zinc-500">
-          <BrandIcon size={22} /> clikou
-        </Link>
+        <div className="flex items-center gap-4">
+          {downloadEnabled && photos.length > 0 && (
+            <a
+              href={`/api/g/${slug}/download-all`}
+              className="rounded-full bg-yellow-400 px-4 py-2 text-sm font-semibold text-zinc-950 hover:bg-yellow-300"
+            >
+              ⬇️ Baixar todas
+            </a>
+          )}
+          <Link
+            href="/"
+            className="flex items-center gap-2 text-sm text-zinc-500"
+          >
+            <BrandIcon size={22} /> clikou
+          </Link>
+        </div>
       </header>
 
       {photos.length === 0 ? (

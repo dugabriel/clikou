@@ -8,6 +8,7 @@ import { getSession } from "@/lib/auth";
 import CopyLinkButton from "@/components/CopyLinkButton";
 import GalleryUploader from "@/components/GalleryUploader";
 import GallerySettings from "@/components/GallerySettings";
+import GalleryNotify from "@/components/GalleryNotify";
 import GalleryPhotoGrid from "@/components/GalleryPhotoGrid";
 
 export const dynamic = "force-dynamic";
@@ -80,6 +81,12 @@ export default async function ManageGallery({ params }) {
       )}
 
       <GalleryUploader galleryId={id} />
+
+      <GalleryNotify
+        galleryId={id}
+        clientEmail={gallery.clientEmail || ""}
+        notifiedAt={gallery.notifiedAt ? gallery.notifiedAt.toISOString() : null}
+      />
 
       <GallerySettings gallery={g} />
 
