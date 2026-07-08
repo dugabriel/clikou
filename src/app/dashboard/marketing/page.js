@@ -19,9 +19,9 @@ export default async function MarketingPage() {
   if (!isPro(user)) {
     return (
       <div className="mx-auto max-w-xl text-center">
-        <h1 className="font-display text-3xl font-bold tracking-tight">
+        <h2 className="font-display text-2xl font-bold tracking-tight">
           Divulgação
-        </h1>
+        </h2>
         <p className="mt-3 text-zinc-400">
           Veja quantas pessoas visitam seu perfil, quem clica nos seus contatos
           e receba pedidos de orçamento — tudo no plano Pro.
@@ -51,9 +51,9 @@ export default async function MarketingPage() {
 
   return (
     <div>
-      <h1 className="font-display text-3xl font-bold tracking-tight">
+      <h2 className="font-display text-2xl font-bold tracking-tight">
         Divulgação
-      </h1>
+      </h2>
       <p className="mt-2 text-zinc-400">
         Como sua página está performando e os contatos que ela gerou.
       </p>

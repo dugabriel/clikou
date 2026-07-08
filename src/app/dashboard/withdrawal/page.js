@@ -23,6 +23,9 @@ export default async function WithdrawalPage({ searchParams }) {
 
   return (
     <div className="mx-auto max-w-lg">
+      <h2 className="mb-6 font-display text-2xl font-bold tracking-tight">
+        Carteira
+      </h2>
       <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-5 text-center">
         <p className="text-sm text-zinc-400">Saldo disponível</p>
         <p className="mt-1 text-3xl font-bold text-yellow-400">

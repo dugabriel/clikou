@@ -36,7 +36,9 @@ export default async function GalleriesPage() {
     <div>
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h2 className="text-xl font-bold">Galerias de entrega</h2>
+          <h2 className="font-display text-2xl font-bold tracking-tight">
+            Entregas
+          </h2>
           <p className="mt-1 max-w-2xl text-sm text-zinc-400">
             Crie uma galeria privada de um trabalho, suba as fotos e mande o
             link pro cliente. Ele vê, favorita e baixa em alta — sem precisar

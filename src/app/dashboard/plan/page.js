@@ -36,9 +36,9 @@ export default async function PlanPage() {
 
   return (
     <div className="mx-auto max-w-2xl">
-      <h1 className="font-display text-3xl font-bold tracking-tight">
+      <h2 className="font-display text-2xl font-bold tracking-tight">
         Seu plano
-      </h1>
+      </h2>
       <p className="mt-2 text-zinc-400">
         {pro
           ? "Você é Pro — vende sem comissão, com página profissional e ferramentas de divulgação."
