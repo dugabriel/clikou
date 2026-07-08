@@ -112,6 +112,24 @@ export async function readMpStateToken(token) {
   }
 }
 
+// Desbloqueio de uma galeria de entrega protegida por PIN. Guardado num
+// cookie por galeria; o cliente não tem conta, só prova que acertou o PIN.
+export async function createGalleryAccessToken(galleryId) {
+  return new SignJWT({ gid: galleryId.toString(), purpose: "gallery-access" })
+    .setProtectedHeader({ alg: "HS256" })
+    .setExpirationTime("30d")
+    .sign(secret);
+}
+
+export async function readGalleryAccessToken(token) {
+  try {
+    const { payload } = await jwtVerify(token, secret);
+    return payload.purpose === "gallery-access" ? payload.gid : null;
+  } catch {
+    return null;
+  }
+}
+
 // Admins são definidos por e-mail em ADMIN_EMAILS (separados por vírgula).
 const adminEmails = (process.env.ADMIN_EMAILS || "")
   .split(",")

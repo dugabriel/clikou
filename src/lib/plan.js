@@ -5,8 +5,18 @@ import { COMMISSION_PERCENT } from "@/lib/mp";
 export const PRO_PRICE_CENTS = 4900;
 
 export const PLAN_LIMITS = {
-  free: { collections: 1, photosPerCollection: 8, namedCollections: false },
-  pro: { collections: 20, photosPerCollection: 100, namedCollections: true },
+  free: {
+    collections: 1,
+    photosPerCollection: 8,
+    namedCollections: false,
+    galleries: 1,
+  },
+  pro: {
+    collections: 20,
+    photosPerCollection: 100,
+    namedCollections: true,
+    galleries: Infinity,
+  },
 };
 
 // Assinante Pro com ciclo vigente. Sem planCurrentPeriodEnd (ativado no

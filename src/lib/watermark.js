@@ -50,3 +50,16 @@ export async function generatePreview(originalBuffer) {
 
   return { preview, width, height };
 }
+
+// Preview reduzido SEM marca d'água — usado nas galerias de entrega, onde o
+// cliente já é dono das fotos (o download entrega o original em alta).
+export async function generatePlainPreview(originalBuffer) {
+  const base = await sharp(originalBuffer)
+    .rotate()
+    .resize({ width: 1600, withoutEnlargement: true })
+    .jpeg({ quality: 78 })
+    .toBuffer();
+
+  const { width, height } = await sharp(base).metadata();
+  return { preview: base, width, height };
+}
