@@ -3,6 +3,7 @@ import "./globals.css";
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import Logo from "@/components/Logo";
+import GoogleAnalytics from "@/components/GoogleAnalytics";
 
 const geist = Geist({ subsets: ["latin"], variable: "--font-geist" });
 const grotesk = Space_Grotesk({
@@ -52,6 +53,7 @@ export default function RootLayout({ children }) {
       className={`${geist.variable} ${grotesk.variable} h-full antialiased`}
     >
       <body className="flex min-h-full flex-col font-sans">
+        <GoogleAnalytics />
         <Navbar />
         <main className="flex-1">{children}</main>
         <footer className="mt-16 border-t border-white/5 bg-zinc-950">
