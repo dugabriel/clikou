@@ -19,6 +19,8 @@ export default function GallerySettings({ gallery }) {
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState("");
+  const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState("");
 
   async function save(e) {
     e.preventDefault();
@@ -46,19 +48,32 @@ export default function GallerySettings({ gallery }) {
   }
 
   async function remove() {
-    if (!confirm("Apagar esta galeria e todas as fotos? Não dá para desfazer.")) {
+    if (
+      !confirm("Apagar esta galeria e todas as fotos? Não dá para desfazer.")
+    ) {
       return;
     }
+    setDeleting(true);
+    setDeleteError("");
     const res = await fetch(`/api/galleries/${gallery.id}`, {
       method: "DELETE",
     });
-    if (res.ok) router.push("/dashboard/galleries");
+    if (res.ok) {
+      // Sai da página da galeria apagada e revalida a lista.
+      router.replace("/dashboard/galleries");
+      router.refresh();
+      return;
+    }
+    const data = await res.json().catch(() => ({}));
+    setDeleting(false);
+    setDeleteError(data.error || "Não foi possível apagar a galeria.");
   }
 
   const checkbox =
     "h-4 w-4 rounded border-zinc-600 bg-zinc-900 accent-yellow-400";
 
   return (
+    <>
     <form
       onSubmit={save}
       className="mt-6 rounded-xl border border-zinc-800 bg-zinc-900/60 p-6"
@@ -140,14 +155,30 @@ export default function GallerySettings({ gallery }) {
         </button>
         {saved && <span className="text-sm text-emerald-400">Salvo ✓</span>}
         {error && <span className="text-sm text-red-400">{error}</span>}
+      </div>
+    </form>
+
+    {/* Zona de perigo — apagar é irreversível, então fica separado das opções. */}
+    <div className="mt-6 rounded-xl border border-red-500/25 bg-red-500/[0.03] p-6">
+      <h3 className="font-semibold text-red-400">Apagar galeria</h3>
+      <p className="mt-1 text-sm text-zinc-400">
+        Remove a galeria, todas as fotos e o link de entrega do cliente. Esta
+        ação não pode ser desfeita.
+      </p>
+      <div className="mt-4 flex flex-wrap items-center gap-4">
         <button
           type="button"
           onClick={remove}
-          className="ml-auto text-sm text-red-400 hover:underline"
+          disabled={deleting}
+          className="rounded-lg border border-red-500/50 px-5 py-2.5 text-sm font-semibold text-red-400 transition hover:bg-red-500/10 disabled:opacity-50"
         >
-          Apagar galeria
+          {deleting ? "Apagando…" : "Apagar galeria"}
         </button>
+        {deleteError && (
+          <span className="text-sm text-red-400">{deleteError}</span>
+        )}
       </div>
-    </form>
+    </div>
+    </>
   );
 }

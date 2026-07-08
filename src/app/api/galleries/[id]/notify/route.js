@@ -5,6 +5,9 @@ import Gallery from "@/models/Gallery";
 import { getSession } from "@/lib/auth";
 import { emailEnabled, sendGalleryReadyEmail } from "@/lib/email";
 
+// Guardrail anti-spam: só reenvia pro MESMO e-mail depois desse intervalo.
+export const NOTIFY_COOLDOWN_MS = 10 * 60 * 1000;
+
 // Envia (ou reenvia) o link da galeria por e-mail para o cliente.
 export async function POST(req, ctx) {
   const session = await getSession();
@@ -30,11 +33,32 @@ export async function POST(req, ctx) {
   }
 
   // Guarda o e-mail do cliente para reenvios futuros.
+  const previousEmail = gallery.clientEmail;
   gallery.clientEmail = clientEmail;
 
   if (!emailEnabled) {
     await gallery.save();
     return NextResponse.json({ ok: true, disabled: true });
+  }
+
+  // Bloqueia clique repetido: reenvio pro mesmo e-mail só após o cooldown.
+  // Trocar de destinatário (ex.: corrigir digitação) libera na hora.
+  if (
+    gallery.notifiedAt &&
+    previousEmail === clientEmail &&
+    Date.now() - new Date(gallery.notifiedAt).getTime() < NOTIFY_COOLDOWN_MS
+  ) {
+    const waitMs =
+      NOTIFY_COOLDOWN_MS - (Date.now() - new Date(gallery.notifiedAt).getTime());
+    return NextResponse.json(
+      {
+        error: `Você já avisou esse cliente agora há pouco. Espere ${Math.ceil(
+          waitMs / 60000
+        )} min para reenviar.`,
+        retryAfterSeconds: Math.ceil(waitMs / 1000),
+      },
+      { status: 429 }
+    );
   }
 
   const appUrl = process.env.APP_URL || new URL(req.url).origin;

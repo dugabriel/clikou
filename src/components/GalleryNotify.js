@@ -1,6 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+
+// Mesmo cooldown do servidor (route.js NOTIFY_COOLDOWN_MS): evita spam de
+// e-mail por cliques repetidos.
+const COOLDOWN_MS = 10 * 60 * 1000;
 
 // Envia o link da galeria por e-mail pro cliente.
 export default function GalleryNotify({ galleryId, clientEmail, notifiedAt }) {
@@ -10,13 +14,33 @@ export default function GalleryNotify({ galleryId, clientEmail, notifiedAt }) {
     notifiedAt
       ? {
           kind: "info",
-          text: `Enviado em ${new Date(notifiedAt).toLocaleDateString("pt-BR")}.`,
+          text: `Último aviso em ${new Date(notifiedAt).toLocaleDateString(
+            "pt-BR"
+          )}.`,
         }
       : null
   );
+  // E-mail que recebeu o último aviso e até quando o reenvio fica travado.
+  const [lastNotifiedEmail, setLastNotifiedEmail] = useState(clientEmail || "");
+  const [cooldownUntil, setCooldownUntil] = useState(
+    notifiedAt ? new Date(notifiedAt).getTime() + COOLDOWN_MS : 0
+  );
+  const [now, setNow] = useState(() => Date.now());
+
+  // Só mantém o timer vivo enquanto há cooldown pra correr.
+  useEffect(() => {
+    if (cooldownUntil <= Date.now()) return;
+    const t = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(t);
+  }, [cooldownUntil]);
+
+  const remainingMs = Math.max(0, cooldownUntil - now);
+  // O cooldown só vale pro mesmo destinatário — trocar o e-mail libera.
+  const cooling = remainingMs > 0 && email.trim() === lastNotifiedEmail;
 
   async function send(e) {
     e.preventDefault();
+    if (cooling) return;
     setSending(true);
     setMsg(null);
     const res = await fetch(`/api/galleries/${galleryId}/notify`, {
@@ -26,6 +50,17 @@ export default function GalleryNotify({ galleryId, clientEmail, notifiedAt }) {
     });
     const data = await res.json().catch(() => ({}));
     setSending(false);
+
+    if (res.status === 429) {
+      // Servidor recusou por cooldown — sincroniza o timer local com ele.
+      if (data.retryAfterSeconds) {
+        setLastNotifiedEmail(email.trim());
+        setCooldownUntil(Date.now() + data.retryAfterSeconds * 1000);
+        setNow(Date.now());
+      }
+      setMsg({ kind: "error", text: data.error || "Aguarde para reenviar." });
+      return;
+    }
     if (!res.ok) {
       setMsg({ kind: "error", text: data.error || "Não foi possível enviar." });
       return;
@@ -44,6 +79,10 @@ export default function GalleryNotify({ galleryId, clientEmail, notifiedAt }) {
       });
       return;
     }
+    // Enviou: arma o cooldown pra este destinatário.
+    setLastNotifiedEmail(email.trim());
+    setCooldownUntil(Date.now() + COOLDOWN_MS);
+    setNow(Date.now());
     setMsg({ kind: "ok", text: `Link enviado para ${email} ✓` });
   }
 
@@ -53,6 +92,10 @@ export default function GalleryNotify({ galleryId, clientEmail, notifiedAt }) {
       : msg?.kind === "error"
         ? "text-red-400"
         : "text-zinc-500";
+
+  // Contagem regressiva formatada (ex.: "9m 42s").
+  const totalSec = Math.ceil(remainingMs / 1000);
+  const mmss = `${Math.floor(totalSec / 60)}m ${totalSec % 60}s`;
 
   return (
     <form
@@ -77,13 +120,20 @@ export default function GalleryNotify({ galleryId, clientEmail, notifiedAt }) {
           />
         </div>
         <button
-          disabled={sending || !email.trim()}
+          disabled={sending || !email.trim() || cooling}
           className="rounded-lg bg-yellow-400 px-5 py-2.5 font-semibold text-zinc-950 hover:bg-yellow-300 disabled:opacity-50"
         >
-          {sending ? "Enviando…" : "Enviar link"}
+          {sending ? "Enviando…" : cooling ? `Reenviar em ${mmss}` : "Enviar link"}
         </button>
       </div>
-      {msg && <p className={`mt-3 text-sm ${color}`}>{msg.text}</p>}
+      {cooling ? (
+        <p className="mt-3 text-sm text-zinc-500">
+          Já avisamos {lastNotifiedEmail} agora há pouco. Você pode reenviar em{" "}
+          {mmss} — ou trocar o e-mail para avisar outro contato na hora.
+        </p>
+      ) : (
+        msg && <p className={`mt-3 text-sm ${color}`}>{msg.text}</p>
+      )}
     </form>
   );
 }
