@@ -46,9 +46,9 @@ export default async function Home() {
               <span className="text-yellow-400">Venda sem comissão.</span>
             </h1>
             <p className="mt-5 max-w-xl text-base text-zinc-300 sm:text-lg">
-              Uma página profissional pra colar na bio, portfólio por coleções e
-              suas fotos à venda com busca por selfie. Grátis pra começar; no Pro
-              você fica com 100% de cada venda.
+              Uma página profissional pra colar na bio, galerias pra entregar
+              trabalhos ao cliente e suas fotos à venda com busca por selfie.
+              Grátis pra começar; no Pro você fica com 100% de cada venda.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <Link
@@ -165,6 +165,78 @@ export default async function Home() {
               </span>
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* Kit do fotógrafo */}
+      <section className="mx-auto max-w-6xl px-4 py-16">
+        <div className="text-center">
+          <p className="text-xs font-semibold uppercase tracking-[0.35em] text-yellow-400">
+            Tudo num lugar só
+          </p>
+          <h2 className="font-display mt-3 text-3xl font-bold tracking-tight sm:text-4xl">
+            O kit completo de quem vive da{" "}
+            <span className="text-yellow-400">fotografia</span>
+          </h2>
+          <p className="mx-auto mt-3 max-w-xl text-zinc-400">
+            Do primeiro clique ao pagamento: divulgar, entregar e vender o seu
+            trabalho sem juntar mil ferramentas.
+          </p>
+        </div>
+        <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          {[
+            [
+              "🖼️",
+              "Portfólio pra bio",
+              "Sua página clikou.click/f/seunome com suas melhores fotos, sua história e seus contatos — pronta pra colar no Instagram.",
+            ],
+            [
+              "📦",
+              "Galeria de entrega",
+              "Entregue ensaios e casamentos num link privado com PIN. O cliente favorita e baixa em alta, uma a uma ou tudo em ZIP.",
+            ],
+            [
+              "🤳",
+              "Busca por selfie e print",
+              "No evento, o cliente manda uma selfie (ou o print de uma foto) e acha na hora as fotos em que aparece.",
+            ],
+            [
+              "💸",
+              "Venda sem comissão",
+              "Pagamento online com download em alta liberado na hora. No Pro, você fica com 100% de cada venda.",
+            ],
+            [
+              "🎨",
+              "Página com a sua cara",
+              "No Pro, use a sua cor e a sua capa e esconda a marca clikou — a página fica com o seu branding.",
+            ],
+            [
+              "📈",
+              "Orçamentos e métricas",
+              "Receba pedidos de contratação pela sua página e acompanhe visitas e cliques nos seus contatos.",
+            ],
+          ].map(([emoji, title, text]) => (
+            <div
+              key={title}
+              className="rounded-2xl border border-white/5 bg-zinc-900/60 p-6 transition hover:border-yellow-400/30"
+            >
+              <div className="text-3xl">{emoji}</div>
+              <h3 className="mt-4 text-lg font-semibold">{title}</h3>
+              <p className="mt-2 text-sm leading-relaxed text-zinc-400">{text}</p>
+            </div>
+          ))}
+        </div>
+        <div className="mt-10 text-center">
+          <Link
+            href="/signup?next=/dashboard/profile"
+            className="group inline-flex items-center gap-2 rounded-full bg-yellow-400 px-7 py-3.5 font-semibold text-zinc-950 transition hover:bg-yellow-300"
+          >
+            Criar minha conta grátis
+            <ArrowIcon
+              size={18}
+              className="transition-transform group-hover:translate-x-1"
+            />
+          </Link>
         </div>
       </section>
 

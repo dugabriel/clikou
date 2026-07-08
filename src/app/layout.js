@@ -4,6 +4,8 @@ import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import Logo from "@/components/Logo";
 import GoogleAnalytics from "@/components/GoogleAnalytics";
+import CookieConsent from "@/components/CookieConsent";
+import ManageCookiesLink from "@/components/ManageCookiesLink";
 
 const geist = Geist({ subsets: ["latin"], variable: "--font-geist" });
 const grotesk = Space_Grotesk({
@@ -54,6 +56,7 @@ export default function RootLayout({ children }) {
     >
       <body className="flex min-h-full flex-col font-sans">
         <GoogleAnalytics />
+        <CookieConsent />
         <Navbar />
         <main className="flex-1">{children}</main>
         <footer className="mt-16 border-t border-white/5 bg-zinc-950">
@@ -95,6 +98,7 @@ export default function RootLayout({ children }) {
                 <Link href="/privacy" className="block text-zinc-500 hover:text-yellow-400">
                   Privacidade
                 </Link>
+                <ManageCookiesLink />
               </div>
             </div>
           </div>

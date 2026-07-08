@@ -1,14 +1,25 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { primaryButton, secondaryButton } from "@/components/ui";
+import { trackEvent } from "@/lib/analytics";
+
+const PLAN_VALUE = { monthly: 49, annual: 490 };
 
 export default function PlanActions({ pro }) {
   const router = useRouter();
+  const params = useSearchParams();
   const [cycle, setCycle] = useState("monthly");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+
+  // O MP redireciona de volta com ?sub=ok após autorizar — conversão real.
+  useEffect(() => {
+    if (params.get("sub") === "ok") {
+      trackEvent("subscribe", { currency: "BRL" });
+    }
+  }, [params]);
 
   async function subscribe() {
     setBusy(true);
@@ -28,6 +39,13 @@ export default function PlanActions({ pro }) {
     if (data.url?.startsWith("http")) {
       window.location.href = data.url;
     } else {
+      // Modo dev: virou Pro na hora — conta a conversão aqui (o retorno real
+      // ?sub=ok cobre o fluxo do MP).
+      trackEvent("subscribe", {
+        currency: "BRL",
+        value: PLAN_VALUE[cycle],
+        cycle,
+      });
       router.refresh();
     }
   }

@@ -6,6 +6,7 @@ import { useSearchParams } from "next/navigation";
 import GoogleButton from "@/components/GoogleButton";
 import { BrandIcon } from "@/components/Logo";
 import { field, label, primaryButton, card } from "@/components/ui";
+import { trackEvent } from "@/lib/analytics";
 
 export default function SignupForm() {
   const params = useSearchParams();
@@ -62,6 +63,8 @@ export default function SignupForm() {
       loadCaptcha();
       return;
     }
+    // Conversão: conta criada com sucesso (vale pros dois caminhos).
+    trackEvent("sign_up", { method: "email" });
     if (data.verify) {
       setSentEmail(email);
       setEmailFailed(data.emailSent === false);

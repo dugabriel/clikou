@@ -17,6 +17,15 @@ export default function GoogleAnalytics() {
           window.dataLayer = window.dataLayer || [];
           function gtag(){dataLayer.push(arguments);}
           gtag('js', new Date());
+          // Consent Mode v2: começa NEGADO (LGPD). O banner de cookies libera
+          // depois, se o usuário aceitar.
+          gtag('consent', 'default', {
+            ad_storage: 'denied',
+            analytics_storage: 'denied',
+            ad_user_data: 'denied',
+            ad_personalization: 'denied',
+            wait_for_update: 500
+          });
           gtag('config', '${GA_ID}');
         `}
       </Script>
