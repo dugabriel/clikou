@@ -1,9 +1,9 @@
 import Link from "next/link";
 
 export const metadata = {
-  title: "Sobre a clikou — quem faz e por quê",
+  title: "Sobre a clikou — ferramentas para o fotógrafo viver do seu trabalho",
   description:
-    "A clikou nasceu de profissionais de TI apaixonados por fotografia: tecnologia para nenhuma foto boa morrer no cartão de memória.",
+    "A clikou nasceu para melhorar a vida do fotógrafo profissional: ferramentas acessíveis para divulgar, entregar e vender o seu trabalho — sem site caro nem complicação.",
   alternates: { canonical: "/about" },
 };
 
@@ -21,54 +21,61 @@ export default function AboutPage() {
       <div className="mt-10 space-y-6 leading-relaxed text-zinc-300">
         <p>
           A clikou foi criada por profissionais de tecnologia que, fora do
-          expediente, vivem com uma câmera pendurada no pescoço. De dia,
-          código, servidores e reuniões; no fim de semana, a gente estava na
-          beira da pista fotografando corrida de rua, no gramado do campeonato
-          de várzea, na pista de kart, na formatura de amigos.
+          expediente, vivem com uma câmera no pescoço. De dia, código,
+          servidores e reuniões; nos fins de semana, na beira da pista
+          fotografando corrida de rua, no gramado do campeonato de várzea, na
+          pista de kart, na formatura de amigos.
         </p>
         <p>
-          E toda semana a história se repetia. O fotógrafo voltava para casa
-          com o cartão de memória cheio de fotos boas — <em>boas de verdade</em>{" "}
-          — que ninguém nunca ia ver. A galeria ia para uma pasta no Drive, o
-          link se perdia no grupo, e começava a enxurrada de mensagens:
-          {" "}
-          <em>&quot;tem foto minha?&quot;</em>,{" "}
-          <em>&quot;sou o de camiseta azul, número 214&quot;</em>,{" "}
-          <em>&quot;consegue procurar aí?&quot;</em>. Duas mil fotos, quinhentos
-          participantes, zero paciência dos dois lados. O corredor desistia de
-          procurar, o fotógrafo desistia de cobrar — e um trabalho lindo virava
-          pasta esquecida.
+          E toda semana a mesma frustração — só que ela não era com a
+          fotografia. Talento e foto boa não faltavam.{" "}
+          <em>Faltava o que vem depois do clique.</em> Mostrar o trabalho pedia
+          um site caro e trabalhoso. Entregar pro cliente virava link de
+          WeTransfer que expirava. Cobrar era planilha e mensagem solta no
+          WhatsApp. Divulgar era um Linktree que não vendia nada. O fotógrafo
+          gastava mais energia com a logística do que com a fotografia — e um
+          trabalho lindo acabava preso numa pasta.
         </p>
         <p>
-          Um dia caiu a ficha: os dois problemas eram, no fundo,{" "}
-          <strong className="text-white">problemas de software</strong>. E
-          software é justamente o que a gente faz da vida.
+          Um dia caiu a ficha: o gargalo não era a fotografia,{" "}
+          <strong className="text-white">eram as ferramentas</strong>. E
+          ferramenta boa, acessível e bem-feita é justamente o que a gente faz
+          da vida.
         </p>
         <p>
-          Então juntamos as duas paixões. Reconhecimento facial para cada
-          participante se encontrar com uma selfie, em segundos, no meio de
-          milhares de fotos. Marca d&apos;água automática para o trabalho
-          circular protegido. Pagamento online e download em alta liberado na
-          hora. Página de portfólio para o fotógrafo colocar na bio. Tudo o que
-          a gente sempre quis que existisse quando estava do outro lado da
-          lente.
+          Então juntamos as duas paixões e construímos o que a gente sempre quis
+          ter do outro lado da lente: uma página de portfólio pronta pra colar
+          na bio, galerias privadas para entregar o trabalho ao cliente em alta,
+          venda com pagamento online e download liberado na hora, marca
+          d&apos;água automática para o trabalho circular protegido e busca por
+          rosto para quem esteve no evento se encontrar numa selfie. Tudo
+          acessível: de graça para começar, simples, sem código.
         </p>
         <p>
           A clikou existe por uma convicção simples:{" "}
           <strong className="text-white">
-            nenhuma foto boa merece morrer no cartão de memória
+            o fotógrafo profissional merece ferramentas à altura do seu
+            trabalho — acessíveis, para divulgar e distribuir o que ele faz
           </strong>
-          . Quem estava lá merece se encontrar; quem fotografou merece ser
-          pago. A tecnologia serve para aproximar esses dois — e a gente cuida
-          do resto.
+          . Talento não pode ficar preso num cartão de memória por falta de
+          ferramenta. A gente cuida da tecnologia para você cuidar da foto.
         </p>
       </div>
 
       <div className="mt-12 grid gap-4 sm:grid-cols-3">
         {[
-          ["O clique tem valor", "Fotografou, tem que poder viver disso — profissional ou não."],
-          ["Tecnologia invisível", "IA, proteção e pagamento trabalhando em silêncio; você só vê o resultado."],
-          ["Simples dos dois lados", "Quem compra se acha com uma selfie; quem vende publica em minutos."],
+          [
+            "Ferramentas acessíveis",
+            "Comece de graça, sem site caro nem código. O que era complicado e custava caro agora cabe num link.",
+          ],
+          [
+            "Seu trabalho circulando",
+            "Portfólio, entrega ao cliente e venda no mesmo lugar — do clique ao pagamento, sem fricção.",
+          ],
+          [
+            "Você cuida da foto",
+            "IA, proteção e pagamento trabalham nos bastidores; você só vê o resultado.",
+          ],
         ].map(([title, text]) => (
           <div
             key={title}
@@ -82,16 +89,16 @@ export default function AboutPage() {
 
       <div className="mt-12 flex flex-wrap gap-3">
         <Link
-          href="/events"
+          href="/signup?next=/dashboard/profile"
           className="rounded-full bg-yellow-400 px-7 py-3.5 font-semibold text-zinc-950 transition hover:bg-yellow-300"
         >
-          Encontrar minhas fotos
+          Criar minha conta grátis
         </Link>
         <Link
-          href="/dashboard"
+          href="/f/demo"
           className="rounded-full border border-zinc-700 px-7 py-3.5 font-semibold text-zinc-200 transition hover:border-yellow-400 hover:text-yellow-400"
         >
-          Vender minhas fotos
+          Ver um exemplo ao vivo
         </Link>
       </div>
     </div>
