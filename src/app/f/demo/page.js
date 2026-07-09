@@ -55,15 +55,15 @@ export default function DemoProfile() {
         </Link>
       </div>
 
-      {/* Capa */}
+      {/* Capa em alta (1920x1080) — foto esportiva de banco livre (Unsplash). */}
       <div className="relative h-56 w-full overflow-hidden sm:h-72">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
-          src="/demo/thumb-2.jpg"
+          src="/demo/cover.jpg"
           alt="Capa de Marina Duarte"
           className="h-full w-full object-cover"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/40 to-transparent" />
       </div>
 
       {/* Cabeçalho */}
