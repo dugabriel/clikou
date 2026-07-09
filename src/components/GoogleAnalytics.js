@@ -1,8 +1,10 @@
 import Script from "next/script";
 
-// Google Analytics 4 (gtag). Só carrega em produção para não poluir a
-// propriedade do GA com tráfego de desenvolvimento.
-const GA_ID = "G-QRBXV64DE6";
+// Google Analytics 4 + Google Ads (gtag). Um único gtag.js atende os dois:
+// basta um gtag('config', ...) por ID. Só carrega em produção para não
+// poluir a propriedade do GA com tráfego de desenvolvimento.
+const GA_ID = "G-QRBXV64DE6"; // GA4 (medição)
+const ADS_ID = "AW-18309790219"; // Google Ads (conversões dos anúncios)
 
 export default function GoogleAnalytics() {
   if (process.env.NODE_ENV !== "production") return null;
@@ -27,6 +29,7 @@ export default function GoogleAnalytics() {
             wait_for_update: 500
           });
           gtag('config', '${GA_ID}');
+          gtag('config', '${ADS_ID}');
         `}
       </Script>
     </>
