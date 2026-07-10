@@ -6,6 +6,7 @@ import Logo from "@/components/Logo";
 import GoogleAnalytics from "@/components/GoogleAnalytics";
 import CookieConsent from "@/components/CookieConsent";
 import ManageCookiesLink from "@/components/ManageCookiesLink";
+import { InstagramIcon, FacebookIcon } from "@/components/Icons";
 
 const geist = Geist({ subsets: ["latin"], variable: "--font-geist" });
 const grotesk = Space_Grotesk({
@@ -67,6 +68,26 @@ export default function RootLayout({ children }) {
                 Fotos de evento direto de quem fotografou — profissional ou
                 não. Você publica, compartilha o link e recebe.
               </p>
+              <div className="mt-4 flex gap-3">
+                <a
+                  href="https://www.instagram.com/clikou.click/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Instagram da clikou"
+                  className="text-zinc-500 transition hover:text-yellow-400"
+                >
+                  <InstagramIcon size={20} />
+                </a>
+                <a
+                  href="https://www.facebook.com/profile.php?id=61591937182794"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Facebook da clikou"
+                  className="text-zinc-500 transition hover:text-yellow-400"
+                >
+                  <FacebookIcon size={20} />
+                </a>
+              </div>
             </div>
             <div className="flex gap-16 text-sm">
               <div className="space-y-2.5">

@@ -112,6 +112,14 @@ export function InstagramIcon(props) {
   );
 }
 
+export function FacebookIcon(props) {
+  return (
+    <Base {...props}>
+      <path d="M17.5 3.5H15a4.5 4.5 0 0 0-4.5 4.5v2.5H8v4h2.5v6h4v-6H17l.5-4h-3V8a1 1 0 0 1 1-1h2Z" />
+    </Base>
+  );
+}
+
 export function WhatsAppIcon(props) {
   return (
     <Base {...props}>
