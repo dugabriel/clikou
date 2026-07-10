@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { BrandIcon } from "@/components/Logo";
+import { MailIcon } from "@/components/Icons";
 import { field, label, primaryButton, card } from "@/components/ui";
 
 export default function ForgotPasswordForm() {
@@ -62,8 +63,9 @@ export default function ForgotPasswordForm() {
         <BrandIcon size={40} />
         {sent ? (
           <>
-            <h1 className="font-display mt-5 text-3xl font-bold tracking-tight">
-              Confira seu e-mail 📬
+            <h1 className="font-display mt-5 flex items-center gap-2.5 text-3xl font-bold tracking-tight">
+              <MailIcon size={28} className="shrink-0 text-yellow-400" />
+              Confira seu e-mail
             </h1>
             <p className="mt-3 text-sm text-zinc-400">
               Se existir uma conta com esse e-mail, enviamos um link para

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import GoogleButton from "@/components/GoogleButton";
 import { BrandIcon } from "@/components/Logo";
+import { MailIcon } from "@/components/Icons";
 import { field, label, primaryButton, card } from "@/components/ui";
 import { trackEvent } from "@/lib/analytics";
 
@@ -99,8 +100,9 @@ export default function SignupForm() {
             </>
           ) : (
             <>
-              <h1 className="font-display mt-5 text-3xl font-bold tracking-tight">
-                Confira seu e-mail 📬
+              <h1 className="font-display mt-5 flex items-center gap-2.5 text-3xl font-bold tracking-tight">
+                <MailIcon size={28} className="shrink-0 text-yellow-400" />
+                Confira seu e-mail
               </h1>
               <p className="mt-3 text-sm text-zinc-400">
                 Enviamos um link de confirmação para{" "}

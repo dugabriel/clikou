@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { CameraIcon, CartIcon, GlobeIcon, WalletIcon, ArrowIcon, CheckIcon } from "@/components/Icons";
+import { CameraIcon, CartIcon, GlobeIcon, WalletIcon, ArrowIcon, CheckIcon, DownloadIcon, HeartIcon } from "@/components/Icons";
 
 export const metadata = {
   title: "Portfólio grátis para fotógrafos — link pra bio que vende — Clikou",
@@ -247,8 +247,8 @@ export default function PortfolioLanding() {
                     <p className="font-semibold">Casamento Ana &amp; João</p>
                     <p className="text-xs text-zinc-500">248 fotos</p>
                   </div>
-                  <span className="rounded-full bg-yellow-400 px-3 py-1.5 text-xs font-semibold text-zinc-950">
-                    ⬇️ Baixar todas
+                  <span className="flex items-center gap-1 rounded-full bg-yellow-400 px-3 py-1.5 text-xs font-semibold text-zinc-950">
+                    <DownloadIcon size={13} /> Baixar todas
                   </span>
                 </div>
                 <div className="mt-4 grid grid-cols-3 gap-1.5">
@@ -262,8 +262,8 @@ export default function PortfolioLanding() {
                         className="aspect-square w-full rounded-md object-cover"
                       />
                       {i % 2 === 0 && (
-                        <span className="absolute left-1 top-1 text-xs">
-                          ❤️
+                        <span className="absolute left-1 top-1 text-red-500">
+                          <HeartIcon size={13} filled />
                         </span>
                       )}
                     </div>

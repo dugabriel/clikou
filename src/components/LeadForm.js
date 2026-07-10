@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { field, label } from "@/components/ui";
+import { CheckIcon } from "@/components/Icons";
 
 // Formulário "peça um orçamento" no perfil público (recurso Pro). A cor de
 // destaque vem por CSS var (--brand) herdada da página.
@@ -37,8 +38,8 @@ export default function LeadForm({ username }) {
   if (sent) {
     return (
       <div className="rounded-2xl border border-white/10 bg-zinc-900/60 p-8 text-center">
-        <p className="text-lg font-semibold text-[color:var(--brand)]">
-          Pedido enviado! ✅
+        <p className="flex items-center justify-center gap-2 text-lg font-semibold text-[color:var(--brand)]">
+          <CheckIcon size={20} /> Pedido enviado!
         </p>
         <p className="mt-2 text-sm text-zinc-400">
           O fotógrafo vai receber seu contato e responder em breve.

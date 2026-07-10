@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { StarIcon } from "@/components/Icons";
 
 // Grade de gestão das fotos: mostra as favoritas do cliente e permite excluir.
 export default function GalleryPhotoGrid({ galleryId, photos }) {
@@ -41,8 +42,8 @@ export default function GalleryPhotoGrid({ galleryId, photos }) {
             className="aspect-square w-full object-cover"
           />
           {p.favorited && (
-            <span className="absolute left-1.5 top-1.5 rounded-full bg-black/60 px-1.5 py-0.5 text-xs">
-              ⭐
+            <span className="absolute left-1.5 top-1.5 flex h-6 w-6 items-center justify-center rounded-full bg-black/60 text-yellow-400">
+              <StarIcon size={14} filled />
             </span>
           )}
           <button

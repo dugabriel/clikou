@@ -11,6 +11,7 @@ import { formatPrice } from "@/lib/currency";
 import { isSellerProfileComplete } from "@/lib/seller";
 import { isPro } from "@/lib/plan";
 import OnboardingChecklist from "@/components/OnboardingChecklist";
+import { PackageIcon, LockIcon } from "@/components/Icons";
 import mongoose from "mongoose";
 
 export const dynamic = "force-dynamic";
@@ -164,7 +165,9 @@ export default async function Dashboard() {
             href="/dashboard/galleries"
             className="mt-4 flex flex-col items-center gap-1 rounded-xl border border-dashed border-zinc-700 bg-zinc-900/40 px-5 py-12 text-center transition hover:border-yellow-400/40"
           >
-            <span className="text-3xl">📦</span>
+            <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-yellow-400/10 text-yellow-400">
+              <PackageIcon size={24} />
+            </span>
             <p className="mt-2 font-semibold">Crie sua primeira entrega</p>
             <p className="max-w-sm text-sm text-zinc-500">
               Suba as fotos de um trabalho e mande o link pro cliente — ele nem
@@ -187,7 +190,11 @@ export default async function Dashboard() {
                 )}
                 <div className="mt-3 flex flex-wrap items-center gap-2 text-xs text-zinc-500">
                   <span>{photosByGallery[g._id.toString()] || 0} fotos</span>
-                  {g.pin && <span>· 🔒 PIN</span>}
+                  {g.pin && (
+                    <span className="flex items-center gap-1">
+                      · <LockIcon size={12} /> PIN
+                    </span>
+                  )}
                   {g.expiresAt && (
                     <span>
                       · expira {new Date(g.expiresAt).toLocaleDateString("pt-BR")}

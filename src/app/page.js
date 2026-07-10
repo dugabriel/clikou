@@ -10,6 +10,13 @@ import {
   WalletIcon,
   GlobeIcon,
   ArrowIcon,
+  TicketIcon,
+  ScanFaceIcon,
+  ImageIcon,
+  PackageIcon,
+  BanknoteIcon,
+  PaletteIcon,
+  ChartIcon,
 } from "@/components/Icons";
 
 export const dynamic = "force-dynamic";
@@ -68,8 +75,9 @@ export default async function Home() {
                 Ver planos
               </Link>
             </div>
-            <p className="mt-4 text-sm text-zinc-300">
-              🎫 Comprou entrada num evento?{" "}
+            <p className="mt-4 flex flex-wrap items-center gap-x-1.5 text-sm text-zinc-300">
+              <TicketIcon size={16} className="text-yellow-400" />
+              Comprou entrada num evento?{" "}
               <Link
                 href="/events"
                 className="font-semibold text-yellow-400 underline-offset-2 hover:underline"
@@ -158,8 +166,9 @@ export default async function Home() {
                 />
               ))}
             </div>
-            <div className="absolute left-1/2 top-0 -translate-x-1/2 whitespace-nowrap rounded-full border border-yellow-400/40 bg-zinc-950 px-4 py-2 text-sm shadow-lg">
-              🤳 Selfie enviada ·{" "}
+            <div className="absolute left-1/2 top-0 flex -translate-x-1/2 items-center gap-1.5 whitespace-nowrap rounded-full border border-yellow-400/40 bg-zinc-950 px-4 py-2 text-sm shadow-lg">
+              <ScanFaceIcon size={16} className="text-yellow-400" />
+              Selfie enviada ·{" "}
               <span className="font-semibold text-yellow-400">
                 3 fotos suas encontradas
               </span>
@@ -186,41 +195,43 @@ export default async function Home() {
         <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {[
             [
-              "🖼️",
+              ImageIcon,
               "Portfólio pra bio",
               "Sua página clikou.click/f/seunome com suas melhores fotos, sua história e seus contatos — pronta pra colar no Instagram.",
             ],
             [
-              "📦",
+              PackageIcon,
               "Galeria de entrega",
               "Entregue ensaios e casamentos num link privado com PIN. O cliente favorita e baixa em alta, uma a uma ou tudo em ZIP.",
             ],
             [
-              "🤳",
+              ScanFaceIcon,
               "Busca por selfie e print",
               "No evento, o cliente manda uma selfie (ou o print de uma foto) e acha na hora as fotos em que aparece.",
             ],
             [
-              "💸",
+              BanknoteIcon,
               "Venda sem comissão",
               "Pagamento online com download em alta liberado na hora. No Pro, você fica com 100% de cada venda.",
             ],
             [
-              "🎨",
+              PaletteIcon,
               "Página com a sua cara",
               "No Pro, use a sua cor e a sua capa e esconda a marca clikou — a página fica com o seu branding.",
             ],
             [
-              "📈",
+              ChartIcon,
               "Orçamentos e métricas",
               "Receba pedidos de contratação pela sua página e acompanhe visitas e cliques nos seus contatos.",
             ],
-          ].map(([emoji, title, text]) => (
+          ].map(([Icon, title, text]) => (
             <div
               key={title}
               className="rounded-2xl border border-white/5 bg-zinc-900/60 p-6 transition hover:border-yellow-400/30"
             >
-              <div className="text-3xl">{emoji}</div>
+              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-yellow-400/10 text-yellow-400">
+                <Icon size={22} />
+              </div>
               <h3 className="mt-4 text-lg font-semibold">{title}</h3>
               <p className="mt-2 text-sm leading-relaxed text-zinc-400">{text}</p>
             </div>

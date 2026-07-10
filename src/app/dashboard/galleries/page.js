@@ -7,6 +7,7 @@ import GalleryPhoto from "@/models/GalleryPhoto";
 import { getSession } from "@/lib/auth";
 import { isPro, planLimits } from "@/lib/plan";
 import NewGalleryForm from "@/components/NewGalleryForm";
+import { LockIcon } from "@/components/Icons";
 
 export const dynamic = "force-dynamic";
 
@@ -79,7 +80,11 @@ export default async function GalleriesPage() {
               )}
               <div className="mt-3 flex flex-wrap items-center gap-2 text-xs text-zinc-500">
                 <span>{photosByGallery[g._id.toString()] || 0} fotos</span>
-                {g.pin && <span>· 🔒 PIN</span>}
+                {g.pin && (
+                  <span className="flex items-center gap-1">
+                    · <LockIcon size={12} /> PIN
+                  </span>
+                )}
                 {g.expiresAt && (
                   <span>
                     · expira{" "}

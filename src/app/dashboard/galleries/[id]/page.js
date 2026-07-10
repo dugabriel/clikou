@@ -10,6 +10,7 @@ import GalleryUploader from "@/components/GalleryUploader";
 import GallerySettings from "@/components/GallerySettings";
 import GalleryNotify from "@/components/GalleryNotify";
 import GalleryPhotoGrid from "@/components/GalleryPhotoGrid";
+import { StarIcon, LockIcon } from "@/components/Icons";
 
 export const dynamic = "force-dynamic";
 
@@ -52,10 +53,15 @@ export default async function ManageGallery({ params }) {
             ← Entregas
           </Link>
           <h2 className="mt-1 text-xl font-bold">{gallery.title}</h2>
-          <p className="text-sm text-zinc-400">
+          <p className="flex items-center gap-1 text-sm text-zinc-400">
             {gallery.clientName ? `${gallery.clientName} · ` : ""}
             {photos.length} fotos
-            {favorites > 0 && ` · ${favorites} favorita${favorites > 1 ? "s" : ""} ⭐`}
+            {favorites > 0 && (
+              <>
+                {` · ${favorites} favorita${favorites > 1 ? "s" : ""}`}
+                <StarIcon size={14} filled className="text-yellow-400" />
+              </>
+            )}
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-3">
@@ -74,9 +80,12 @@ export default async function ManageGallery({ params }) {
       </div>
 
       {gallery.pin && (
-        <p className="mt-3 rounded-xl border border-yellow-400/20 bg-yellow-400/5 px-4 py-3 text-sm text-zinc-300">
-          🔒 Esta galeria pede o PIN <strong>{gallery.pin}</strong>. Mande o PIN
-          junto com o link (ou por outro canal, se preferir mais segurança).
+        <p className="mt-3 flex items-start gap-2 rounded-xl border border-yellow-400/20 bg-yellow-400/5 px-4 py-3 text-sm text-zinc-300">
+          <LockIcon size={16} className="mt-0.5 shrink-0 text-yellow-400" />
+          <span>
+            Esta galeria pede o PIN <strong>{gallery.pin}</strong>. Mande o PIN
+            junto com o link (ou por outro canal, se preferir mais segurança).
+          </span>
         </p>
       )}
 

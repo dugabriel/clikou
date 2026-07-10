@@ -44,8 +44,9 @@ export default function DemoProfile() {
     <div className="relative" style={{ "--brand": ACCENT }}>
       {/* Faixa de "exemplo" com CTA */}
       <div className="sticky top-0 z-30 flex flex-wrap items-center justify-center gap-x-3 gap-y-1 border-b border-white/10 bg-zinc-950/90 px-4 py-2.5 text-center text-sm backdrop-blur">
-        <span className="text-zinc-300">
-          📸 Exemplo de página de fotógrafo na clikou
+        <span className="flex items-center gap-1.5 text-zinc-300">
+          <CameraIcon size={16} className="text-[color:var(--brand)]" />
+          Exemplo de página de fotógrafo na clikou
         </span>
         <Link
           href="/signup?next=/dashboard/profile"

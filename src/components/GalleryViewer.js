@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { BrandIcon } from "@/components/Logo";
+import { DownloadIcon, HeartIcon, StarIcon } from "@/components/Icons";
 
 // Galeria vista pelo cliente: grade, lightbox, favoritar e baixar em alta.
 export default function GalleryViewer({
@@ -64,19 +65,24 @@ export default function GalleryViewer({
           <h1 className="font-display text-2xl font-bold tracking-tight">
             {title}
           </h1>
-          <p className="mt-0.5 text-sm text-zinc-400">
+          <p className="mt-0.5 flex items-center gap-1 text-sm text-zinc-400">
             {clientName ? `${clientName} · ` : ""}
             {photos.length} foto{photos.length === 1 ? "" : "s"}
-            {allowFavorites && favCount > 0 && ` · ${favCount} favorita${favCount === 1 ? "" : "s"} ⭐`}
+            {allowFavorites && favCount > 0 && (
+              <>
+                {` · ${favCount} favorita${favCount === 1 ? "" : "s"}`}
+                <StarIcon size={14} filled className="text-yellow-400" />
+              </>
+            )}
           </p>
         </div>
         <div className="flex items-center gap-4">
           {downloadEnabled && photos.length > 0 && (
             <a
               href={`/api/g/${slug}/download-all`}
-              className="rounded-full bg-yellow-400 px-4 py-2 text-sm font-semibold text-zinc-950 hover:bg-yellow-300"
+              className="flex items-center gap-1.5 rounded-full bg-yellow-400 px-4 py-2 text-sm font-semibold text-zinc-950 hover:bg-yellow-300"
             >
-              ⬇️ Baixar todas
+              <DownloadIcon size={16} /> Baixar todas
             </a>
           )}
           <Link
@@ -112,23 +118,29 @@ export default function GalleryViewer({
                   <button
                     onClick={() => toggleFav(p.id)}
                     title="Favoritar"
-                    className="pointer-events-auto flex h-8 w-8 items-center justify-center rounded-full bg-black/50 text-base backdrop-blur hover:bg-black/70"
+                    className="pointer-events-auto flex h-8 w-8 items-center justify-center rounded-full bg-black/50 text-white backdrop-blur hover:bg-black/70"
                   >
-                    {favs[p.id] ? "❤️" : "🤍"}
+                    <HeartIcon
+                      size={16}
+                      filled={!!favs[p.id]}
+                      className={favs[p.id] ? "text-red-500" : ""}
+                    />
                   </button>
                 )}
                 {downloadEnabled && (
                   <a
                     href={downloadHref(p.id)}
                     title="Baixar em alta"
-                    className="pointer-events-auto flex h-8 w-8 items-center justify-center rounded-full bg-black/50 text-base backdrop-blur hover:bg-black/70"
+                    className="pointer-events-auto flex h-8 w-8 items-center justify-center rounded-full bg-black/50 text-white backdrop-blur hover:bg-black/70"
                   >
-                    ⬇️
+                    <DownloadIcon size={16} />
                   </a>
                 )}
               </div>
               {allowFavorites && favs[p.id] && (
-                <span className="absolute left-1.5 top-1.5 text-sm">❤️</span>
+                <span className="absolute left-1.5 top-1.5 text-red-500">
+                  <HeartIcon size={15} filled />
+                </span>
               )}
             </div>
           ))}
@@ -187,7 +199,12 @@ export default function GalleryViewer({
                 onClick={() => toggleFav(current.id)}
                 className="flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-sm font-medium text-white hover:bg-white/20"
               >
-                {favs[current.id] ? "❤️ Favoritada" : "🤍 Favoritar"}
+                <HeartIcon
+                  size={16}
+                  filled={!!favs[current.id]}
+                  className={favs[current.id] ? "text-red-500" : ""}
+                />
+                {favs[current.id] ? "Favoritada" : "Favoritar"}
               </button>
             )}
             {downloadEnabled && (
@@ -195,7 +212,7 @@ export default function GalleryViewer({
                 href={downloadHref(current.id)}
                 className="flex items-center gap-2 rounded-full bg-yellow-400 px-5 py-2 text-sm font-semibold text-zinc-950 hover:bg-yellow-300"
               >
-                ⬇️ Baixar em alta
+                <DownloadIcon size={16} /> Baixar em alta
               </a>
             )}
           </div>

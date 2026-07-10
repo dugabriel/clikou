@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { RocketIcon } from "@/components/Icons";
 
 // Checklist de ativação no topo do dashboard. Some sozinho quando tudo está
 // concluído. Só o próximo passo pendente ganha o botão de destaque.
@@ -10,7 +11,10 @@ export default function OnboardingChecklist({ steps }) {
   return (
     <div className="mb-8 rounded-2xl border border-yellow-400/20 bg-gradient-to-b from-yellow-400/[0.06] to-transparent p-6">
       <div className="flex items-center justify-between gap-3">
-        <h2 className="font-display text-lg font-bold">Comece por aqui 🚀</h2>
+        <h2 className="font-display flex items-center gap-2 text-lg font-bold">
+          <RocketIcon size={18} className="text-yellow-400" />
+          Comece por aqui
+        </h2>
         <span className="text-sm text-zinc-400">
           {done}/{steps.length} concluído
         </span>
