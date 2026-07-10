@@ -79,7 +79,7 @@ export default function RootLayout({ children }) {
                   <InstagramIcon size={20} />
                 </a>
                 <a
-                  href="https://www.facebook.com/profile.php?id=61591937182794"
+                  href="https://www.facebook.com/clikou.click"
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label="Facebook da clikou"
