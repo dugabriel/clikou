@@ -1,4 +1,5 @@
 import { formatPrice } from "@/lib/currency";
+import { rateLimit } from "@/lib/ratelimit";
 
 // Envio de e-mail via MailerSend. Sem MAILERSEND_TOKEN o envio fica
 // desativado e o cadastro por senha entra sem confirmação (modo dev).
@@ -7,7 +8,22 @@ const API_URL =
 
 export const emailEnabled = !!process.env.MAILERSEND_TOKEN;
 
+// Última linha de defesa anti-spam: nenhum endereço recebe mais que isso por
+// hora, não importa qual fluxo disparou. As rotas públicas têm limites
+// próprios mais apertados; este teto cobre o que escapar delas.
+const PER_RECIPIENT = { limit: 10, windowMs: 60 * 60 * 1000 };
+
 export async function sendEmail({ to, subject, html, text }) {
+  try {
+    const hit = await rateLimit("email-to", String(to).toLowerCase(), PER_RECIPIENT);
+    if (!hit.ok) {
+      console.error("sendEmail: teto por destinatário atingido:", to, "-", subject);
+      return false;
+    }
+  } catch (e) {
+    // Limiter fora do ar não pode derrubar e-mail transacional legítimo.
+    console.error("sendEmail: rate limit indisponível, enviando assim mesmo:", e.message);
+  }
   const res = await fetch(API_URL, {
     method: "POST",
     headers: {

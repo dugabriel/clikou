@@ -5,6 +5,11 @@ import User from "@/models/User";
 import { createSession, createVerificationToken } from "@/lib/auth";
 import { verifyChallenge } from "@/lib/captcha";
 import { emailEnabled, sendVerificationEmail } from "@/lib/email";
+import { rateLimit, clientIp } from "@/lib/ratelimit";
+
+// Guardrail anti-spam: cada cadastro dispara um e-mail de verificação, então
+// um robô criando contas em série viraria canhão de spam (e sujaria o banco).
+const IP_LIMIT = { limit: 5, windowMs: 60 * 60 * 1000 }; // 5 cadastros / hora por IP
 
 export async function POST(req) {
   const { name, email, password, captcha, captchaToken, website } =
@@ -16,6 +21,17 @@ export async function POST(req) {
   }
   if (!name || !email || !password) {
     return NextResponse.json({ error: "Dados inválidos." }, { status: 400 });
+  }
+  const ipHit = await rateLimit("signup-ip", clientIp(req), IP_LIMIT);
+  if (!ipHit.ok) {
+    return NextResponse.json(
+      {
+        error: `Muitos cadastros em pouco tempo. Espere ${Math.ceil(
+          ipHit.retryAfterSeconds / 60
+        )} min e tente de novo.`,
+      },
+      { status: 429 }
+    );
   }
   if (!(await verifyChallenge(captchaToken, captcha))) {
     return NextResponse.json(

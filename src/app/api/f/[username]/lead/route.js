@@ -5,6 +5,13 @@ import Lead from "@/models/Lead";
 import { isPro } from "@/lib/plan";
 import { containsForbiddenWord } from "@/lib/moderation";
 import { emailEnabled, sendLeadEmail } from "@/lib/email";
+import { rateLimit, clientIp } from "@/lib/ratelimit";
+
+// Guardrails anti-spam: o formulário é público (sem login nem captcha), então
+// limita por IP e também por fotógrafo — proteger a caixa de entrada dele é o
+// objetivo, venha o spam de um IP só ou de uma botnet.
+const IP_LIMIT = { limit: 5, windowMs: 10 * 60 * 1000 }; // 5 envios / 10 min por IP
+const PHOTOGRAPHER_LIMIT = { limit: 30, windowMs: 24 * 60 * 60 * 1000 }; // 30 / dia
 
 // Recebe um pedido de orçamento do perfil público (recurso Pro).
 export async function POST(req, ctx) {
@@ -13,6 +20,18 @@ export async function POST(req, ctx) {
 
   // Honeypot: campo invisível que só robô preenche.
   if (website) return NextResponse.json({ ok: true });
+
+  const ipHit = await rateLimit("lead-ip", clientIp(req), IP_LIMIT);
+  if (!ipHit.ok) {
+    return NextResponse.json(
+      {
+        error: `Muitos pedidos em pouco tempo. Espere ${Math.ceil(
+          ipHit.retryAfterSeconds / 60
+        )} min e tente de novo.`,
+      },
+      { status: 429 }
+    );
+  }
 
   const cleanName = String(name || "").trim().slice(0, 80);
   const cleanContact = String(contact || "").trim().slice(0, 120);
@@ -36,6 +55,18 @@ export async function POST(req, ctx) {
   );
   if (!photographer || !isPro(photographer)) {
     return NextResponse.json({ error: "Perfil não encontrado." }, { status: 404 });
+  }
+
+  const targetHit = await rateLimit(
+    "lead-photographer",
+    photographer._id.toString(),
+    PHOTOGRAPHER_LIMIT
+  );
+  if (!targetHit.ok) {
+    return NextResponse.json(
+      { error: "Esse fotógrafo recebeu muitos pedidos hoje. Tente amanhã." },
+      { status: 429 }
+    );
   }
 
   const lead = await Lead.create({

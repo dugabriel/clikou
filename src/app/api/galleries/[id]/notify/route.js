@@ -4,9 +4,14 @@ import { dbConnect } from "@/lib/db";
 import Gallery from "@/models/Gallery";
 import { getSession } from "@/lib/auth";
 import { emailEnabled, sendGalleryReadyEmail } from "@/lib/email";
+import { rateLimit } from "@/lib/ratelimit";
 
 // Guardrail anti-spam: só reenvia pro MESMO e-mail depois desse intervalo.
 export const NOTIFY_COOLDOWN_MS = 10 * 60 * 1000;
+
+// O cooldown acima é por galeria+destinatário; este teto barra quem varia o
+// e-mail ou a galeria em loop (ex.: automatizando a API com a sessão).
+const USER_LIMIT = { limit: 20, windowMs: 60 * 60 * 1000 }; // 20 avisos / hora
 
 // Envia (ou reenvia) o link da galeria por e-mail para o cliente.
 export async function POST(req, ctx) {
@@ -56,6 +61,19 @@ export async function POST(req, ctx) {
           waitMs / 60000
         )} min para reenviar.`,
         retryAfterSeconds: Math.ceil(waitMs / 1000),
+      },
+      { status: 429 }
+    );
+  }
+
+  const userHit = await rateLimit("notify-user", session.id, USER_LIMIT);
+  if (!userHit.ok) {
+    return NextResponse.json(
+      {
+        error: `Você enviou muitos avisos na última hora. Espere ${Math.ceil(
+          userHit.retryAfterSeconds / 60
+        )} min para reenviar.`,
+        retryAfterSeconds: userHit.retryAfterSeconds,
       },
       { status: 429 }
     );
