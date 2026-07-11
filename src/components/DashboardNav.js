@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import LinkPending from "@/components/LinkPending";
 
 // Só destinos — a criação de evento/galeria virou ação dentro das páginas,
 // não item de navegação. Entregas primeiro: é o coração do painel.
@@ -37,7 +38,7 @@ export default function DashboardNav() {
               : "font-medium text-zinc-400 hover:text-white"
           }`}
         >
-          {label}
+          <LinkPending>{label}</LinkPending>
         </Link>
       ))}
     </nav>

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { getSession, isAdmin } from "@/lib/auth";
 import Logo from "@/components/Logo";
+import LinkPending from "@/components/LinkPending";
 
 export default async function Navbar() {
   const session = await getSession();
@@ -11,13 +12,13 @@ export default async function Navbar() {
         <Logo />
         <div className="hidden items-center gap-6 text-sm font-medium text-zinc-400 sm:flex">
           <Link href="/portfolio" className="transition hover:text-white">
-            Para fotógrafos
+            <LinkPending>Para fotógrafos</LinkPending>
           </Link>
           <Link href="/events" className="transition hover:text-white">
-            Eventos
+            <LinkPending>Eventos</LinkPending>
           </Link>
           <Link href="/about" className="transition hover:text-white">
-            Sobre
+            <LinkPending>Sobre</LinkPending>
           </Link>
         </div>
 
@@ -52,13 +53,13 @@ export default async function Navbar() {
                 href="/my-purchases"
                 className="hidden font-medium text-zinc-300 transition hover:text-white sm:block"
               >
-                Minhas compras
+                <LinkPending>Minhas compras</LinkPending>
               </Link>
               <Link
                 href="/dashboard"
                 className="rounded-full border border-zinc-700 px-4 py-2 font-medium text-zinc-200 transition hover:border-yellow-400 hover:text-yellow-400"
               >
-                Meu painel
+                <LinkPending>Meu painel</LinkPending>
               </Link>
               <form action="/api/auth/logout" method="POST">
                 <button className="px-2 text-zinc-500 transition hover:text-white">
