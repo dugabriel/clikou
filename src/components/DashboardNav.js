@@ -5,10 +5,12 @@ import { usePathname } from "next/navigation";
 import LinkPending from "@/components/LinkPending";
 
 // Só destinos — a criação de evento/galeria virou ação dentro das páginas,
-// não item de navegação. Entregas primeiro: é o coração do painel.
+// não item de navegação. Entregas primeiro (coração do painel), Eventos ao
+// lado: são os dois produtos.
 const tabs = [
   { href: "/dashboard", label: "Início" },
   { href: "/dashboard/galleries", label: "Entregas" },
+  { href: "/dashboard/events", label: "Eventos" },
   { href: "/dashboard/profile", label: "Minha página" },
   { href: "/dashboard/marketing", label: "Divulgação" },
   { href: "/dashboard/withdrawal", label: "Carteira" },
@@ -19,10 +21,7 @@ export default function DashboardNav() {
   const pathname = usePathname();
 
   function isActive(href) {
-    // Eventos não têm aba própria — criar/gerenciar evento conta como "Início".
-    if (href === "/dashboard") {
-      return pathname === "/dashboard" || pathname.startsWith("/dashboard/events");
-    }
+    if (href === "/dashboard") return pathname === "/dashboard";
     return pathname === href || pathname.startsWith(`${href}/`);
   }
 

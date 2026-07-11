@@ -107,11 +107,14 @@ export default function UploadProvider({ children }) {
     try {
       const form = new FormData();
       form.append("file", item.file, item.name);
+      for (const [key, value] of Object.entries(item.fields || {})) {
+        form.append(key, value);
+      }
       if (item.indexFaces) {
         const facesJson = await extractFaces(item);
         if (facesJson) form.append("faces", facesJson);
       }
-      const res = await fetch(`/api/galleries/${item.galleryId}/photos`, {
+      const res = await fetch(item.endpoint, {
         method: "POST",
         body: form,
         signal: controller.signal,
@@ -159,11 +162,14 @@ export default function UploadProvider({ children }) {
     pump();
   }
 
-  function enqueue({ galleryId, files, label, indexFaces = false }) {
+  // endpoint: rota POST multipart que recebe um "file" por requisição;
+  // fields: campos extras do FormData (ex.: preço no upload de evento).
+  function enqueue({ endpoint, files, label, fields, indexFaces = false }) {
     const newItems = [...files].map((file) => ({
       id: crypto.randomUUID(),
-      galleryId,
+      endpoint,
       label,
+      fields,
       indexFaces,
       file,
       name: file.name || "foto.jpg",

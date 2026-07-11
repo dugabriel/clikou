@@ -12,7 +12,12 @@ export default function GalleryUploader({ galleryId, galleryTitle, indexFaces })
     const files = [...e.target.files];
     e.target.value = "";
     if (files.length === 0) return;
-    uploader.enqueue({ galleryId, files, label: galleryTitle, indexFaces });
+    uploader.enqueue({
+      endpoint: `/api/galleries/${galleryId}/photos`,
+      files,
+      label: galleryTitle,
+      indexFaces,
+    });
   }
 
   return (
