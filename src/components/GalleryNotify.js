@@ -97,16 +97,11 @@ export default function GalleryNotify({ galleryId, clientEmail, notifiedAt }) {
   const totalSec = Math.ceil(remainingMs / 1000);
   const mmss = `${Math.floor(totalSec / 60)}m ${totalSec % 60}s`;
 
+  // Sem cartão próprio: vive dentro do bloco "Entregue ao cliente" da página
+  // da galeria, junto das outras formas de entrega.
   return (
-    <form
-      onSubmit={send}
-      className="mt-6 rounded-xl border border-zinc-800 bg-zinc-900/60 p-6"
-    >
-      <h3 className="font-semibold">Avisar o cliente por e-mail</h3>
-      <p className="mt-1 text-sm text-zinc-400">
-        Mandamos o link (e o PIN, se houver) direto pro e-mail do cliente.
-      </p>
-      <div className="mt-4 flex flex-wrap items-end gap-3">
+    <form onSubmit={send}>
+      <div className="flex flex-wrap items-end gap-3">
         <div className="min-w-[220px] flex-1">
           <label className="mb-1 block text-sm text-zinc-400">
             E-mail do cliente

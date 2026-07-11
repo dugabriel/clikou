@@ -4,7 +4,8 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 
 // Opções da galeria: PIN, expiração, download, favoritos, marca d'água na
-// prova. Salva via PATCH; também apaga a galeria.
+// prova. Sem cartão nem título próprios — a página envolve num <details>
+// recolhido, já que tudo isso é configurado na criação e raramente muda.
 export default function GallerySettings({ gallery }) {
   const router = useRouter();
   const [pin, setPin] = useState(gallery.pin);
@@ -19,8 +20,6 @@ export default function GallerySettings({ gallery }) {
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState("");
-  const [deleting, setDeleting] = useState(false);
-  const [deleteError, setDeleteError] = useState("");
 
   async function save(e) {
     e.preventDefault();
@@ -47,40 +46,12 @@ export default function GallerySettings({ gallery }) {
     router.refresh();
   }
 
-  async function remove() {
-    if (
-      !confirm("Apagar esta galeria e todas as fotos? Não dá para desfazer.")
-    ) {
-      return;
-    }
-    setDeleting(true);
-    setDeleteError("");
-    const res = await fetch(`/api/galleries/${gallery.id}`, {
-      method: "DELETE",
-    });
-    if (res.ok) {
-      // Sai da página da galeria apagada e revalida a lista.
-      router.replace("/dashboard/galleries");
-      router.refresh();
-      return;
-    }
-    const data = await res.json().catch(() => ({}));
-    setDeleting(false);
-    setDeleteError(data.error || "Não foi possível apagar a galeria.");
-  }
-
   const checkbox =
     "h-4 w-4 rounded border-zinc-600 bg-zinc-900 accent-yellow-400";
 
   return (
-    <>
-    <form
-      onSubmit={save}
-      className="mt-6 rounded-xl border border-zinc-800 bg-zinc-900/60 p-6"
-    >
-      <h3 className="font-semibold">Opções da galeria</h3>
-
-      <div className="mt-4 grid gap-5 sm:grid-cols-2">
+    <form onSubmit={save}>
+      <div className="grid gap-5 sm:grid-cols-2">
         <div>
           <label className="mb-1 block text-sm text-zinc-400">
             PIN de acesso (opcional)
@@ -157,11 +128,41 @@ export default function GallerySettings({ gallery }) {
         {error && <span className="text-sm text-red-400">{error}</span>}
       </div>
     </form>
+  );
+}
 
-    {/* Zona de perigo — apagar é irreversível, então fica separado das opções. */}
-    <div className="mt-6 rounded-xl border border-red-500/25 bg-red-500/[0.03] p-6">
-      <h3 className="font-semibold text-red-400">Apagar galeria</h3>
-      <p className="mt-1 text-sm text-zinc-400">
+// Zona de perigo — apagar é irreversível, então fica num bloco separado e
+// recolhido no fim da página.
+export function GalleryDelete({ galleryId }) {
+  const router = useRouter();
+  const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState("");
+
+  async function remove() {
+    if (
+      !confirm("Apagar esta galeria e todas as fotos? Não dá para desfazer.")
+    ) {
+      return;
+    }
+    setDeleting(true);
+    setDeleteError("");
+    const res = await fetch(`/api/galleries/${galleryId}`, {
+      method: "DELETE",
+    });
+    if (res.ok) {
+      // Sai da página da galeria apagada e revalida a lista.
+      router.replace("/dashboard/galleries");
+      router.refresh();
+      return;
+    }
+    const data = await res.json().catch(() => ({}));
+    setDeleting(false);
+    setDeleteError(data.error || "Não foi possível apagar a galeria.");
+  }
+
+  return (
+    <div>
+      <p className="text-sm text-zinc-400">
         Remove a galeria, todas as fotos e o link de entrega do cliente. Esta
         ação não pode ser desfeita.
       </p>
@@ -179,6 +180,5 @@ export default function GallerySettings({ gallery }) {
         )}
       </div>
     </div>
-    </>
   );
 }

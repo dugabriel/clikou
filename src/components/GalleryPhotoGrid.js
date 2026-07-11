@@ -53,8 +53,9 @@ export default function GalleryPhotoGrid({ galleryId, photos }) {
 
   if (photos.length === 0) {
     return (
-      <p className="mt-8 text-sm text-zinc-500">
-        Nenhuma foto ainda. Suba as primeiras acima.
+      <p className="mt-4 rounded-xl border border-dashed border-zinc-700 bg-zinc-900/50 px-6 py-10 text-center text-sm text-zinc-500">
+        Nenhuma foto ainda — clique em &ldquo;Selecionar fotos&rdquo; para
+        começar.
       </p>
     );
   }
@@ -66,7 +67,7 @@ export default function GalleryPhotoGrid({ galleryId, photos }) {
 
   return (
     <>
-      <div className="mt-8 grid grid-cols-3 gap-3 sm:grid-cols-4 lg:grid-cols-6">
+      <div className="mt-4 grid grid-cols-3 gap-3 sm:grid-cols-4 lg:grid-cols-6">
         {photos.map((p, i) => (
           <div
             key={p.id}
