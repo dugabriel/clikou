@@ -33,6 +33,8 @@ export default function UploadProvider({ children }) {
   const itemsRef = useRef([]);
   const [items, setItems] = useState([]);
   const [minimized, setMinimized] = useState(false);
+  // Fotos puladas no último enfileiramento por já estarem enviadas.
+  const [skipped, setSkipped] = useState(0);
   const controllersRef = useRef(new Map());
   const timersRef = useRef(new Set());
   const lastRefreshRef = useRef(0);
@@ -164,19 +166,59 @@ export default function UploadProvider({ children }) {
 
   // endpoint: rota POST multipart que recebe um "file" por requisição;
   // fields: campos extras do FormData (ex.: preço no upload de evento).
-  function enqueue({ endpoint, files, label, fields, indexFaces = false }) {
-    const newItems = [...files].map((file) => ({
-      id: crypto.randomUUID(),
-      endpoint,
-      label,
-      fields,
-      indexFaces,
-      file,
-      name: file.name || "foto.jpg",
-      status: "pending",
-      attempts: 0,
-      error: "",
-    }));
+  // existing: [{name, size}] já no servidor — reenvio do mesmo arquivo
+  // (nome + tamanho) é pulado, para retomar um envio interrompido sem
+  // duplicar nada.
+  function enqueue({
+    endpoint,
+    files,
+    label,
+    fields,
+    indexFaces = false,
+    existing = [],
+  }) {
+    const known = new Set();
+    const knownNames = new Set(); // legado: registro sem tamanho salvo
+    for (const e of existing) {
+      if (e.size) known.add(`${e.name}::${e.size}`);
+      else if (e.name) knownNames.add(e.name);
+    }
+    // O que já subiu (ou está na fila) nesta sessão para o mesmo destino.
+    for (const i of itemsRef.current) {
+      if (i.endpoint === endpoint && i.status !== "error") {
+        known.add(`${i.name}::${i.size}`);
+      }
+    }
+
+    const newItems = [];
+    let skippedCount = 0;
+    for (const file of [...files]) {
+      const name = file.name || "foto.jpg";
+      const key = `${name}::${file.size}`;
+      if (known.has(key) || knownNames.has(name)) {
+        skippedCount++;
+        continue;
+      }
+      known.add(key); // também deduplica dentro da própria seleção
+      newItems.push({
+        id: crypto.randomUUID(),
+        endpoint,
+        label,
+        fields,
+        indexFaces,
+        file,
+        name,
+        size: file.size,
+        status: "pending",
+        attempts: 0,
+        error: "",
+      });
+    }
+
+    setSkipped(skippedCount);
+    setMinimized(false);
+    if (newItems.length === 0) return; // só puladas — o cartão avisa
+
     // Envio novo limpa o histórico concluído do cartão anterior.
     itemsRef.current = [
       ...itemsRef.current.filter(
@@ -185,7 +227,6 @@ export default function UploadProvider({ children }) {
       ...newItems,
     ];
     sync();
-    setMinimized(false);
     pump();
   }
 
@@ -211,6 +252,7 @@ export default function UploadProvider({ children }) {
 
   function dismiss() {
     itemsRef.current = [];
+    setSkipped(0);
     sync();
   }
 
@@ -239,16 +281,18 @@ export default function UploadProvider({ children }) {
     <UploadContext.Provider value={{ enqueue, active }}>
       {children}
 
-      {total > 0 && (
+      {(total > 0 || skipped > 0) && (
         <div className="fixed bottom-4 right-4 z-50 w-[min(92vw,22rem)] overflow-hidden rounded-xl border border-zinc-700 bg-zinc-900 shadow-2xl shadow-black/50">
           <div className="flex items-center gap-3 px-4 py-3">
             <div className="min-w-0 flex-1">
               <p className="truncate text-sm font-semibold">
                 {active
                   ? `Enviando ${Math.min(doneCount + 1, total)} de ${total}…`
-                  : failed.length > 0
-                    ? `${doneCount} enviada${doneCount === 1 ? "" : "s"}, ${failed.length} com erro`
-                    : `${doneCount} foto${doneCount === 1 ? "" : "s"} enviada${doneCount === 1 ? "" : "s"} ✓`}
+                  : total === 0
+                    ? "Nenhuma foto nova para enviar"
+                    : failed.length > 0
+                      ? `${doneCount} enviada${doneCount === 1 ? "" : "s"}, ${failed.length} com erro`
+                      : `${doneCount} foto${doneCount === 1 ? "" : "s"} enviada${doneCount === 1 ? "" : "s"} ✓`}
               </p>
               {items[0]?.label && (
                 <p className="truncate text-xs text-zinc-500">
@@ -288,15 +332,24 @@ export default function UploadProvider({ children }) {
             )}
           </div>
 
-          <div className="h-1 bg-zinc-800">
-            <div
-              className={`h-full transition-all ${active ? "bg-yellow-400" : failed.length > 0 ? "bg-red-400" : "bg-emerald-400"}`}
-              style={{ width: `${pct}%` }}
-            />
-          </div>
+          {total > 0 && (
+            <div className="h-1 bg-zinc-800">
+              <div
+                className={`h-full transition-all ${active ? "bg-yellow-400" : failed.length > 0 ? "bg-red-400" : "bg-emerald-400"}`}
+                style={{ width: `${pct}%` }}
+              />
+            </div>
+          )}
 
           {!minimized && (
             <div className="px-4 py-3 text-sm">
+              {skipped > 0 && (
+                <p className="mb-1.5 text-zinc-400">
+                  {skipped} foto{skipped === 1 ? "" : "s"} já enviada
+                  {skipped === 1 ? "" : "s"} antes — pulada
+                  {skipped === 1 ? "" : "s"} ✓
+                </p>
+              )}
               {active && (
                 <>
                   <p className="text-zinc-400">

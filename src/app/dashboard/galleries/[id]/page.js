@@ -54,7 +54,7 @@ export default async function ManageGallery({ params }) {
 
   const photos = await GalleryPhoto.find({ gallery: id })
     .sort({ createdAt: -1 })
-    .select("favorited fileName")
+    .select("favorited fileName fileSize")
     .lean();
 
   const favorites = photos.filter((p) => p.favorited).length;
@@ -105,6 +105,10 @@ export default async function ManageGallery({ params }) {
             galleryId={id}
             galleryTitle={gallery.title}
             indexFaces={g.faceSearch}
+            existing={photos.map((p) => ({
+              name: p.fileName,
+              size: p.fileSize || 0,
+            }))}
           />
         </div>
         <p className="mt-2 text-sm text-zinc-500">

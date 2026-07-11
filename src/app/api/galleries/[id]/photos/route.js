@@ -78,6 +78,7 @@ export async function POST(req, ctx) {
     gallery: gallery._id,
     photographer: session.id,
     fileName: file.name || "foto.jpg",
+    fileSize: file.size || 0,
     width: derived.width,
     height: derived.height,
     faces,

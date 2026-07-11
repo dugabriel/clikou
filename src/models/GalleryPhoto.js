@@ -22,6 +22,9 @@ const GalleryPhotoSchema = new mongoose.Schema(
     width: Number,
     height: Number,
     fileName: { type: String, default: "foto.jpg" },
+    // Tamanho original em bytes — com o nome, identifica reenvio do mesmo
+    // arquivo para pular fotos já enviadas.
+    fileSize: { type: Number, default: 0 },
     // Favorita do cliente (uma galeria = um cliente, então basta um booleano).
     favorited: { type: Boolean, default: false },
     // Descritores faciais (128 números por rosto), calculados no navegador

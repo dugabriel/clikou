@@ -16,6 +16,16 @@ async function loadFaceApi() {
   return faceapi;
 }
 
+// Pré-carrega os modelos (~6 MB) assim que a tela de upload abre, para o
+// primeiro envio não esperar o download na hora de extrair os rostos.
+export async function warmupFaceModels() {
+  try {
+    await loadFaceApi();
+  } catch {
+    // sem rede/WebGL agora — a extração tenta de novo na hora do upload
+  }
+}
+
 function loadImage(file) {
   return new Promise((resolve, reject) => {
     const img = new Image();

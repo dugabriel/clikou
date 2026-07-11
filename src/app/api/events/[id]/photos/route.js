@@ -89,6 +89,7 @@ export async function POST(req, ctx) {
     photographer: session.id,
     priceCents,
     fileName: file.name || "foto.jpg",
+    fileSize: file.size || 0,
     width: derived.width,
     height: derived.height,
     faces,

@@ -1,15 +1,20 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useUploader } from "@/components/UploadManager";
 
 // Upload de fotos de evento: define o preço do lote e enfileira no
 // gerenciador global (UploadManager) — o envio roda em segundo plano com a
 // marca d'água aplicada no servidor e os rostos extraídos no navegador para
 // a busca por selfie.
-export default function Uploader({ eventId, eventTitle, defaultPrice }) {
+export default function Uploader({ eventId, eventTitle, defaultPrice, existing }) {
   const uploader = useUploader();
   const [price, setPrice] = useState(defaultPrice);
+
+  // Baixa os modelos de rosto agora, não na hora do primeiro envio.
+  useEffect(() => {
+    import("@/lib/face").then((m) => m.warmupFaceModels()).catch(() => {});
+  }, []);
 
   function onSelect(e) {
     const files = [...e.target.files];
@@ -21,6 +26,7 @@ export default function Uploader({ eventId, eventTitle, defaultPrice }) {
       label: eventTitle,
       fields: { price },
       indexFaces: true,
+      existing,
     });
   }
 

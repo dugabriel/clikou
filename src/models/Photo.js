@@ -20,6 +20,9 @@ const PhotoSchema = new mongoose.Schema(
     width: Number,
     height: Number,
     fileName: { type: String, default: "foto.jpg" },
+    // Tamanho original em bytes — com o nome, identifica reenvio do mesmo
+    // arquivo para pular fotos já enviadas.
+    fileSize: { type: Number, default: 0 },
     // Descritores faciais (128 números por rosto) extraídos no navegador
     // durante o upload — usados na busca por selfie dentro do evento.
     faces: { type: [[Number]], default: [] },

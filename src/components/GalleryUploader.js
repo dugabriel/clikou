@@ -1,12 +1,26 @@
 "use client";
 
+import { useEffect } from "react";
 import { useUploader } from "@/components/UploadManager";
 
 // Botão de seleção de fotos da galeria de entrega. Só enfileira no
 // gerenciador global (UploadManager): o envio roda em segundo plano com o
 // progresso no cartão flutuante, e continua mesmo saindo desta tela.
-export default function GalleryUploader({ galleryId, galleryTitle, indexFaces }) {
+// `existing` (nome + tamanho do que já está na galeria) faz o reenvio da
+// mesma seleção pular o que já subiu.
+export default function GalleryUploader({
+  galleryId,
+  galleryTitle,
+  indexFaces,
+  existing,
+}) {
   const uploader = useUploader();
+
+  // Baixa os modelos de rosto agora, não na hora do primeiro envio.
+  useEffect(() => {
+    if (!indexFaces) return;
+    import("@/lib/face").then((m) => m.warmupFaceModels()).catch(() => {});
+  }, [indexFaces]);
 
   function onSelect(e) {
     const files = [...e.target.files];
@@ -17,6 +31,7 @@ export default function GalleryUploader({ galleryId, galleryTitle, indexFaces })
       files,
       label: galleryTitle,
       indexFaces,
+      existing,
     });
   }
 

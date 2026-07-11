@@ -33,7 +33,7 @@ export default async function ManageEvent({ params }) {
 
   const photos = await Photo.find({ event: id })
     .sort({ createdAt: -1 })
-    .select("priceCents")
+    .select("priceCents fileName fileSize")
     .lean();
 
   return (
@@ -64,6 +64,10 @@ export default async function ManageEvent({ params }) {
             defaultPrice={(event.defaultPriceCents / 100)
               .toFixed(2)
               .replace(".", ",")}
+            existing={photos.map((p) => ({
+              name: p.fileName,
+              size: p.fileSize || 0,
+            }))}
           />
         </div>
         <p className="mt-2 text-sm text-zinc-500">
