@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { CameraIcon, CartIcon, GlobeIcon, WalletIcon, ArrowIcon, CheckIcon, DownloadIcon, HeartIcon } from "@/components/Icons";
+import { COMMISSION_PERCENT } from "@/lib/mp";
 
 export const metadata = {
   title: "Portfólio grátis para fotógrafos — link pra bio que vende — Clikou",
@@ -34,7 +35,7 @@ const TESTIMONIALS = [];
 const FAQ = [
   [
     "É grátis mesmo?",
-    "Sim. Você cria sua conta, monta sua página e recebe clientes sem pagar nada. No plano grátis a clikou fica com 20% de cada venda de foto. O Pro (R$ 49/mês) zera essa comissão e libera coleções, página sem a marca clikou e mais.",
+    `Sim. Você cria sua conta, monta sua página e recebe clientes sem pagar nada. No plano grátis a clikou fica com ${COMMISSION_PERCENT}% de cada venda de foto. O Pro (R$ 49/mês) zera essa comissão e libera coleções, página sem a marca clikou e mais.`,
   ],
   [
     "Preciso entender de tecnologia?",
@@ -282,7 +283,7 @@ export default function PortfolioLanding() {
             Comece grátis. <span className="text-yellow-400">Cresça no Pro.</span>
           </h2>
           <p className="mx-auto mt-2 max-w-lg text-center text-zinc-400">
-            No grátis a clikou fica com 20% de cada venda. No Pro você paga uma
+            No grátis a clikou fica com {COMMISSION_PERCENT}% de cada venda. No Pro você paga uma
             mensalidade fixa e fica com 100%.
           </p>
 
@@ -297,7 +298,7 @@ export default function PortfolioLanding() {
                 {[
                   "Sua página clikou/f/seunome",
                   "Até 8 fotos no portfólio",
-                  "Venda de eventos com 20% de comissão",
+                  `Venda de eventos com ${COMMISSION_PERCENT}% de comissão`,
                   "Contatos de WhatsApp, Instagram e site",
                 ].map((t) => (
                   <li key={t} className="flex items-start gap-3">

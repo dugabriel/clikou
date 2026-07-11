@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { CheckIcon, XIcon, ArrowIcon } from "@/components/Icons";
+import { COMMISSION_PERCENT } from "@/lib/mp";
 
 export const metadata = {
   title: "Sobre a clikou — a ferramenta que se paga sozinha",
@@ -8,17 +9,18 @@ export const metadata = {
   alternates: { canonical: "/about" },
 };
 
-// Reframe da venda: no grátis a plataforma tira 20% de cada venda; no Pro,
-// nada. O número da esquerda é ilustrativo (um mês de R$ 1.000 em vendas).
+// Reframe da venda: no grátis a plataforma tira a comissão padrão de cada
+// venda; no Pro, nada. O número da esquerda é ilustrativo (um mês de
+// R$ 1.000 em vendas).
 const EXAMPLE_SALES = 1000;
-const FREE_COMMISSION = 0.2;
+const FREE_COMMISSION = COMMISSION_PERCENT / 100;
 const PRO_MONTHLY = 49;
 const freeKeeps = EXAMPLE_SALES * (1 - FREE_COMMISSION); // 800
 const proKeeps = EXAMPLE_SALES - PRO_MONTHLY; // 951
 const brl = (n) => `R$ ${n.toLocaleString("pt-BR")}`;
 
 const FREE_LIMITS = [
-  "20% de comissão em cada venda",
+  `${COMMISSION_PERCENT}% de comissão em cada venda`,
   "1 coleção no portfólio (até 8 fotos)",
   "1 galeria de entrega",
   "Marca clikou na sua página",
@@ -84,7 +86,7 @@ export default function AboutPage() {
         <div className="mt-6 grid gap-4 sm:grid-cols-2">
           <div className="rounded-2xl border border-white/10 bg-zinc-950/40 p-6">
             <p className="text-sm font-semibold text-zinc-400">
-              Plano grátis · 20% de comissão
+              Plano grátis · {COMMISSION_PERCENT}% de comissão
             </p>
             <p className="mt-3 text-sm text-zinc-500">
               Comissão da plataforma

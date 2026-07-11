@@ -88,4 +88,4 @@ export async function getConnectedSeller(userId) {
   return user;
 }
 
-export const COMMISSION_PERCENT = Number(process.env.COMMISSION_PERCENT || 20);
+export const COMMISSION_PERCENT = Number(process.env.COMMISSION_PERCENT || 10);

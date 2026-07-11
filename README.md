@@ -17,7 +17,7 @@ Cloud Storage · Mercado Pago · Cloud Run.
 3. O fotógrafo solicita saque via Pix no painel (mínimo R$ 20). O saque fica
    `pending` — você paga manualmente pelo seu banco e marca como pago no
    painel admin (`/admin/withdrawals`); recusar devolve o valor à carteira.
-4. Comissão configurável via `COMMISSION_PERCENT` (padrão 20%), com taxa
+4. Comissão configurável via `COMMISSION_PERCENT` (padrão 10%), com taxa
    individual por fotógrafo ajustável em `/admin/photographers`.
 
 O painel admin (`/admin`) mostra vendas e faturamento; o acesso é liberado
