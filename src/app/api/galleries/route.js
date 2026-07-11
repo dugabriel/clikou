@@ -52,6 +52,8 @@ export async function POST(req) {
     allowFavorites:
       typeof body.allowFavorites === "boolean" ? body.allowFavorites : true,
     watermarkPreviews: body.watermarkPreviews === true,
+    faceSearch:
+      typeof body.faceSearch === "boolean" ? body.faceSearch : true,
   });
 
   return NextResponse.json({ ok: true, id: gallery._id.toString() });

@@ -40,6 +40,9 @@ const GallerySchema = new mongoose.Schema(
     allowFavorites: { type: Boolean, default: true },
     // Prova pré-pagamento pode querer marca d'água; entrega final não.
     watermarkPreviews: { type: Boolean, default: false },
+    // Quem recebeu o link pode se achar por selfie (útil em grupos grandes).
+    // Desligado, o upload nem calcula os descritores de rosto.
+    faceSearch: { type: Boolean, default: true },
   },
   { timestamps: true }
 );

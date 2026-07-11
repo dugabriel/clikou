@@ -3,15 +3,97 @@
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { BrandIcon } from "@/components/Logo";
-import { DownloadIcon, HeartIcon, StarIcon } from "@/components/Icons";
+import { DownloadIcon, HeartIcon, StarIcon, XIcon } from "@/components/Icons";
 
-// Galeria vista pelo cliente: grade, lightbox, favoritar e baixar em alta.
+// Busca por selfie dentro da galeria: extrai o descritor no navegador (como
+// no PhotoFinder dos eventos) e filtra a grade pelas fotos em que a pessoa
+// aparece. Sem busca por print — foto de galeria não tem hash perceptual.
+function SelfieFinder({ slug, matches, shownCount, onFilter }) {
+  const [status, setStatus] = useState("");
+  const [error, setError] = useState("");
+
+  async function onPickSelfie(e) {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+
+    setError("");
+    setStatus("Analisando sua selfie…");
+    try {
+      const { extractDescriptors } = await import("@/lib/face");
+      const faces = await extractDescriptors(file);
+      if (faces.length === 0) {
+        setError(
+          "Não encontrei um rosto nessa imagem. Tente uma selfie de frente, bem iluminada."
+        );
+        setStatus("");
+        return;
+      }
+
+      setStatus("Procurando você nas fotos…");
+      const res = await fetch(`/api/g/${slug}/face-search`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ descriptor: faces[0] }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Erro na busca.");
+      onFilter(new Set(data.photoIds));
+    } catch (err) {
+      setError(err.message || "Erro ao processar a imagem.");
+    }
+    setStatus("");
+  }
+
+  return (
+    <div className="mb-6 flex flex-wrap items-center gap-3 rounded-2xl border border-yellow-400/20 bg-yellow-400/5 px-5 py-4">
+      <div className="mr-auto">
+        <p className="font-semibold">Ache suas fotos</p>
+        <p className="text-sm text-zinc-400">
+          {matches
+            ? `Mostrando ${shownCount} foto${shownCount === 1 ? "" : "s"} com você.`
+            : "Envie uma selfie para ver só as fotos em que você aparece — a análise acontece no seu navegador, nada é guardado."}
+        </p>
+        {status && <p className="mt-1 text-sm text-yellow-400">{status}</p>}
+        {error && <p className="mt-1 text-sm text-red-400">{error}</p>}
+      </div>
+
+      {matches ? (
+        <button
+          onClick={() => onFilter(null)}
+          className="flex items-center gap-2 rounded-full border border-zinc-600 px-5 py-2.5 text-sm font-semibold hover:border-zinc-400"
+        >
+          <XIcon size={15} /> Ver todas
+        </button>
+      ) : (
+        <label
+          className={`cursor-pointer rounded-full bg-yellow-400 px-5 py-2.5 text-sm font-semibold text-zinc-950 transition hover:bg-yellow-300 ${
+            status ? "pointer-events-none opacity-60" : ""
+          }`}
+        >
+          Enviar selfie
+          <input
+            type="file"
+            accept="image/*"
+            capture="user"
+            onChange={onPickSelfie}
+            className="hidden"
+          />
+        </label>
+      )}
+    </div>
+  );
+}
+
+// Galeria vista pelo cliente: grade, lightbox, favoritar, baixar em alta e
+// (se ligado) achar as próprias fotos por selfie.
 export default function GalleryViewer({
   slug,
   title,
   clientName,
   downloadEnabled,
   allowFavorites,
+  faceSearch,
   photos,
 }) {
   const [favs, setFavs] = useState(() => {
@@ -20,6 +102,15 @@ export default function GalleryViewer({
     return m;
   });
   const [open, setOpen] = useState(null); // índice no lightbox
+  const [matches, setMatches] = useState(null); // Set de ids ou null
+
+  // Grade e lightbox trabalham sobre a lista filtrada pela selfie.
+  const shown = matches ? photos.filter((p) => matches.has(p.id)) : photos;
+
+  function applyFilter(ids) {
+    setMatches(ids);
+    setOpen(null); // índices do lightbox mudam junto com a lista
+  }
 
   const previewSrc = (id) => `/api/g/${slug}/photo/${id}/preview`;
   const downloadHref = (id) => `/api/g/${slug}/photo/${id}/download`;
@@ -39,9 +130,9 @@ export default function GalleryViewer({
   const move = useCallback(
     (delta) =>
       setOpen((i) =>
-        i === null ? i : (i + delta + photos.length) % photos.length
+        i === null ? i : (i + delta + shown.length) % shown.length
       ),
-    [photos.length]
+    [shown.length]
   );
 
   useEffect(() => {
@@ -56,7 +147,7 @@ export default function GalleryViewer({
   }, [open, close, move]);
 
   const favCount = Object.values(favs).filter(Boolean).length;
-  const current = open === null ? null : photos[open];
+  const current = open === null ? null : shown[open];
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-10">
@@ -94,13 +185,27 @@ export default function GalleryViewer({
         </div>
       </header>
 
+      {faceSearch && photos.length > 0 && (
+        <SelfieFinder
+          slug={slug}
+          matches={matches}
+          shownCount={shown.length}
+          onFilter={applyFilter}
+        />
+      )}
+
       {photos.length === 0 ? (
         <p className="py-16 text-center text-sm text-zinc-500">
           O fotógrafo ainda não subiu as fotos desta galeria.
         </p>
+      ) : shown.length === 0 ? (
+        <p className="py-16 text-center text-sm text-zinc-500">
+          Não achamos fotos com você — tente outra selfie, de frente e bem
+          iluminada, ou toque em &ldquo;Ver todas&rdquo;.
+        </p>
       ) : (
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4">
-          {photos.map((p, i) => (
+          {shown.map((p, i) => (
             <div
               key={p.id}
               className="group relative overflow-hidden rounded-lg bg-zinc-900"
@@ -154,7 +259,7 @@ export default function GalleryViewer({
         >
           <div className="flex items-center justify-between p-4 text-white">
             <span className="text-sm text-zinc-400">
-              {open + 1} / {photos.length}
+              {open + 1} / {shown.length}
             </span>
             <button
               onClick={close}

@@ -18,6 +18,7 @@ export default function NewGalleryForm() {
   const [downloadEnabled, setDownloadEnabled] = useState(true);
   const [allowFavorites, setAllowFavorites] = useState(true);
   const [watermarkPreviews, setWatermarkPreviews] = useState(false);
+  const [faceSearch, setFaceSearch] = useState(true);
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
@@ -41,6 +42,7 @@ export default function NewGalleryForm() {
         downloadEnabled,
         allowFavorites,
         watermarkPreviews,
+        faceSearch,
       }),
     });
     const data = await res.json().catch(() => ({}));
@@ -166,6 +168,19 @@ export default function NewGalleryForm() {
               />
               Marca d&apos;água na visualização (prova antes do pagamento)
             </label>
+            <label className="flex items-center gap-2.5 text-sm text-zinc-300">
+              <input
+                type="checkbox"
+                checked={faceSearch}
+                onChange={(e) => setFaceSearch(e.target.checked)}
+                className={checkbox}
+              />
+              Deixar quem recebeu se achar por selfie
+            </label>
+            <p className="pl-6 text-xs text-zinc-500">
+              Ótimo para grupos: cada pessoa manda uma selfie e vê só as
+              fotos em que aparece. A análise acontece no navegador.
+            </p>
           </div>
 
           <div className="mt-6 flex flex-wrap items-center gap-4">

@@ -30,6 +30,25 @@ export async function POST(req, ctx) {
     return NextResponse.json({ error: "Envie um arquivo." }, { status: 400 });
   }
 
+  // Descritores faciais calculados no navegador durante o upload (mesma
+  // validação do upload de evento). Só valem com a busca por selfie ligada.
+  let faces = [];
+  if (gallery.faceSearch !== false) {
+    try {
+      const raw = JSON.parse(form.get("faces") || "[]");
+      if (Array.isArray(raw)) {
+        faces = raw
+          .filter(
+            (f) =>
+              Array.isArray(f) &&
+              f.length === 128 &&
+              f.every((n) => typeof n === "number")
+          )
+          .slice(0, 30);
+      }
+    } catch {}
+  }
+
   const original = Buffer.from(await file.arrayBuffer());
 
   const { isImageInappropriate } = await import("@/lib/moderation");
@@ -61,6 +80,7 @@ export async function POST(req, ctx) {
     fileName: file.name || "foto.jpg",
     width: derived.width,
     height: derived.height,
+    faces,
     originalKey: "",
     previewKey: "",
   });

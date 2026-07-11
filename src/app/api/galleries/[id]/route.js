@@ -54,6 +54,9 @@ export async function PATCH(req, ctx) {
   if (typeof body.watermarkPreviews === "boolean") {
     gallery.watermarkPreviews = body.watermarkPreviews;
   }
+  if (typeof body.faceSearch === "boolean") {
+    gallery.faceSearch = body.faceSearch;
+  }
 
   await gallery.save();
   return NextResponse.json({ ok: true });

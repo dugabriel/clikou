@@ -1,7 +1,8 @@
 import mongoose from "mongoose";
 
-// Foto de uma galeria de entrega. Não guarda faces/hashes (galeria privada
-// não é buscável) nem preço (download é a entrega, sem venda avulsa no MVP).
+// Foto de uma galeria de entrega. Sem preço (download é a entrega, sem venda
+// avulsa no MVP); guarda descritores de rosto para o "ache-se por selfie"
+// dentro da galeria, quando a opção está ligada.
 const GalleryPhotoSchema = new mongoose.Schema(
   {
     gallery: {
@@ -23,6 +24,9 @@ const GalleryPhotoSchema = new mongoose.Schema(
     fileName: { type: String, default: "foto.jpg" },
     // Favorita do cliente (uma galeria = um cliente, então basta um booleano).
     favorited: { type: Boolean, default: false },
+    // Descritores faciais (128 números por rosto), calculados no navegador
+    // durante o upload — mesmo esquema das fotos de evento.
+    faces: { type: [[Number]], default: [] },
   },
   { timestamps: true }
 );

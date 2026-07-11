@@ -5,14 +5,14 @@ import { useUploader } from "@/components/UploadManager";
 // Botão de seleção de fotos da galeria de entrega. Só enfileira no
 // gerenciador global (UploadManager): o envio roda em segundo plano com o
 // progresso no cartão flutuante, e continua mesmo saindo desta tela.
-export default function GalleryUploader({ galleryId, galleryTitle }) {
+export default function GalleryUploader({ galleryId, galleryTitle, indexFaces }) {
   const uploader = useUploader();
 
   function onSelect(e) {
     const files = [...e.target.files];
     e.target.value = "";
     if (files.length === 0) return;
-    uploader.enqueue({ galleryId, files, label: galleryTitle });
+    uploader.enqueue({ galleryId, files, label: galleryTitle, indexFaces });
   }
 
   return (

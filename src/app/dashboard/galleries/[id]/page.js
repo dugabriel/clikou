@@ -69,6 +69,8 @@ export default async function ManageGallery({ params }) {
     downloadEnabled: gallery.downloadEnabled,
     allowFavorites: gallery.allowFavorites,
     watermarkPreviews: gallery.watermarkPreviews,
+    // Galerias antigas não têm o campo — ausente conta como ligado.
+    faceSearch: gallery.faceSearch !== false,
   };
 
   return (
@@ -99,7 +101,11 @@ export default async function ManageGallery({ params }) {
           <h3 className="flex items-center gap-2.5 font-semibold">
             <Step n={1} /> Suba e confira as fotos
           </h3>
-          <GalleryUploader galleryId={id} galleryTitle={gallery.title} />
+          <GalleryUploader
+            galleryId={id}
+            galleryTitle={gallery.title}
+            indexFaces={g.faceSearch}
+          />
         </div>
         <p className="mt-2 text-sm text-zinc-500">
           As fotos sobem em segundo plano — acompanhe no cartão no canto da

@@ -51,6 +51,15 @@ export default async function ClientGallery({ params }) {
     .select("favorited fileName")
     .lean();
 
+  // Só oferece a busca por selfie se há rostos indexados (fotos antigas,
+  // de antes do recurso, não têm descritores).
+  const faceSearch =
+    gallery.faceSearch !== false &&
+    !!(await GalleryPhoto.exists({
+      gallery: gallery._id,
+      "faces.0": { $exists: true },
+    }));
+
   return (
     <GalleryViewer
       slug={slug}
@@ -58,6 +67,7 @@ export default async function ClientGallery({ params }) {
       clientName={gallery.clientName || ""}
       downloadEnabled={gallery.downloadEnabled}
       allowFavorites={gallery.allowFavorites}
+      faceSearch={faceSearch}
       photos={photos.map((p) => ({
         id: p._id.toString(),
         favorited: !!p.favorited,

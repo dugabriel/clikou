@@ -36,6 +36,9 @@ export default function UploadProvider({ children }) {
   const controllersRef = useRef(new Map());
   const timersRef = useRef(new Set());
   const lastRefreshRef = useRef(0);
+  // Extração de rostos é pesada — roda um arquivo por vez (corrente de
+  // promises), enquanto a rede segue com os uploads em paralelo.
+  const extractChainRef = useRef(Promise.resolve(null));
 
   function sync() {
     setItems(itemsRef.current);
@@ -80,6 +83,23 @@ export default function UploadProvider({ children }) {
     toStart.forEach(uploadOne);
   }
 
+  // Descritores de rosto para o "ache-se por selfie" da galeria. Falhou a
+  // análise? A foto sobe do mesmo jeito, só não entra na busca.
+  function extractFaces(item) {
+    const run = async () => {
+      try {
+        const { extractDescriptors } = await import("@/lib/face");
+        const faces = await extractDescriptors(item.file);
+        return faces.length > 0 ? JSON.stringify(faces.slice(0, 30)) : null;
+      } catch {
+        return null;
+      }
+    };
+    const p = extractChainRef.current.then(run, run);
+    extractChainRef.current = p.catch(() => null);
+    return p;
+  }
+
   async function uploadOne(item) {
     const controller = new AbortController();
     controllersRef.current.set(item.id, controller);
@@ -87,6 +107,10 @@ export default function UploadProvider({ children }) {
     try {
       const form = new FormData();
       form.append("file", item.file, item.name);
+      if (item.indexFaces) {
+        const facesJson = await extractFaces(item);
+        if (facesJson) form.append("faces", facesJson);
+      }
       const res = await fetch(`/api/galleries/${item.galleryId}/photos`, {
         method: "POST",
         body: form,
@@ -135,11 +159,12 @@ export default function UploadProvider({ children }) {
     pump();
   }
 
-  function enqueue({ galleryId, files, label }) {
+  function enqueue({ galleryId, files, label, indexFaces = false }) {
     const newItems = [...files].map((file) => ({
       id: crypto.randomUUID(),
       galleryId,
       label,
+      indexFaces,
       file,
       name: file.name || "foto.jpg",
       status: "pending",

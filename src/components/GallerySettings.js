@@ -17,6 +17,7 @@ export default function GallerySettings({ gallery }) {
   const [watermarkPreviews, setWatermarkPreviews] = useState(
     gallery.watermarkPreviews
   );
+  const [faceSearch, setFaceSearch] = useState(gallery.faceSearch);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState("");
@@ -35,6 +36,7 @@ export default function GallerySettings({ gallery }) {
         downloadEnabled,
         allowFavorites,
         watermarkPreviews,
+        faceSearch,
       }),
     });
     setSaving(false);
@@ -114,6 +116,19 @@ export default function GallerySettings({ gallery }) {
         <p className="pl-6 text-xs text-zinc-500">
           A marca vale para fotos enviadas depois de marcar esta opção. O
           download em alta é sempre sem marca.
+        </p>
+        <label className="flex items-center gap-2.5 text-sm text-zinc-300">
+          <input
+            type="checkbox"
+            checked={faceSearch}
+            onChange={(e) => setFaceSearch(e.target.checked)}
+            className={checkbox}
+          />
+          Deixar quem recebeu se achar por selfie
+        </label>
+        <p className="pl-6 text-xs text-zinc-500">
+          Vale para fotos enviadas com a opção ligada — a análise dos rostos
+          acontece durante o upload.
         </p>
       </div>
 
