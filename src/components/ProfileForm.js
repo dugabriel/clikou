@@ -16,6 +16,9 @@ export default function ProfileForm({ profile, pro, limits, collections: initial
   const [ok, setOk] = useState(false);
   const [saving, setSaving] = useState(false);
   const [uploadingId, setUploadingId] = useState(null);
+  // Aviso de limite do plano, mostrado junto da grade de fotos (o `error`
+  // aparece lá em cima, no formulário de perfil — longe do upload).
+  const [photoNotice, setPhotoNotice] = useState("");
   const [uploadingCover, setUploadingCover] = useState(false);
   const [creating, setCreating] = useState(false);
 
@@ -66,8 +69,26 @@ export default function ProfileForm({ profile, pro, limits, collections: initial
   // Sobe fotos para uma coleção (collectionId null = coleção padrão, criada
   // no servidor na primeira foto do grátis).
   async function uploadPhotos(collectionId, files) {
+    // Corta a seleção ao espaço que resta no plano antes de enviar — senão o
+    // usuário seleciona 300, cada arquivo viaja inteiro e o servidor rejeita
+    // um a um depois do limite.
+    const current = collectionId
+      ? collections.find((c) => c._id === collectionId)
+      : collections[0];
+    const used = current?.photos.length || 0;
+    const room = Math.max(0, limits.photosPerCollection - used);
+    if (files.length > room) {
+      setPhotoNotice(
+        room === 0
+          ? `Esta coleção já tem as ${limits.photosPerCollection} fotos do seu plano. Remova alguma para trocar${pro ? "" : ", ou assine o Pro para ter mais espaço"}.`
+          : `Seu plano permite ${limits.photosPerCollection} fotos por coleção: cabem mais ${room}, então só as ${room} primeiras das ${files.length} selecionadas serão enviadas.`
+      );
+      files = files.slice(0, room);
+      if (files.length === 0) return;
+    } else {
+      setPhotoNotice("");
+    }
     setUploadingId(collectionId || "default");
-    setError("");
     for (const file of files) {
       const form = new FormData();
       form.append("file", file);
@@ -455,6 +476,12 @@ export default function ProfileForm({ profile, pro, limits, collections: initial
             </span>
           ) : null}
         </div>
+
+        {photoNotice && (
+          <p className="mt-3 rounded-xl border border-yellow-400/20 bg-yellow-400/5 px-4 py-3 text-sm text-zinc-300">
+            {photoNotice}
+          </p>
+        )}
 
         {pro ? (
           <ProCollections

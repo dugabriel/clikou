@@ -9,6 +9,7 @@ import CookieConsent from "@/components/CookieConsent";
 import SignupPing from "@/components/SignupPing";
 import ManageCookiesLink from "@/components/ManageCookiesLink";
 import SupportWidget from "@/components/SupportWidget";
+import UploadProvider from "@/components/UploadManager";
 import { InstagramIcon, FacebookIcon } from "@/components/Icons";
 import { getSession } from "@/lib/auth";
 
@@ -68,7 +69,9 @@ export default async function RootLayout({ children }) {
         <CookieConsent />
         <Navbar />
         <SupportWidget loggedIn={!!session} />
-        <main className="flex-1">{children}</main>
+        <UploadProvider>
+          <main className="flex-1">{children}</main>
+        </UploadProvider>
         <footer className="mt-16 border-t border-white/5 bg-zinc-950">
           <div className="mx-auto flex max-w-6xl flex-col gap-8 px-4 py-12 sm:flex-row sm:items-start sm:justify-between">
             <div className="max-w-xs">

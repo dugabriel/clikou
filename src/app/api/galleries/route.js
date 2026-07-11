@@ -12,7 +12,8 @@ export async function POST(req) {
     return NextResponse.json({ error: "Faça login." }, { status: 401 });
   }
 
-  const { title, clientName } = await req.json().catch(() => ({}));
+  const body = await req.json().catch(() => ({}));
+  const { title, clientName } = body;
   if (!title || !title.trim()) {
     return NextResponse.json(
       { error: "Dê um nome para a galeria." },
@@ -35,10 +36,22 @@ export async function POST(req) {
     );
   }
 
+  // Opções da galeria vêm junto na criação (o fluxo pede antes do upload),
+  // com a mesma sanitização do PATCH.
   const gallery = await Gallery.create({
     photographer: session.id,
     title: title.trim(),
     clientName: (clientName || "").trim(),
+    pin:
+      typeof body.pin === "string"
+        ? body.pin.replace(/\D/g, "").slice(0, 8)
+        : "",
+    expiresAt: body.expiresAt ? new Date(body.expiresAt) : null,
+    downloadEnabled:
+      typeof body.downloadEnabled === "boolean" ? body.downloadEnabled : true,
+    allowFavorites:
+      typeof body.allowFavorites === "boolean" ? body.allowFavorites : true,
+    watermarkPreviews: body.watermarkPreviews === true,
   });
 
   return NextResponse.json({ ok: true, id: gallery._id.toString() });

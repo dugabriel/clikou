@@ -89,7 +89,7 @@ export default async function ManageGallery({ params }) {
         </p>
       )}
 
-      <GalleryUploader galleryId={id} />
+      <GalleryUploader galleryId={id} galleryTitle={gallery.title} />
 
       <GalleryNotify
         galleryId={id}
@@ -102,6 +102,7 @@ export default async function ManageGallery({ params }) {
       <GalleryPhotoGrid galleryId={id} photos={photos.map((p) => ({
         id: p._id.toString(),
         favorited: !!p.favorited,
+        fileName: p.fileName || "",
       }))} />
     </div>
   );
