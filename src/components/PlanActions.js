@@ -14,11 +14,18 @@ export default function PlanActions({ pro }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
 
-  // O MP redireciona de volta com ?sub=ok após autorizar — conversão real.
+  // O MP redireciona de volta com ?sub=ok&cycle=... após autorizar — conversão
+  // real. O sessionStorage evita contar de novo num refresh da mesma URL.
   useEffect(() => {
-    if (params.get("sub") === "ok") {
-      trackEvent("subscribe", { currency: "BRL" });
-    }
+    if (params.get("sub") !== "ok") return;
+    if (sessionStorage.getItem("clikou_sub_tracked")) return;
+    sessionStorage.setItem("clikou_sub_tracked", "1");
+    const backCycle = params.get("cycle");
+    trackEvent("subscribe", {
+      currency: "BRL",
+      value: PLAN_VALUE[backCycle] ?? PLAN_VALUE.monthly,
+      cycle: backCycle || "monthly",
+    });
   }, [params]);
 
   async function subscribe() {

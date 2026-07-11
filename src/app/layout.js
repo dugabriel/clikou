@@ -3,8 +3,10 @@ import "./globals.css";
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import Logo from "@/components/Logo";
+import { Suspense } from "react";
 import GoogleAnalytics from "@/components/GoogleAnalytics";
 import CookieConsent from "@/components/CookieConsent";
+import SignupPing from "@/components/SignupPing";
 import ManageCookiesLink from "@/components/ManageCookiesLink";
 import { InstagramIcon, FacebookIcon } from "@/components/Icons";
 
@@ -57,6 +59,9 @@ export default function RootLayout({ children }) {
     >
       <body className="flex min-h-full flex-col font-sans">
         <GoogleAnalytics />
+        <Suspense fallback={null}>
+          <SignupPing />
+        </Suspense>
         <CookieConsent />
         <Navbar />
         <main className="flex-1">{children}</main>

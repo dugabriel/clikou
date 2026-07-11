@@ -76,7 +76,9 @@ export async function GET(req) {
 
   await dbConnect();
   let user = await User.findOne({ email: profile.email.toLowerCase() });
+  let isNewUser = false;
   if (!user) {
+    isNewUser = true;
     user = await User.create({
       name: profile.name || profile.email.split("@")[0],
       email: profile.email,
@@ -93,5 +95,8 @@ export async function GET(req) {
   }
 
   await createSession(user);
-  return NextResponse.redirect(new URL(state.next || "/events", appUrl));
+  const dest = new URL(state.next || "/events", appUrl);
+  // Marca cadastros novos para o SignupPing (layout) contar o sign_up no gtag.
+  if (isNewUser) dest.searchParams.set("signup", "google");
+  return NextResponse.redirect(dest);
 }
