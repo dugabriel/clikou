@@ -38,9 +38,11 @@ export default function GalleryUploader({
   return (
     <label className="cursor-pointer rounded-lg bg-yellow-400 px-5 py-2.5 font-semibold text-zinc-950 hover:bg-yellow-300">
       Selecionar fotos
+      {/* .heic explícito: o iOS entrega o original sem transcodificar no
+          seletor — a seleção de centenas de fotos deixa de travar. */}
       <input
         type="file"
-        accept="image/*"
+        accept="image/*,.heic,.heif"
         multiple
         onChange={onSelect}
         className="hidden"

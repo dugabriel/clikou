@@ -4,6 +4,7 @@ import Event from "@/models/Event";
 import Photo from "@/models/Photo";
 import { getSession } from "@/lib/auth";
 import { generatePreview } from "@/lib/watermark";
+import { normalizeImage, jpegFileName } from "@/lib/heic";
 import { imageHashes } from "@/lib/imagehash";
 import { saveFile } from "@/lib/storage";
 import { toCents } from "@/lib/currency";
@@ -57,7 +58,22 @@ export async function POST(req, ctx) {
     }
   } catch {}
 
-  const original = Buffer.from(await file.arrayBuffer());
+  // HEIC do iPhone vira JPEG já na entrada — moderação, marca d'água, hash
+  // de print e o download do comprador só veem JPEG.
+  let original = Buffer.from(await file.arrayBuffer());
+  let fileName = file.name || "foto.jpg";
+  try {
+    const norm = await normalizeImage(original);
+    if (norm.converted) {
+      original = norm.buffer;
+      fileName = jpegFileName(fileName);
+    }
+  } catch {
+    return NextResponse.json(
+      { error: `Arquivo "${file.name}" não é uma imagem válida.` },
+      { status: 400 }
+    );
+  }
 
   const { isImageInappropriate } = await import("@/lib/moderation");
   const moderation = await isImageInappropriate(original);
@@ -88,7 +104,7 @@ export async function POST(req, ctx) {
     event: event._id,
     photographer: session.id,
     priceCents,
-    fileName: file.name || "foto.jpg",
+    fileName,
     fileSize: file.size || 0,
     width: derived.width,
     height: derived.height,

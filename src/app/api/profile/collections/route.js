@@ -7,6 +7,7 @@ import { getSession } from "@/lib/auth";
 import { saveFile, deleteFile } from "@/lib/storage";
 import { isImageInappropriate, containsForbiddenWord } from "@/lib/moderation";
 import { planLimits } from "@/lib/plan";
+import { normalizeImage } from "@/lib/heic";
 
 async function loadUser(session) {
   return User.findById(session.id).select(
@@ -55,7 +56,16 @@ export async function POST(req) {
     );
   }
 
-  const original = Buffer.from(await file.arrayBuffer());
+  // HEIC do iPhone vira JPEG já na entrada.
+  let original = Buffer.from(await file.arrayBuffer());
+  try {
+    original = (await normalizeImage(original)).buffer;
+  } catch {
+    return NextResponse.json(
+      { error: "Arquivo não é uma imagem válida." },
+      { status: 400 }
+    );
+  }
   const moderation = await isImageInappropriate(original);
   if (moderation.blocked) {
     return NextResponse.json(

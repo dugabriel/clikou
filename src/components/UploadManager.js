@@ -177,16 +177,23 @@ export default function UploadProvider({ children }) {
     indexFaces = false,
     existing = [],
   }) {
+    // Compara pelo nome SEM extensão + tamanho: HEIC convertido no servidor
+    // é salvo como .jpg, mas o arquivo re-selecionado ainda chama .heic.
+    const baseKey = (name, size) =>
+      `${String(name).replace(/\.[^.]+$/, "").toLowerCase()}::${size}`;
+    const baseName = (name) =>
+      String(name).replace(/\.[^.]+$/, "").toLowerCase();
+
     const known = new Set();
     const knownNames = new Set(); // legado: registro sem tamanho salvo
     for (const e of existing) {
-      if (e.size) known.add(`${e.name}::${e.size}`);
-      else if (e.name) knownNames.add(e.name);
+      if (e.size) known.add(baseKey(e.name, e.size));
+      else if (e.name) knownNames.add(baseName(e.name));
     }
     // O que já subiu (ou está na fila) nesta sessão para o mesmo destino.
     for (const i of itemsRef.current) {
       if (i.endpoint === endpoint && i.status !== "error") {
-        known.add(`${i.name}::${i.size}`);
+        known.add(baseKey(i.name, i.size));
       }
     }
 
@@ -194,8 +201,8 @@ export default function UploadProvider({ children }) {
     let skippedCount = 0;
     for (const file of [...files]) {
       const name = file.name || "foto.jpg";
-      const key = `${name}::${file.size}`;
-      if (known.has(key) || knownNames.has(name)) {
+      const key = baseKey(name, file.size);
+      if (known.has(key) || knownNames.has(baseName(name))) {
         skippedCount++;
         continue;
       }

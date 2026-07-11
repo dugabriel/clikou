@@ -28,6 +28,10 @@ COPY --from=build /app/public ./public
 # nativos completos por cima.
 COPY --from=deps /app/node_modules/@img/sharp-libvips-linux-x64 ./node_modules/@img/sharp-libvips-linux-x64
 COPY --from=deps /app/node_modules/@img/sharp-linux-x64 ./node_modules/@img/sharp-linux-x64
+# Decodificador HEIC (serverExternalPackages) — garante os pacotes inteiros
+# no standalone, como o sharp acima.
+COPY --from=deps /app/node_modules/heic-decode ./node_modules/heic-decode
+COPY --from=deps /app/node_modules/libheif-js ./node_modules/libheif-js
 
 # Cloud Run injeta a PORT (padrão 8080)
 ENV PORT=8080

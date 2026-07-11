@@ -5,6 +5,7 @@ import GalleryPhoto from "@/models/GalleryPhoto";
 import { getSession } from "@/lib/auth";
 import { generatePreview, generatePlainPreview } from "@/lib/watermark";
 import { saveFile } from "@/lib/storage";
+import { normalizeImage, jpegFileName } from "@/lib/heic";
 
 // Sobe uma foto por requisição (o front envia em fila, como no upload de
 // evento). Sem preço/rostos: galeria de entrega é privada e não é vendida.
@@ -49,7 +50,22 @@ export async function POST(req, ctx) {
     } catch {}
   }
 
-  const original = Buffer.from(await file.arrayBuffer());
+  // HEIC do iPhone vira JPEG já na entrada — moderação, marca d'água e o
+  // download do cliente só veem JPEG.
+  let original = Buffer.from(await file.arrayBuffer());
+  let fileName = file.name || "foto.jpg";
+  try {
+    const norm = await normalizeImage(original);
+    if (norm.converted) {
+      original = norm.buffer;
+      fileName = jpegFileName(fileName);
+    }
+  } catch {
+    return NextResponse.json(
+      { error: `Arquivo "${file.name}" não é uma imagem válida.` },
+      { status: 400 }
+    );
+  }
 
   const { isImageInappropriate } = await import("@/lib/moderation");
   const moderation = await isImageInappropriate(original);
@@ -77,7 +93,7 @@ export async function POST(req, ctx) {
   const photo = new GalleryPhoto({
     gallery: gallery._id,
     photographer: session.id,
-    fileName: file.name || "foto.jpg",
+    fileName,
     fileSize: file.size || 0,
     width: derived.width,
     height: derived.height,
