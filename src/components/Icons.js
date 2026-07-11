@@ -263,3 +263,13 @@ export function RocketIcon(props) {
     </Base>
   );
 }
+
+export function SupportIcon(props) {
+  return (
+    <Base {...props}>
+      <path d="M12 3a8.5 8.5 0 0 1 8.5 8.5c0 4.7-3.8 8.5-8.5 8.5-1.4 0-2.8-.3-4-1l-4 1.2 1.3-3.8A8.46 8.46 0 0 1 3.5 11.5 8.5 8.5 0 0 1 12 3Z" />
+      <path d="M9.9 9.7a2.2 2.2 0 0 1 4.3.6c0 1.4-2.1 1.7-2.1 2.9" />
+      <path d="M12.1 16.1h.01" />
+    </Base>
+  );
+}

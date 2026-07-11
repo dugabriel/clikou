@@ -28,6 +28,14 @@ export default function CookieConsent() {
     setShow(false);
   }
 
+  // Anuncia quando o banner está na tela: ele é um overlay z-50 rente ao
+  // rodapé, então quem também vive ali (bolinha de suporte) sai da frente.
+  useEffect(() => {
+    window.dispatchEvent(
+      new CustomEvent("clikou:consent-visible", { detail: show })
+    );
+  }, [show]);
+
   useEffect(() => {
     let choice = null;
     try {

@@ -13,7 +13,7 @@ export const emailEnabled = !!process.env.MAILERSEND_TOKEN;
 // próprios mais apertados; este teto cobre o que escapar delas.
 const PER_RECIPIENT = { limit: 10, windowMs: 60 * 60 * 1000 };
 
-export async function sendEmail({ to, subject, html, text }) {
+export async function sendEmail({ to, subject, html, text, cc, replyTo }) {
   try {
     const hit = await rateLimit("email-to", String(to).toLowerCase(), PER_RECIPIENT);
     if (!hit.ok) {
@@ -36,6 +36,8 @@ export async function sendEmail({ to, subject, html, text }) {
         name: "clikou",
       },
       to: [{ email: to }],
+      ...(cc ? { cc: [{ email: cc }] } : {}),
+      ...(replyTo ? { reply_to: { email: replyTo } } : {}),
       subject,
       html,
       text: text || html.replace(/<[^>]+>/g, " "),
@@ -210,6 +212,44 @@ export async function sendWithdrawalRejectedEmail({ to, name, amountCents }) {
         saldo no clikou.</p>
         <p style="color:#71717a;font-size:13px">Confira se a chave Pix está
         correta e solicite de novo. Qualquer dúvida, responda este e-mail.</p>
+      </div>`,
+  });
+}
+
+// Ticket de suporte: vai para a caixa do suporte com o usuário em cópia — a
+// conversa segue por e-mail normal (reply-to aponta pro usuário). Conteúdo é
+// texto livre do usuário, então escapamos antes de interpolar no HTML.
+const SUPPORT_EMAIL = process.env.SUPPORT_EMAIL || "suporte@clikou.click";
+
+function escapeHtml(s) {
+  return String(s)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;");
+}
+
+export async function sendSupportTicketEmail({ user, category, message, page }) {
+  const cat = escapeHtml(category);
+  return sendEmail({
+    to: SUPPORT_EMAIL,
+    cc: user.email,
+    replyTo: user.email,
+    subject: `[Suporte] ${category} — ${user.name || user.email}`,
+    html: `
+      <div style="font-family:sans-serif;max-width:520px">
+        <h2>Novo ticket de suporte</h2>
+        <p style="color:#71717a;font-size:13px">
+          De <strong>${escapeHtml(user.name || "")}</strong>
+          &lt;${escapeHtml(user.email)}&gt; · ${cat}${
+            page ? ` · página ${escapeHtml(page)}` : ""
+          }
+        </p>
+        <p style="white-space:pre-wrap;border-left:3px solid #facc15;padding-left:12px">${escapeHtml(
+          message
+        )}</p>
+        <p style="color:#71717a;font-size:13px">Você está em cópia — o suporte
+        responde neste mesmo e-mail.</p>
       </div>`,
   });
 }
