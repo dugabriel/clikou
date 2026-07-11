@@ -77,6 +77,7 @@ export default async function ManageEvent({ params }) {
           da tela. Clique numa foto para vê-la em tela cheia.
         </p>
         <EventPhotoGrid
+          eventId={id}
           photos={photos.map((p) => ({
             id: p._id.toString(),
             priceCents: p.priceCents,

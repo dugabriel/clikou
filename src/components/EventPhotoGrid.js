@@ -1,15 +1,40 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { formatPrice } from "@/lib/currency";
 
-// Grade de gestão das fotos do evento, com carrossel em tela cheia — o
-// mesmo padrão do GalleryPhotoGrid da entrega. Sem exclusão: foto de evento
-// à venda não tem API de remoção (por enquanto).
-export default function EventPhotoGrid({ photos }) {
+// Grade de gestão das fotos do evento, com carrossel em tela cheia e
+// exclusão — o mesmo padrão do GalleryPhotoGrid da entrega. Foto já vendida
+// o servidor não deixa excluir (o comprador baixa por ela).
+export default function EventPhotoGrid({ eventId, photos }) {
+  const router = useRouter();
+  const [busy, setBusy] = useState(null);
+  const [error, setError] = useState("");
   const [open, setOpen] = useState(null); // índice no carrossel
 
   const src = (pid) => `/api/photos/${pid}/preview`;
+
+  async function remove(pid) {
+    if (!confirm("Remover esta foto do evento?")) return;
+    setBusy(pid);
+    setError("");
+    const res = await fetch(`/api/events/${eventId}/photos/${pid}`, {
+      method: "DELETE",
+    });
+    setBusy(null);
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      setError(data.error || "Não foi possível remover a foto.");
+      return;
+    }
+    // No carrossel, fica na mesma posição (a próxima foto assume o lugar);
+    // fecha se era a última que restava.
+    setOpen((i) =>
+      i === null || photos.length <= 1 ? null : Math.min(i, photos.length - 2)
+    );
+    router.refresh();
+  }
 
   const close = useCallback(() => setOpen(null), []);
   const move = useCallback(
@@ -40,15 +65,20 @@ export default function EventPhotoGrid({ photos }) {
     );
   }
 
-  const current = open === null ? null : photos[open];
+  // O refresh pós-exclusão encolhe a lista; o índice clampado evita abrir
+  // uma posição que já não existe.
+  const current =
+    open === null ? null : photos[Math.min(open, photos.length - 1)];
 
   return (
     <>
+      {error && <p className="mt-3 text-sm text-red-400">{error}</p>}
+
       <div className="mt-4 grid grid-cols-3 gap-3 sm:grid-cols-4 lg:grid-cols-6">
         {photos.map((p, i) => (
           <div
             key={p.id}
-            className="overflow-hidden rounded-lg border border-zinc-800"
+            className="group relative overflow-hidden rounded-lg border border-zinc-800"
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
@@ -61,6 +91,14 @@ export default function EventPhotoGrid({ photos }) {
             <p className="bg-zinc-900 px-2 py-1 text-center text-xs text-zinc-400">
               {formatPrice(p.priceCents)}
             </p>
+            <button
+              onClick={() => remove(p.id)}
+              disabled={busy === p.id}
+              title="Remover foto"
+              className="absolute right-1.5 top-1.5 flex h-6 w-6 items-center justify-center rounded-full bg-black/60 text-sm text-white opacity-0 transition group-hover:opacity-100 hover:bg-red-500 disabled:opacity-50"
+            >
+              ×
+            </button>
           </div>
         ))}
       </div>
@@ -72,7 +110,8 @@ export default function EventPhotoGrid({ photos }) {
         >
           <div className="flex items-center justify-between p-4 text-white">
             <span className="text-sm text-zinc-400">
-              {open + 1} / {photos.length} · {formatPrice(current.priceCents)}
+              {Math.min(open, photos.length - 1) + 1} / {photos.length} ·{" "}
+              {formatPrice(current.priceCents)}
             </span>
             <button
               onClick={close}
@@ -83,7 +122,7 @@ export default function EventPhotoGrid({ photos }) {
           </div>
 
           <div
-            className="relative flex flex-1 items-center justify-center overflow-hidden px-2 pb-4"
+            className="relative flex flex-1 items-center justify-center overflow-hidden px-2"
             onClick={(e) => e.stopPropagation()}
           >
             <button
@@ -105,6 +144,20 @@ export default function EventPhotoGrid({ photos }) {
               aria-label="Próxima"
             >
               ›
+            </button>
+          </div>
+
+          <div
+            className="flex flex-col items-center gap-2 p-4"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {error && <p className="text-sm text-red-400">{error}</p>}
+            <button
+              onClick={() => remove(current.id)}
+              disabled={busy === current.id}
+              className="rounded-full border border-red-500/50 px-4 py-2 text-sm font-medium text-red-400 transition hover:bg-red-500/10 disabled:opacity-50"
+            >
+              {busy === current.id ? "Removendo…" : "Remover foto"}
             </button>
           </div>
         </div>
