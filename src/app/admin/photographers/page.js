@@ -2,8 +2,10 @@ import { dbConnect } from "@/lib/db";
 import User from "@/models/User";
 import Order from "@/models/Order";
 import { COMMISSION_PERCENT } from "@/lib/mp";
+import { isPro } from "@/lib/plan";
 import { formatPrice } from "@/lib/currency";
 import CommissionForm from "@/components/CommissionForm";
+import PartnerProToggle from "@/components/PartnerProToggle";
 
 export const dynamic = "force-dynamic";
 
@@ -14,7 +16,9 @@ export default async function AdminPhotographers() {
 
   const [users, sales] = await Promise.all([
     User.find()
-      .select("name email balanceCents commissionPercent username")
+      .select(
+        "name email balanceCents commissionPercent username plan planCurrentPeriodEnd"
+      )
       .sort({ createdAt: -1 })
       .limit(500)
       .lean(),
@@ -84,6 +88,18 @@ export default async function AdminPhotographers() {
                 userId={u._id.toString()}
                 currentRate={u.commissionPercent}
                 defaultRate={COMMISSION_PERCENT}
+              />
+              <PartnerProToggle
+                userId={u._id.toString()}
+                status={
+                  // Pro com vencimento = assinatura; sem vencimento = parceria;
+                  // vencido ou plano free = livre para virar parceria.
+                  isPro(u)
+                    ? u.planCurrentPeriodEnd
+                      ? "paid"
+                      : "partner"
+                    : "free"
+                }
               />
             </div>
           </div>
