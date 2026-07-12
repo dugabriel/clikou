@@ -145,6 +145,15 @@ export default async function EventPage({ params }) {
           ) : (
             event.photographer?.name
           )}
+          {/* Data de criação (timestamps do Mongoose) — sinal de frescor
+              pra quem procura as fotos: "publicado em" ≠ data do evento. */}
+          {event.createdAt && (
+            <span className="text-zinc-500">
+              {" "}
+              · publicado em{" "}
+              {new Date(event.createdAt).toLocaleDateString("pt-BR")}
+            </span>
+          )}
         </p>
         {event.description && (
           <p className="mt-3 max-w-2xl text-zinc-300">{event.description}</p>
