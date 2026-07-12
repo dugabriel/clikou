@@ -5,6 +5,7 @@ import Link from "next/link";
 import { BrandIcon } from "@/components/Logo";
 import { DownloadIcon, HeartIcon, StarIcon, XIcon } from "@/components/Icons";
 import SearchingOverlay from "@/components/SearchingOverlay";
+import DownloadAllZip from "@/components/DownloadAllZip";
 
 // Busca por selfie dentro da galeria: extrai o descritor no navegador (como
 // no PhotoFinder dos eventos) e filtra a grade pelas fotos em que a pessoa
@@ -96,6 +97,7 @@ export default function GalleryViewer({
   downloadEnabled,
   allowFavorites,
   faceSearch,
+  zipReady,
   photos,
 }) {
   const [favs, setFavs] = useState(() => {
@@ -171,12 +173,7 @@ export default function GalleryViewer({
         </div>
         <div className="flex items-center gap-4">
           {downloadEnabled && photos.length > 0 && (
-            <a
-              href={`/api/g/${slug}/download-all`}
-              className="flex items-center gap-1.5 rounded-full bg-yellow-400 px-4 py-2 text-sm font-semibold text-zinc-950 hover:bg-yellow-300"
-            >
-              <DownloadIcon size={16} /> Baixar todas
-            </a>
+            <DownloadAllZip slug={slug} initialReady={zipReady} />
           )}
           <Link
             href="/"

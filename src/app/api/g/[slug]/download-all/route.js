@@ -1,108 +1,127 @@
 import { NextResponse } from "next/server";
 import { Readable } from "stream";
-import { once } from "events";
-import { ZipArchive } from "archiver";
 import { dbConnect } from "@/lib/db";
 import Gallery from "@/models/Gallery";
 import GalleryPhoto from "@/models/GalleryPhoto";
 import { isExpired, hasGalleryAccess } from "@/lib/gallery";
-import { readFile } from "@/lib/storage";
+import { signedDownloadUrl, readStream } from "@/lib/storage";
+import {
+  zipIsCurrent,
+  buildGalleryZip,
+  MAX_ZIP_BYTES,
+  BUILD_LOCK_MS,
+} from "@/lib/galleryZip";
 
-// Trava de tamanho do zip: acima disso a resposta seria longa demais até
-// para o timeout máximo do Cloud Run e cara demais para servir em uma
-// requisição só. Fotos antigas sem fileSize contam como 0 (melhor esforço).
-const MAX_ZIP_BYTES = 2 * 1024 * 1024 * 1024; // 2 GB
-
-// "Baixar todas": zip dos originais em streaming (store, sem recomprimir os
-// JPEGs). Mesmo gating do download individual. O zip passa pelo servidor —
-// só o download individual vai direto do bucket via URL assinada.
-export async function GET(req, ctx) {
-  const { slug } = await ctx.params;
-
+async function gatedGallery(slug) {
   await dbConnect();
   const gallery = await Gallery.findOne({ slug });
   if (!gallery || isExpired(gallery)) {
-    return new NextResponse("Indisponível", { status: 404 });
+    return { error: new NextResponse("Indisponível", { status: 404 }) };
   }
   if (!gallery.downloadEnabled) {
-    return new NextResponse("Download desativado nesta galeria.", {
-      status: 403,
-    });
+    return {
+      error: new NextResponse("Download desativado nesta galeria.", {
+        status: 403,
+      }),
+    };
   }
   if (!(await hasGalleryAccess(gallery))) {
-    return new NextResponse("Acesso negado", { status: 403 });
+    return { error: new NextResponse("Acesso negado", { status: 403 }) };
+  }
+  return { gallery };
+}
+
+function zipFileName(gallery) {
+  return `${
+    (gallery.title || "galeria").replace(/[^\w-]+/g, "_").slice(0, 60) ||
+    "galeria"
+  }.zip`;
+}
+
+// Prepara o ZIP (gera uma vez e guarda no bucket). Guardrails: cache por
+// estado das fotos (cliques repetidos reutilizam), trava atômica contra
+// gerações concorrentes e teto de tamanho.
+export async function POST(req, ctx) {
+  const { slug } = await ctx.params;
+  const { gallery, error } = await gatedGallery(slug);
+  if (error) return error;
+
+  if (await zipIsCurrent(gallery)) {
+    return NextResponse.json({ ready: true, bytes: gallery.zipBytes });
   }
 
-  const photos = await GalleryPhoto.find({ gallery: gallery._id })
-    .sort({ createdAt: 1 })
-    .select("originalKey fileName fileSize");
+  const photos = await GalleryPhoto.find({ gallery: gallery._id }).select(
+    "fileSize"
+  );
   if (photos.length === 0) {
-    return new NextResponse("Galeria vazia", { status: 404 });
+    return NextResponse.json({ error: "Galeria vazia." }, { status: 404 });
   }
-
   const totalBytes = photos.reduce((sum, p) => sum + (p.fileSize || 0), 0);
   if (totalBytes > MAX_ZIP_BYTES) {
-    return new NextResponse(
-      "Esta galeria passa de 2 GB — baixe as fotos individualmente ou fale com o fotógrafo.",
+    return NextResponse.json(
+      { error: "Esta galeria passa de 6 GB — baixe as fotos individualmente." },
       { status: 413 }
     );
   }
 
-  const archive = new ZipArchive({ store: true });
-  // Cliente desistiu do download → para de ler do bucket.
-  req.signal?.addEventListener("abort", () => {
-    try {
-      archive.abort();
-    } catch {}
-  });
+  // Toma a trava de geração de forma atômica: só um build por galeria.
+  const now = new Date();
+  const locked = await Gallery.findOneAndUpdate(
+    {
+      _id: gallery._id,
+      $or: [
+        { zipBuildingAt: null },
+        { zipBuildingAt: { $lt: new Date(now.getTime() - BUILD_LOCK_MS) } },
+      ],
+    },
+    { zipBuildingAt: now },
+    { new: true }
+  );
+  if (!locked) {
+    return NextResponse.json({ building: true }, { status: 202 });
+  }
 
-  // Alimenta o zip enquanto a resposta já vai sendo transmitida.
-  (async () => {
-    const used = new Map();
-    try {
-      for (const p of photos) {
-        if (req.signal?.aborted) return;
-        let name = p.fileName || `foto-${p._id}.jpg`;
-        const n = (used.get(name) || 0) + 1;
-        used.set(name, n);
-        if (n > 1) {
-          const dot = name.lastIndexOf(".");
-          name =
-            dot > 0
-              ? `${name.slice(0, dot)}-${n}${name.slice(dot)}`
-              : `${name}-${n}`;
-        }
-        let buf;
-        try {
-          buf = await readFile(p.originalKey);
-        } catch {
-          continue; // arquivo sumiu do storage — pula
-        }
-        archive.append(buf, { name });
-        // Contrapressão: espera esta entrada ser consumida antes de ler a
-        // próxima do bucket. Sem isso o loop enfileira a galeria INTEIRA na
-        // RAM quando o cliente baixa mais devagar que o GCS entrega — foi o
-        // que estourava a memória (e truncava o zip) em galerias grandes.
-        await once(archive, "entry");
-      }
-      archive.finalize();
-    } catch {
-      // Erro no meio do stream (ou cliente abortou): encerra o zip para o
-      // consumidor não ficar pendurado.
-      try {
-        archive.abort();
-      } catch {}
-    }
-  })();
+  try {
+    const { bytes } = await buildGalleryZip(locked);
+    return NextResponse.json({ ready: true, bytes });
+  } catch {
+    // Solta a trava para a próxima tentativa não esperar o lock vencer.
+    await Gallery.updateOne(
+      { _id: gallery._id },
+      { $unset: { zipBuildingAt: 1 } }
+    );
+    return NextResponse.json(
+      { error: "Não foi possível preparar o ZIP. Tente de novo." },
+      { status: 500 }
+    );
+  }
+}
 
-  const zipName =
-    (gallery.title || "galeria").replace(/[^\w-]+/g, "_").slice(0, 60) ||
-    "galeria";
+// Entrega o ZIP pronto: redirect para URL assinada (download direto do
+// bucket, retomável) ou streaming do arquivo quando não dá para assinar
+// (dev local). Se o zip não está pronto/atual, manda preparar.
+export async function GET(req, ctx) {
+  const { slug } = await ctx.params;
+  const { gallery, error } = await gatedGallery(slug);
+  if (error) return error;
 
-  return new NextResponse(Readable.toWeb(archive), {
+  if (!(await zipIsCurrent(gallery))) {
+    return new NextResponse(
+      "O ZIP ainda não foi preparado — use o botão 'Baixar todas' na página da galeria.",
+      { status: 409 }
+    );
+  }
+
+  const name = zipFileName(gallery);
+  const signed = await signedDownloadUrl(gallery.zipKey, name);
+  if (signed) return NextResponse.redirect(signed);
+
+  const stream = await readStream(gallery.zipKey);
+  return new NextResponse(Readable.toWeb(stream), {
     headers: {
       "Content-Type": "application/zip",
-      "Content-Disposition": `attachment; filename="${zipName}.zip"`,
+      "Content-Length": String(gallery.zipBytes || ""),
+      "Content-Disposition": `attachment; filename="${name}"`,
     },
   });
 }

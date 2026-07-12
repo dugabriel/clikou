@@ -6,6 +6,7 @@ import { BrandIcon } from "@/components/Logo";
 import { isExpired, hasGalleryAccess } from "@/lib/gallery";
 import GalleryPinGate from "@/components/GalleryPinGate";
 import GalleryViewer from "@/components/GalleryViewer";
+import { zipIsCurrent } from "@/lib/galleryZip";
 
 export const dynamic = "force-dynamic";
 
@@ -60,6 +61,12 @@ export default async function ClientGallery({ params }) {
       "faces.0": { $exists: true },
     }));
 
+  // ZIP pré-gerado ainda vale? Aí o botão vira link direto na página.
+  const zipReady =
+    gallery.downloadEnabled && photos.length > 0
+      ? await zipIsCurrent(gallery)
+      : false;
+
   return (
     <GalleryViewer
       slug={slug}
@@ -68,6 +75,7 @@ export default async function ClientGallery({ params }) {
       downloadEnabled={gallery.downloadEnabled}
       allowFavorites={gallery.allowFavorites}
       faceSearch={faceSearch}
+      zipReady={zipReady}
       photos={photos.map((p) => ({
         id: p._id.toString(),
         favorited: !!p.favorited,

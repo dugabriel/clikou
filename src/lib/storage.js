@@ -1,4 +1,6 @@
 import fs from "fs/promises";
+import { createReadStream, createWriteStream } from "fs";
+import { pipeline } from "stream/promises";
 import path from "path";
 
 // Se GCS_BUCKET estiver definido usa o Google Cloud Storage;
@@ -26,6 +28,31 @@ export async function saveFile(key, buffer, contentType) {
     await fs.mkdir(path.dirname(target), { recursive: true });
     await fs.writeFile(target, buffer);
   }
+}
+
+// Grava um stream direto no storage (ex.: ZIP grande sendo montado) sem
+// materializar o conteúdo inteiro em memória.
+export async function saveStream(key, readable, contentType) {
+  if (BUCKET) {
+    const b = await bucket();
+    await pipeline(
+      readable,
+      b.file(key).createWriteStream({ contentType, resumable: false })
+    );
+  } else {
+    const target = path.join(LOCAL_DIR, key);
+    await fs.mkdir(path.dirname(target), { recursive: true });
+    await pipeline(readable, createWriteStream(target));
+  }
+}
+
+// Lê como stream (arquivos grandes) — contraparte do readFile em buffer.
+export async function readStream(key) {
+  if (BUCKET) {
+    const b = await bucket();
+    return b.file(key).createReadStream();
+  }
+  return createReadStream(path.join(LOCAL_DIR, key));
 }
 
 export async function deleteFile(key) {

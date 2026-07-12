@@ -43,6 +43,14 @@ const GallerySchema = new mongoose.Schema(
     // Quem recebeu o link pode se achar por selfie (útil em grupos grandes).
     // Desligado, o upload nem calcula os descritores de rosto.
     faceSearch: { type: Boolean, default: true },
+    // ZIP "baixar todas" pré-gerado no bucket (gallery-zips/, TTL por
+    // lifecycle). Vale enquanto as fotos não mudam; zipBuildingAt é a trava
+    // contra gerações concorrentes.
+    zipKey: { type: String, default: "" },
+    zipBuiltAt: { type: Date },
+    zipBytes: { type: Number, default: 0 },
+    zipPhotoCount: { type: Number, default: 0 },
+    zipBuildingAt: { type: Date },
   },
   { timestamps: true }
 );

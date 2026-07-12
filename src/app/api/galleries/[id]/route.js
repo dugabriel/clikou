@@ -87,6 +87,8 @@ export async function DELETE(req, ctx) {
       deleteFile(p.previewKey),
     ])
   );
+  // ZIP pré-gerado da galeria (o lifecycle do bucket é só rede de segurança).
+  if (gallery.zipKey) await deleteFile(gallery.zipKey);
   await GalleryPhoto.deleteMany({ gallery: id });
   await gallery.deleteOne();
 
