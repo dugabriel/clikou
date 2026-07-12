@@ -26,4 +26,8 @@ const EventSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+// A vitrine pública filtra published e ordena por createdAt desc — sem este
+// índice a consulta vira scan + sort quando o catálogo crescer.
+EventSchema.index({ published: 1, createdAt: -1 });
+
 export default mongoose.models.Event || mongoose.model("Event", EventSchema);
