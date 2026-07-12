@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { BrandIcon } from "@/components/Logo";
 import { DownloadIcon, HeartIcon, StarIcon, XIcon } from "@/components/Icons";
+import SearchingOverlay from "@/components/SearchingOverlay";
 
 // Busca por selfie dentro da galeria: extrai o descritor no navegador (como
 // no PhotoFinder dos eventos) e filtra a grade pelas fotos em que a pessoa
@@ -47,6 +48,7 @@ function SelfieFinder({ slug, matches, shownCount, onFilter }) {
 
   return (
     <div className="mb-6 flex flex-wrap items-center gap-3 rounded-2xl border border-yellow-400/20 bg-yellow-400/5 px-5 py-4">
+      <SearchingOverlay message={status} />
       <div className="mr-auto">
         <p className="font-semibold">Ache suas fotos</p>
         <p className="text-sm text-zinc-400">

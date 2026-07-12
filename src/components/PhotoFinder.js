@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { XIcon } from "@/components/Icons";
+import SearchingOverlay from "@/components/SearchingOverlay";
 
 // Duas formas de achar fotos no evento: selfie (reconhecimento facial,
 // roda no navegador) e print (imagem da própria foto, comparada no
@@ -68,6 +69,7 @@ export default function PhotoFinder({ eventId, onFilter, filterActive }) {
 
   return (
     <div className="mb-6 flex flex-wrap items-center gap-3 rounded-2xl border border-yellow-400/20 bg-yellow-400/5 px-5 py-4">
+      <SearchingOverlay message={status} />
       <div className="mr-auto">
         <p className="font-semibold">Ache suas fotos</p>
         <p className="text-sm text-zinc-400">

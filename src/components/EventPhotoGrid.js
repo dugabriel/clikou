@@ -4,14 +4,21 @@ import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { formatPrice } from "@/lib/currency";
 
-// Grade de gestão das fotos do evento, com carrossel em tela cheia e
-// exclusão — o mesmo padrão do GalleryPhotoGrid da entrega. Foto já vendida
-// o servidor não deixa excluir (o comprador baixa por ela).
+// Quantas exclusões em paralelo no modo seleção múltipla.
+const DELETE_CHUNK = 5;
+
+// Grade de gestão das fotos do evento: carrossel em tela cheia e exclusão —
+// uma a uma (X/carrossel) ou várias de uma vez no modo "Selecionar", estilo
+// Google Photos. Foto já vendida o servidor não deixa excluir (o comprador
+// baixa por ela).
 export default function EventPhotoGrid({ eventId, photos }) {
   const router = useRouter();
   const [busy, setBusy] = useState(null);
   const [error, setError] = useState("");
   const [open, setOpen] = useState(null); // índice no carrossel
+  const [selecting, setSelecting] = useState(false);
+  const [selected, setSelected] = useState(() => new Set());
+  const [removing, setRemoving] = useState(false);
 
   const src = (pid) => `/api/photos/${pid}/preview`;
 
@@ -33,6 +40,63 @@ export default function EventPhotoGrid({ eventId, photos }) {
     setOpen((i) =>
       i === null || photos.length <= 1 ? null : Math.min(i, photos.length - 2)
     );
+    router.refresh();
+  }
+
+  function toggleSelect(pid) {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (next.has(pid)) next.delete(pid);
+      else next.add(pid);
+      return next;
+    });
+  }
+
+  function exitSelecting() {
+    setSelecting(false);
+    setSelected(new Set());
+  }
+
+  async function removeSelected() {
+    const ids = [...selected];
+    if (ids.length === 0) return;
+    if (
+      !confirm(
+        `Remover ${ids.length} foto${ids.length > 1 ? "s" : ""} do evento?`
+      )
+    ) {
+      return;
+    }
+    setRemoving(true);
+    setError("");
+    let sold = 0;
+    let failed = 0;
+    for (let i = 0; i < ids.length; i += DELETE_CHUNK) {
+      await Promise.all(
+        ids.slice(i, i + DELETE_CHUNK).map(async (pid) => {
+          const res = await fetch(`/api/events/${eventId}/photos/${pid}`, {
+            method: "DELETE",
+          });
+          if (res.status === 409) sold++;
+          else if (!res.ok) failed++;
+        })
+      );
+    }
+    setRemoving(false);
+    exitSelecting();
+    setOpen(null);
+    const parts = [];
+    if (sold > 0) {
+      parts.push(
+        `${sold} já ${sold > 1 ? "foram vendidas e ficaram" : "foi vendida e ficou"} no evento (o comprador baixa por ela${sold > 1 ? "s" : ""})`
+      );
+    }
+    if (failed > 0) {
+      parts.push(
+        `${failed} ${failed > 1 ? "falharam" : "falhou"} — tente de novo`
+      );
+    }
+    setError(parts.length > 0 ? `${parts.join("; ")}.` : "");
     router.refresh();
   }
 
@@ -72,38 +136,100 @@ export default function EventPhotoGrid({ eventId, photos }) {
 
   return (
     <>
-      {error && <p className="mt-3 text-sm text-red-400">{error}</p>}
-
-      <div className="mt-4 grid grid-cols-3 gap-3 sm:grid-cols-4 lg:grid-cols-6">
-        {photos.map((p, i) => (
-          <div
-            key={p.id}
-            className="group relative overflow-hidden rounded-lg border border-zinc-800"
-          >
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={src(p.id)}
-              alt="Foto do evento"
-              loading="lazy"
-              onClick={() => setOpen(i)}
-              className="aspect-square w-full cursor-zoom-in object-cover"
-            />
-            <p className="bg-zinc-900 px-2 py-1 text-center text-xs text-zinc-400">
-              {formatPrice(p.priceCents)}
-            </p>
+      {/* Barra de seleção múltipla */}
+      <div className="mt-4 flex min-h-9 flex-wrap items-center justify-between gap-3">
+        {selecting ? (
+          <>
+            <span className="text-sm text-zinc-400">
+              {selected.size} selecionada{selected.size === 1 ? "" : "s"} —
+              toque nas fotos para marcar
+            </span>
+            <div className="flex gap-2">
+              <button
+                onClick={removeSelected}
+                disabled={removing || selected.size === 0}
+                className="rounded-lg border border-red-500/50 px-4 py-1.5 text-sm font-semibold text-red-400 transition hover:bg-red-500/10 disabled:opacity-50"
+              >
+                {removing ? "Removendo…" : `Excluir (${selected.size})`}
+              </button>
+              <button
+                onClick={exitSelecting}
+                disabled={removing}
+                className="rounded-lg border border-zinc-700 px-4 py-1.5 text-sm font-medium text-zinc-300 hover:border-zinc-500 disabled:opacity-50"
+              >
+                Cancelar
+              </button>
+            </div>
+          </>
+        ) : (
+          <>
+            <span className="text-sm text-red-400">{error}</span>
             <button
-              onClick={() => remove(p.id)}
-              disabled={busy === p.id}
-              title="Remover foto"
-              className="absolute right-1.5 top-1.5 flex h-6 w-6 items-center justify-center rounded-full bg-black/60 text-sm text-white opacity-0 transition group-hover:opacity-100 hover:bg-red-500 disabled:opacity-50"
+              onClick={() => setSelecting(true)}
+              className="rounded-lg border border-zinc-700 px-4 py-1.5 text-sm font-medium text-zinc-300 hover:border-zinc-500"
             >
-              ×
+              Selecionar
             </button>
-          </div>
-        ))}
+          </>
+        )}
       </div>
 
-      {current && (
+      <div className="mt-3 grid grid-cols-3 gap-3 sm:grid-cols-4 lg:grid-cols-6">
+        {photos.map((p, i) => {
+          const isSelected = selected.has(p.id);
+          return (
+            <div
+              key={p.id}
+              className={`group relative overflow-hidden rounded-lg border ${
+                isSelected ? "border-yellow-400" : "border-zinc-800"
+              }`}
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={src(p.id)}
+                alt="Foto do evento"
+                loading="lazy"
+                onClick={() =>
+                  selecting ? toggleSelect(p.id) : setOpen(i)
+                }
+                className={`aspect-square w-full cursor-pointer object-cover transition ${
+                  selecting
+                    ? isSelected
+                      ? "opacity-100"
+                      : "opacity-60"
+                    : "cursor-zoom-in"
+                }`}
+              />
+              <p className="bg-zinc-900 px-2 py-1 text-center text-xs text-zinc-400">
+                {formatPrice(p.priceCents)}
+              </p>
+              {selecting && (
+                <span
+                  className={`pointer-events-none absolute left-1.5 top-1.5 flex h-6 w-6 items-center justify-center rounded-full text-sm font-bold ${
+                    isSelected
+                      ? "bg-yellow-400 text-zinc-950"
+                      : "border-2 border-white/70 bg-black/30"
+                  }`}
+                >
+                  {isSelected ? "✓" : ""}
+                </span>
+              )}
+              {!selecting && (
+                <button
+                  onClick={() => remove(p.id)}
+                  disabled={busy === p.id}
+                  title="Remover foto"
+                  className="absolute right-1.5 top-1.5 flex h-6 w-6 items-center justify-center rounded-full bg-black/60 text-sm text-white opacity-0 transition group-hover:opacity-100 hover:bg-red-500 disabled:opacity-50"
+                >
+                  ×
+                </button>
+              )}
+            </div>
+          );
+        })}
+      </div>
+
+      {current && !selecting && (
         <div
           className="fixed inset-0 z-50 flex flex-col bg-black/95"
           onClick={close}
