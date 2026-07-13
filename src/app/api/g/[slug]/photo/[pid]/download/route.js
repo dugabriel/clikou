@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { dbConnect } from "@/lib/db";
 import Gallery from "@/models/Gallery";
 import GalleryPhoto from "@/models/GalleryPhoto";
-import { isExpired, hasGalleryAccess } from "@/lib/gallery";
+import { isExpired, hasGalleryAccess, galleryFileSlug } from "@/lib/gallery";
 import { readFile, signedDownloadUrl } from "@/lib/storage";
 
 // Download do original em alta — a entrega. Gated por slug (+PIN) e pelo
@@ -27,7 +27,10 @@ export async function GET(req, ctx) {
   const photo = await GalleryPhoto.findOne({ _id: pid, gallery: gallery._id });
   if (!photo) return new NextResponse("Não encontrada", { status: 404 });
 
-  const name = photo.fileName || `clikou-${photo._id}.jpg`;
+  // Prefixa com o nome da entrega — o arquivo baixado se identifica sozinho.
+  const name = `${galleryFileSlug(gallery)}-${
+    photo.fileName || `${photo._id}.jpg`
+  }`;
   const signed = await signedDownloadUrl(photo.originalKey, name);
   if (signed) return NextResponse.redirect(signed);
 

@@ -9,6 +9,14 @@ export function galleryCookieName(id) {
   return `clikou_g_${id}`;
 }
 
+// Título da entrega em forma de nome de arquivo — usado no ZIP e como
+// prefixo dos downloads individuais.
+export function galleryFileSlug(gallery) {
+  return (
+    (gallery.title || "").replace(/[^\w-]+/g, "_").slice(0, 60) || "galeria"
+  );
+}
+
 export function isExpired(gallery) {
   return (
     !!gallery.expiresAt &&

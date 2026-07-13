@@ -90,7 +90,10 @@ export async function signedDownloadUrl(key, fileName) {
       responseDisposition: `attachment; filename="${fileName}"`,
     });
     return url;
-  } catch {
+  } catch (err) {
+    // Sem permissão de signBlob (IAM) ou credencial sem chave — o chamador
+    // decide o fallback, mas a falha precisa aparecer no log.
+    console.error("signedDownloadUrl falhou:", err?.message || err);
     return null;
   }
 }

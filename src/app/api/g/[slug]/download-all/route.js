@@ -3,8 +3,8 @@ import { Readable } from "stream";
 import { dbConnect } from "@/lib/db";
 import Gallery from "@/models/Gallery";
 import GalleryPhoto from "@/models/GalleryPhoto";
-import { isExpired, hasGalleryAccess } from "@/lib/gallery";
-import { signedDownloadUrl, readStream } from "@/lib/storage";
+import { isExpired, hasGalleryAccess, galleryFileSlug } from "@/lib/gallery";
+import { signedDownloadUrl, readStream, usingGCS } from "@/lib/storage";
 import {
   zipIsCurrent,
   buildGalleryZip,
@@ -32,10 +32,7 @@ async function gatedGallery(slug) {
 }
 
 function zipFileName(gallery) {
-  return `${
-    (gallery.title || "galeria").replace(/[^\w-]+/g, "_").slice(0, 60) ||
-    "galeria"
-  }.zip`;
+  return `${galleryFileSlug(gallery)}.zip`;
 }
 
 // Prepara o ZIP (gera uma vez e guarda no bucket). Guardrails: cache por
@@ -115,6 +112,17 @@ export async function GET(req, ctx) {
   const name = zipFileName(gallery);
   const signed = await signedDownloadUrl(gallery.zipKey, name);
   if (signed) return NextResponse.redirect(signed);
+
+  if (usingGCS) {
+    // Com GCS a entrega é sempre por URL assinada: servir o ZIP pelo app
+    // estoura o limite de resposta do Cloud Run. Se chegou aqui, a
+    // assinatura falhou (ver log de signedDownloadUrl) — erro legível em
+    // vez de tela branca.
+    return new NextResponse(
+      "Não foi possível gerar o link de download. Tente de novo em instantes.",
+      { status: 500 }
+    );
+  }
 
   const stream = await readStream(gallery.zipKey);
   return new NextResponse(Readable.toWeb(stream), {
