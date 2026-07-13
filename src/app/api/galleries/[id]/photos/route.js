@@ -1,8 +1,10 @@
 import { NextResponse } from "next/server";
 import { dbConnect } from "@/lib/db";
+import User from "@/models/User";
 import Gallery from "@/models/Gallery";
 import GalleryPhoto from "@/models/GalleryPhoto";
 import { getSession } from "@/lib/auth";
+import { planLimits, isPro, MAX_PHOTO_BYTES } from "@/lib/plan";
 import { generatePreview, generatePlainPreview } from "@/lib/watermark";
 import { saveFile } from "@/lib/storage";
 import { normalizeImage, jpegFileName } from "@/lib/heic";
@@ -15,6 +17,16 @@ export async function POST(req, ctx) {
     return NextResponse.json({ error: "Faça login." }, { status: 401 });
   }
 
+  // Rejeita requisição gigante antes de materializar o corpo em memória
+  // (folga de 2 MB para os campos extras do form, ex.: descritores de rosto).
+  const contentLength = Number(req.headers.get("content-length") || 0);
+  if (contentLength > MAX_PHOTO_BYTES + 2 * 1024 * 1024) {
+    return NextResponse.json(
+      { error: "Cada foto pode ter no máximo 40 MB." },
+      { status: 413 }
+    );
+  }
+
   const { id } = await ctx.params;
   await dbConnect();
   const gallery = await Gallery.findById(id);
@@ -25,10 +37,45 @@ export async function POST(req, ctx) {
     );
   }
 
+  // Tetos por entrega (fotos e GB) conforme o plano — guardrail de custo.
+  // Uploads paralelos podem passar uma margem mínima do teto; aceitável.
+  const user = await User.findById(session.id).lean();
+  const limits = planLimits(user);
+  const [usage] = await GalleryPhoto.aggregate([
+    { $match: { gallery: gallery._id } },
+    { $group: { _id: null, count: { $sum: 1 }, bytes: { $sum: "$fileSize" } } },
+  ]);
+  const { count = 0, bytes = 0 } = usage || {};
+  if (count >= limits.galleryPhotos) {
+    return NextResponse.json(
+      {
+        error: `Esta entrega chegou ao limite de ${limits.galleryPhotos} fotos do seu plano.`,
+        upgrade: !isPro(user),
+      },
+      { status: 403 }
+    );
+  }
+
   const form = await req.formData();
   const file = form.get("file");
   if (!file || typeof file === "string") {
     return NextResponse.json({ error: "Envie um arquivo." }, { status: 400 });
+  }
+  if (file.size > MAX_PHOTO_BYTES) {
+    return NextResponse.json(
+      { error: `"${file.name}" passa de 40 MB — reduza e tente de novo.` },
+      { status: 413 }
+    );
+  }
+  if (bytes + file.size > limits.galleryBytes) {
+    const gb = Math.round(limits.galleryBytes / (1024 * 1024 * 1024));
+    return NextResponse.json(
+      {
+        error: `Esta entrega chegou ao limite de ${gb} GB do seu plano.`,
+        upgrade: !isPro(user),
+      },
+      { status: 403 }
+    );
   }
 
   // Descritores faciais calculados no navegador durante o upload (mesma

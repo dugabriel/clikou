@@ -4,18 +4,26 @@ import { COMMISSION_PERCENT } from "@/lib/mp";
 
 export const PRO_PRICE_CENTS = 4900;
 
+// Teto por arquivo no upload de entrega — JPEG de câmera profissional cabe
+// com folga; barra abuso com arquivo único gigante antes de processar.
+export const MAX_PHOTO_BYTES = 40 * 1024 * 1024; // 40 MB
+
 export const PLAN_LIMITS = {
   free: {
     collections: 1,
     photosPerCollection: 8,
     namedCollections: false,
     galleries: 1,
+    galleryPhotos: 100,
+    galleryBytes: 1 * 1024 * 1024 * 1024, // 1 GB por entrega
   },
   pro: {
     collections: 20,
     photosPerCollection: 100,
     namedCollections: true,
     galleries: Infinity,
+    galleryPhotos: 1500,
+    galleryBytes: 5 * 1024 * 1024 * 1024, // 5 GB por entrega
   },
 };
 
