@@ -23,7 +23,9 @@ export default function EventCard({ event }) {
           </div>
         )}
         <span className="absolute left-3 top-3 rounded-full bg-black/60 px-3 py-1 text-xs font-semibold text-yellow-400 backdrop-blur">
-          a partir de {formatPrice(event.defaultPriceCents)}
+          {event.promo
+            ? "Fotos grátis"
+            : `a partir de ${formatPrice(event.defaultPriceCents)}`}
         </span>
       </div>
       <div className="p-4">

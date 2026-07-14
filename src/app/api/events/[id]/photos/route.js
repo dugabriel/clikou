@@ -2,8 +2,10 @@ import { NextResponse } from "next/server";
 import { dbConnect } from "@/lib/db";
 import Event from "@/models/Event";
 import Photo from "@/models/Photo";
+import User from "@/models/User";
 import { getSession } from "@/lib/auth";
-import { generatePreview } from "@/lib/watermark";
+import { isPro } from "@/lib/plan";
+import { generatePreview, generatePlainPreview } from "@/lib/watermark";
 import { normalizeImage, jpegFileName } from "@/lib/heic";
 import { imageHashes } from "@/lib/imagehash";
 import { saveFile } from "@/lib/storage";
@@ -29,17 +31,33 @@ export async function POST(req, ctx) {
     return NextResponse.json({ error: "Envie um arquivo." }, { status: 400 });
   }
 
-  let priceCents = event.defaultPriceCents;
-  const priceForm = form.get("price");
-  if (priceForm) {
-    const p = toCents(priceForm);
-    if (p === null || p < 100) {
+  // Evento de divulgação: fotos gratuitas e preview sem marca d'água — exige
+  // Pro vigente também no upload (a flag é do evento, mas a assinatura pode
+  // ter caducado desde a criação).
+  let priceCents = 0;
+  if (event.promo) {
+    const seller = await User.findById(session.id)
+      .select("plan planCurrentPeriodEnd")
+      .lean();
+    if (!isPro(seller)) {
       return NextResponse.json(
-        { error: "Preço mínimo por foto: R$ 1,00." },
-        { status: 400 }
+        { error: "Evento de divulgação exige o plano Pro ativo para subir fotos." },
+        { status: 403 }
       );
     }
-    priceCents = p;
+  } else {
+    priceCents = event.defaultPriceCents;
+    const priceForm = form.get("price");
+    if (priceForm) {
+      const p = toCents(priceForm);
+      if (p === null || p < 100) {
+        return NextResponse.json(
+          { error: "Preço mínimo por foto: R$ 1,00." },
+          { status: 400 }
+        );
+      }
+      priceCents = p;
+    }
   }
 
   // Descritores faciais calculados no navegador durante o upload
@@ -88,7 +106,9 @@ export async function POST(req, ctx) {
 
   let derived;
   try {
-    derived = await generatePreview(original);
+    derived = event.promo
+      ? await generatePlainPreview(original)
+      : await generatePreview(original);
   } catch {
     return NextResponse.json(
       { error: `Arquivo "${file.name}" não é uma imagem válida.` },

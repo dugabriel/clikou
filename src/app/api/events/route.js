@@ -6,6 +6,7 @@ import { getSession } from "@/lib/auth";
 import { toCents } from "@/lib/currency";
 import { CATEGORY_VALUES } from "@/lib/categories";
 import { isSellerProfileComplete, SELLER_PROFILE_MESSAGE } from "@/lib/seller";
+import { isPro } from "@/lib/plan";
 
 export async function POST(req) {
   const session = await getSession();
@@ -15,14 +16,20 @@ export async function POST(req) {
 
   await dbConnect();
   const seller = await User.findById(session.id)
-    .select("cpf birthDate phone address")
+    .select("cpf birthDate phone address plan planCurrentPeriodEnd")
     .lean();
   if (!isSellerProfileComplete(seller)) {
     return NextResponse.json({ error: SELLER_PROFILE_MESSAGE }, { status: 403 });
   }
 
-  const { title, description, date, city, state, category, defaultPrice } =
+  const { title, description, date, city, state, category, defaultPrice, promo } =
     await req.json();
+  if (promo && !isPro(seller)) {
+    return NextResponse.json(
+      { error: "Evento de divulgação é um recurso do plano Pro." },
+      { status: 403 }
+    );
+  }
   if (!title) {
     return NextResponse.json({ error: "Informe o título." }, { status: 400 });
   }
@@ -46,12 +53,15 @@ export async function POST(req) {
       { status: 400 }
     );
   }
-  const defaultPriceCents = toCents(defaultPrice ?? "10,00");
-  if (defaultPriceCents === null || defaultPriceCents < 100) {
-    return NextResponse.json(
-      { error: "Preço mínimo por foto: R$ 1,00." },
-      { status: 400 }
-    );
+  let defaultPriceCents = 0;
+  if (!promo) {
+    defaultPriceCents = toCents(defaultPrice ?? "10,00");
+    if (defaultPriceCents === null || defaultPriceCents < 100) {
+      return NextResponse.json(
+        { error: "Preço mínimo por foto: R$ 1,00." },
+        { status: 400 }
+      );
+    }
   }
 
   await dbConnect();
@@ -64,6 +74,7 @@ export async function POST(req) {
     category: CATEGORY_VALUES.includes(category) ? category : "others",
     photographer: session.id,
     defaultPriceCents,
+    promo: !!promo,
   });
 
   return NextResponse.json({ ok: true, id: event._id.toString() });

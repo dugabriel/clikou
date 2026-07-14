@@ -2,14 +2,16 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { field, label, primaryButton } from "@/components/ui";
 import CityPicker from "@/components/CityPicker";
 import { CATEGORIES } from "@/lib/categories";
 
-export default function EventForm() {
+export default function EventForm({ pro = false }) {
   const router = useRouter();
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [promo, setPromo] = useState(false);
 
   async function submit(e) {
     e.preventDefault();
@@ -27,6 +29,7 @@ export default function EventForm() {
         state: form.get("state"),
         category: form.get("category"),
         defaultPrice: form.get("defaultPrice"),
+        promo,
       }),
     });
     const data = await res.json();
@@ -81,18 +84,50 @@ export default function EventForm() {
         />
       </div>
 
-      <div>
-        <label className={label}>Preço padrão por foto (R$)</label>
-        <input
-          name="defaultPrice"
-          defaultValue="10,00"
-          inputMode="decimal"
-          className={field}
-        />
-        <p className="mt-1.5 text-xs text-zinc-500">
-          Você pode ajustar o preço em cada envio de fotos.
+      {pro ? (
+        <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-zinc-700 bg-zinc-900/60 p-4">
+          <input
+            type="checkbox"
+            checked={promo}
+            onChange={(e) => setPromo(e.target.checked)}
+            className="mt-0.5 h-4 w-4 accent-yellow-400"
+          />
+          <span className="text-sm">
+            <span className="font-semibold">Evento de divulgação</span>
+            <span className="ml-2 rounded-full bg-yellow-400/15 px-2 py-0.5 text-xs font-semibold text-yellow-400">
+              Pro
+            </span>
+            <span className="mt-1 block text-zinc-400">
+              Fotos gratuitas e sem marca d&apos;água — quem estava lá baixa de
+              graça. A escolha não pode ser alterada depois.
+            </span>
+          </span>
+        </label>
+      ) : (
+        <p className="rounded-xl border border-zinc-800 bg-zinc-900/40 p-4 text-xs text-zinc-500">
+          No plano{" "}
+          <Link href="/dashboard/plan" className="text-yellow-400 hover:underline">
+            Pro
+          </Link>{" "}
+          você também pode criar eventos de divulgação: fotos gratuitas e sem
+          marca d&apos;água para promover sua cobertura.
         </p>
-      </div>
+      )}
+
+      {!promo && (
+        <div>
+          <label className={label}>Preço padrão por foto (R$)</label>
+          <input
+            name="defaultPrice"
+            defaultValue="10,00"
+            inputMode="decimal"
+            className={field}
+          />
+          <p className="mt-1.5 text-xs text-zinc-500">
+            Você pode ajustar o preço em cada envio de fotos.
+          </p>
+        </div>
+      )}
 
       {error && <p className="text-sm text-red-400">{error}</p>}
       <button disabled={submitting} className={`${primaryButton} w-full`}>

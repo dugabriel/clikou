@@ -32,6 +32,13 @@ export async function POST(req) {
   if (photos.length === 0) {
     return NextResponse.json({ error: "Fotos não encontradas." }, { status: 404 });
   }
+  // Fotos de evento de divulgação são gratuitas — não passam pelo checkout.
+  if (photos.some((p) => p.priceCents === 0)) {
+    return NextResponse.json(
+      { error: "Estas fotos são gratuitas — baixe direto na página do evento." },
+      { status: 400 }
+    );
+  }
 
   const total = photos.reduce((s, p) => s + p.priceCents, 0);
   const order = await Order.create({

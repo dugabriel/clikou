@@ -3,6 +3,7 @@ import { dbConnect } from "@/lib/db";
 import User from "@/models/User";
 import { getSession } from "@/lib/auth";
 import { isSellerProfileComplete } from "@/lib/seller";
+import { isPro } from "@/lib/plan";
 import EventForm from "@/components/EventForm";
 import { card } from "@/components/ui";
 
@@ -14,7 +15,7 @@ export default async function NewEvent() {
   const session = await getSession();
   await dbConnect();
   const seller = await User.findById(session.id)
-    .select("cpf birthDate phone address")
+    .select("cpf birthDate phone address plan planCurrentPeriodEnd")
     .lean();
   const complete = isSellerProfileComplete(seller);
 
@@ -33,7 +34,7 @@ export default async function NewEvent() {
             <p className="mt-1.5 text-sm text-zinc-400">
               Depois de criar, você sobe as fotos e elas ficam à venda na hora.
             </p>
-            <EventForm />
+            <EventForm pro={isPro(seller)} />
           </>
         ) : (
           <>

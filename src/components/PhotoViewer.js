@@ -17,6 +17,8 @@ export default function PhotoViewer({
   onBuy,
   buying,
   loggedIn,
+  promo = false,
+  eventId,
 }) {
   const touchX = useRef(null);
   const photo = photos[index];
@@ -135,50 +137,76 @@ export default function PhotoViewer({
         <div className="mx-auto flex max-w-3xl flex-wrap items-center justify-center gap-3 sm:justify-between">
           <div className="text-sm">
             <p className="text-lg font-bold text-yellow-400">
-              {formatPrice(photo.priceCents)}
+              {promo ? "Grátis" : formatPrice(photo.priceCents)}
             </p>
             <p className="text-zinc-500">
-              Alta resolução, sem marca d&apos;água
+              {promo
+                ? "Divulgação do fotógrafo — sem marca d'água"
+                : "Alta resolução, sem marca d'água"}
             </p>
           </div>
 
-          <div className="flex flex-wrap items-center justify-center gap-2">
-            {isPurchased ? (
+          {promo ? (
+            <div className="flex flex-wrap items-center justify-center gap-2">
               <a
-                href={`/api/photos/${photo.id}/download`}
-                className="rounded-full bg-emerald-500 px-6 py-2.5 font-semibold text-zinc-950 transition hover:bg-emerald-400"
+                href={`/api/photos/${photo.id}/preview?download=1`}
+                download
+                className="rounded-full bg-yellow-400 px-6 py-2.5 font-semibold text-zinc-950 transition hover:bg-yellow-300"
               >
-                Baixar ✓
+                Baixar grátis
               </a>
-            ) : (
-              <button
-                onClick={() => onToggle(photo.id)}
-                className={`rounded-full px-6 py-2.5 font-semibold transition ${
-                  isSelected
-                    ? "border border-yellow-400 text-yellow-400 hover:bg-yellow-400/10"
-                    : "bg-yellow-400 text-zinc-950 hover:bg-yellow-300"
-                }`}
+              <a
+                href={
+                  loggedIn
+                    ? `/api/photos/${photo.id}/download`
+                    : `/login?next=/events/${eventId}`
+                }
+                className="rounded-full border border-white/15 px-6 py-2.5 font-medium text-zinc-200 transition hover:border-yellow-400/60 hover:text-yellow-400"
               >
-                {isSelected ? "Selecionada ✓ — remover" : "Quero esta foto"}
-              </button>
-            )}
+                {loggedIn
+                  ? "Baixar em alta resolução"
+                  : "Criar conta p/ alta resolução"}
+              </a>
+            </div>
+          ) : (
+            <div className="flex flex-wrap items-center justify-center gap-2">
+              {isPurchased ? (
+                <a
+                  href={`/api/photos/${photo.id}/download`}
+                  className="rounded-full bg-emerald-500 px-6 py-2.5 font-semibold text-zinc-950 transition hover:bg-emerald-400"
+                >
+                  Baixar ✓
+                </a>
+              ) : (
+                <button
+                  onClick={() => onToggle(photo.id)}
+                  className={`rounded-full px-6 py-2.5 font-semibold transition ${
+                    isSelected
+                      ? "border border-yellow-400 text-yellow-400 hover:bg-yellow-400/10"
+                      : "bg-yellow-400 text-zinc-950 hover:bg-yellow-300"
+                  }`}
+                >
+                  {isSelected ? "Selecionada ✓ — remover" : "Quero esta foto"}
+                </button>
+              )}
 
-            {selected.size > 0 && (
-              <button
-                onClick={onBuy}
-                disabled={buying}
-                className="rounded-full border border-white/15 px-6 py-2.5 font-medium text-zinc-200 transition hover:border-yellow-400/60 hover:text-yellow-400 disabled:pointer-events-none disabled:opacity-50"
-              >
-                {buying
-                  ? "Aguarde…"
-                  : `${loggedIn ? "Comprar" : "Entrar e comprar"} ${
-                      selected.size
-                    } foto${selected.size > 1 ? "s" : ""} · ${formatPrice(
-                      totalCents
-                    )}`}
-              </button>
-            )}
-          </div>
+              {selected.size > 0 && (
+                <button
+                  onClick={onBuy}
+                  disabled={buying}
+                  className="rounded-full border border-white/15 px-6 py-2.5 font-medium text-zinc-200 transition hover:border-yellow-400/60 hover:text-yellow-400 disabled:pointer-events-none disabled:opacity-50"
+                >
+                  {buying
+                    ? "Aguarde…"
+                    : `${loggedIn ? "Comprar" : "Entrar e comprar"} ${
+                        selected.size
+                      } foto${selected.size > 1 ? "s" : ""} · ${formatPrice(
+                        totalCents
+                      )}`}
+                </button>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </div>

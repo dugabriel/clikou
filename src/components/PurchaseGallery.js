@@ -6,7 +6,9 @@ import { formatPrice } from "@/lib/currency";
 import PhotoFinder from "@/components/PhotoFinder";
 import PhotoViewer from "@/components/PhotoViewer";
 
-export default function PurchaseGallery({ photos, purchased, loggedIn, eventId }) {
+// promo: evento de divulgação — tudo grátis e sem marca d'água. A versão web
+// (1600px) baixa sem login; o original em alta pede cadastro (captação de lead).
+export default function PurchaseGallery({ photos, purchased, loggedIn, eventId, promo = false }) {
   const router = useRouter();
   const [selected, setSelected] = useState(new Set());
   const [buying, setBuying] = useState(false);
@@ -114,9 +116,18 @@ export default function PurchaseGallery({ photos, purchased, loggedIn, eventId }
               </span>
               <div className="absolute inset-x-0 bottom-0 flex items-center justify-between bg-gradient-to-t from-black/80 to-transparent px-3 py-2 text-sm">
                 <span className="font-medium">
-                  {formatPrice(p.priceCents)}
+                  {promo ? "Grátis" : formatPrice(p.priceCents)}
                 </span>
-                {isPurchased ? (
+                {promo ? (
+                  <a
+                    href={`/api/photos/${p.id}/preview?download=1`}
+                    download
+                    onClick={(e) => e.stopPropagation()}
+                    className="rounded bg-yellow-400 px-2 py-0.5 text-xs font-semibold text-zinc-950"
+                  >
+                    Baixar ↓
+                  </a>
+                ) : isPurchased ? (
                   <a
                     href={`/api/photos/${p.id}/download`}
                     onClick={(e) => e.stopPropagation()}
@@ -160,6 +171,8 @@ export default function PurchaseGallery({ photos, purchased, loggedIn, eventId }
           onBuy={buy}
           buying={buying}
           loggedIn={loggedIn}
+          promo={promo}
+          eventId={eventId}
         />
       )}
 

@@ -61,8 +61,12 @@ export default async function EventsDashboardPage() {
               <div>
                 <p className="font-semibold">{e.title}</p>
                 <p className="text-sm text-zinc-400">
-                  {photosByEvent[e._id.toString()] || 0} fotos · preço padrão{" "}
-                  {formatPrice(e.defaultPriceCents)}
+                  {photosByEvent[e._id.toString()] || 0} fotos ·{" "}
+                  {e.promo ? (
+                    <span className="text-yellow-400">divulgação — grátis</span>
+                  ) : (
+                    <>preço padrão {formatPrice(e.defaultPriceCents)}</>
+                  )}
                 </p>
               </div>
               <span className="text-sm text-yellow-400">Gerenciar →</span>

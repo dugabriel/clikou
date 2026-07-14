@@ -7,11 +7,11 @@ import { formatPrice } from "@/lib/currency";
 // Quantas exclusões em paralelo no modo seleção múltipla.
 const DELETE_CHUNK = 5;
 
-// Grade de gestão das fotos do evento: carrossel em tela cheia e exclusão —
-// uma a uma (X/carrossel) ou várias de uma vez no modo "Selecionar", estilo
-// Google Photos. Foto já vendida o servidor não deixa excluir (o comprador
-// baixa por ela).
-export default function EventPhotoGrid({ eventId, photos }) {
+// Grade de gestão das fotos do evento: carrossel em tela cheia, escolha da
+// capa e exclusão — uma a uma (X/carrossel) ou várias de uma vez no modo
+// "Selecionar", estilo Google Photos. Foto já vendida o servidor não deixa
+// excluir (o comprador baixa por ela).
+export default function EventPhotoGrid({ eventId, photos, coverId, promo }) {
   const router = useRouter();
   const [busy, setBusy] = useState(null);
   const [error, setError] = useState("");
@@ -19,8 +19,28 @@ export default function EventPhotoGrid({ eventId, photos }) {
   const [selecting, setSelecting] = useState(false);
   const [selected, setSelected] = useState(() => new Set());
   const [removing, setRemoving] = useState(false);
+  const [settingCover, setSettingCover] = useState(false);
 
   const src = (pid) => `/api/photos/${pid}/preview`;
+
+  // A capa aparece no card da vitrine, no compartilhamento e no hero da
+  // página pública do evento.
+  async function setCover(pid) {
+    setSettingCover(true);
+    setError("");
+    const res = await fetch(`/api/events/${eventId}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ cover: pid }),
+    });
+    setSettingCover(false);
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      setError(data.error || "Não foi possível definir a capa.");
+      return;
+    }
+    router.refresh();
+  }
 
   async function remove(pid) {
     if (!confirm("Remover esta foto do evento?")) return;
@@ -201,8 +221,13 @@ export default function EventPhotoGrid({ eventId, photos }) {
                 }`}
               />
               <p className="bg-zinc-900 px-2 py-1 text-center text-xs text-zinc-400">
-                {formatPrice(p.priceCents)}
+                {promo ? "Grátis" : formatPrice(p.priceCents)}
               </p>
+              {!selecting && p.id === coverId && (
+                <span className="pointer-events-none absolute left-1.5 top-1.5 rounded-full bg-yellow-400 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-zinc-950">
+                  Capa
+                </span>
+              )}
               {selecting && (
                 <span
                   className={`pointer-events-none absolute left-1.5 top-1.5 flex h-6 w-6 items-center justify-center rounded-full text-sm font-bold ${
@@ -237,7 +262,7 @@ export default function EventPhotoGrid({ eventId, photos }) {
           <div className="flex items-center justify-between p-4 text-white">
             <span className="text-sm text-zinc-400">
               {Math.min(open, photos.length - 1) + 1} / {photos.length} ·{" "}
-              {formatPrice(current.priceCents)}
+              {promo ? "Grátis" : formatPrice(current.priceCents)}
             </span>
             <button
               onClick={close}
@@ -278,13 +303,26 @@ export default function EventPhotoGrid({ eventId, photos }) {
             onClick={(e) => e.stopPropagation()}
           >
             {error && <p className="text-sm text-red-400">{error}</p>}
-            <button
-              onClick={() => remove(current.id)}
-              disabled={busy === current.id}
-              className="rounded-full border border-red-500/50 px-4 py-2 text-sm font-medium text-red-400 transition hover:bg-red-500/10 disabled:opacity-50"
-            >
-              {busy === current.id ? "Removendo…" : "Remover foto"}
-            </button>
+            <div className="flex flex-wrap items-center justify-center gap-2">
+              <button
+                onClick={() => setCover(current.id)}
+                disabled={settingCover || current.id === coverId}
+                className="rounded-full border border-yellow-400/50 px-4 py-2 text-sm font-medium text-yellow-400 transition hover:bg-yellow-400/10 disabled:opacity-50"
+              >
+                {current.id === coverId
+                  ? "É a capa do evento ✓"
+                  : settingCover
+                    ? "Definindo…"
+                    : "Definir como capa"}
+              </button>
+              <button
+                onClick={() => remove(current.id)}
+                disabled={busy === current.id}
+                className="rounded-full border border-red-500/50 px-4 py-2 text-sm font-medium text-red-400 transition hover:bg-red-500/10 disabled:opacity-50"
+              >
+                {busy === current.id ? "Removendo…" : "Remover foto"}
+              </button>
+            </div>
           </div>
         </div>
       )}

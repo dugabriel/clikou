@@ -47,8 +47,14 @@ export default async function ManageEvent({ params }) {
         </Link>
         <h2 className="mt-1 text-xl font-bold">{event.title}</h2>
         <p className="text-sm text-zinc-400">
-          {photos.length} foto{photos.length === 1 ? "" : "s"} · preço padrão{" "}
-          {formatPrice(event.defaultPriceCents)}
+          {photos.length} foto{photos.length === 1 ? "" : "s"} ·{" "}
+          {event.promo ? (
+            <span className="font-medium text-yellow-400">
+              evento de divulgação — fotos grátis, sem marca d&apos;água
+            </span>
+          ) : (
+            <>preço padrão {formatPrice(event.defaultPriceCents)}</>
+          )}
         </p>
       </div>
 
@@ -68,13 +74,15 @@ export default async function ManageEvent({ params }) {
               name: p.fileName,
               size: p.fileSize || 0,
             }))}
+            promo={!!event.promo}
           />
         </div>
         <p className="mt-2 text-sm text-zinc-500">
-          A prova pública sai sempre com marca d&apos;água — a foto limpa só
-          depois da compra — e os rostos são detectados para a busca por
-          selfie. O envio roda em segundo plano: acompanhe no cartão no canto
-          da tela. Clique numa foto para vê-la em tela cheia.
+          {event.promo
+            ? "Evento de divulgação: as fotos ficam públicas sem marca d'água e qualquer pessoa baixa de graça — o download em alta resolução pede cadastro. Os rostos são detectados para a busca por selfie."
+            : "A prova pública sai sempre com marca d'água — a foto limpa só depois da compra — e os rostos são detectados para a busca por selfie."}{" "}
+          O envio roda em segundo plano: acompanhe no cartão no canto da tela.
+          Clique numa foto para vê-la em tela cheia e definir a capa do evento.
         </p>
         <EventPhotoGrid
           eventId={id}
@@ -82,13 +90,15 @@ export default async function ManageEvent({ params }) {
             id: p._id.toString(),
             priceCents: p.priceCents,
           }))}
+          coverId={event.cover?.toString()}
+          promo={!!event.promo}
         />
       </section>
 
       {/* Passo 2 — divulgar */}
       <section className="mt-12">
         <h3 className="flex items-center gap-2.5 font-semibold">
-          <Step n={2} /> Divulgue e venda
+          <Step n={2} /> {event.promo ? "Divulgue" : "Divulgue e venda"}
         </h3>
         <div className="mt-4 rounded-xl border border-zinc-800 bg-zinc-900/60 p-6">
           {photos.length === 0 && (
@@ -112,7 +122,8 @@ export default async function ManageEvent({ params }) {
           </div>
           <p className="mt-4 text-sm text-zinc-400">
             Mande o link no grupo do WhatsApp ou poste no story — quem estava
-            lá encontra as próprias fotos com uma selfie e compra direto.
+            lá encontra as próprias fotos com uma selfie e{" "}
+            {event.promo ? "baixa de graça" : "compra direto"}.
           </p>
         </div>
       </section>

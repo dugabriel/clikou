@@ -7,7 +7,8 @@ import { useUploader } from "@/components/UploadManager";
 // gerenciador global (UploadManager) — o envio roda em segundo plano com a
 // marca d'água aplicada no servidor e os rostos extraídos no navegador para
 // a busca por selfie.
-export default function Uploader({ eventId, eventTitle, defaultPrice, existing }) {
+// promo: evento de divulgação — fotos gratuitas, sem campo de preço.
+export default function Uploader({ eventId, eventTitle, defaultPrice, existing, promo }) {
   const uploader = useUploader();
   const [price, setPrice] = useState(defaultPrice);
 
@@ -24,7 +25,7 @@ export default function Uploader({ eventId, eventTitle, defaultPrice, existing }
       endpoint: `/api/events/${eventId}/photos`,
       files,
       label: eventTitle,
-      fields: { price },
+      fields: promo ? {} : { price },
       indexFaces: true,
       existing,
     });
@@ -32,17 +33,19 @@ export default function Uploader({ eventId, eventTitle, defaultPrice, existing }
 
   return (
     <div className="flex flex-wrap items-end gap-3">
-      <div>
-        <label className="mb-1 block text-sm text-zinc-400">
-          Preço por foto neste envio (R$)
-        </label>
-        <input
-          value={price}
-          onChange={(e) => setPrice(e.target.value)}
-          inputMode="decimal"
-          className="w-32 rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2 outline-none focus:border-yellow-400"
-        />
-      </div>
+      {!promo && (
+        <div>
+          <label className="mb-1 block text-sm text-zinc-400">
+            Preço por foto neste envio (R$)
+          </label>
+          <input
+            value={price}
+            onChange={(e) => setPrice(e.target.value)}
+            inputMode="decimal"
+            className="w-32 rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2 outline-none focus:border-yellow-400"
+          />
+        </div>
+      )}
       <label className="cursor-pointer rounded-lg bg-yellow-400 px-5 py-2.5 font-semibold text-zinc-950 hover:bg-yellow-300">
         Selecionar fotos
         {/* .heic explícito: o iOS entrega o original sem transcodificar no

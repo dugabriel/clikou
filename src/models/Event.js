@@ -20,6 +20,10 @@ const EventSchema = new mongoose.Schema(
       index: true,
     },
     defaultPriceCents: { type: Number, default: 1000 },
+    // Evento de divulgação (recurso Pro): fotos gratuitas e sem marca d'água.
+    // Definido na criação e imutável — o preview limpo já foi pro bucket, então
+    // converter para pago exporia fotos sem marca.
+    promo: { type: Boolean, default: false },
     cover: { type: mongoose.Schema.Types.ObjectId, ref: "Photo" },
     published: { type: Boolean, default: true },
   },
