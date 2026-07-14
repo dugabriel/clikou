@@ -30,6 +30,7 @@ const PRO_PERKS = [
   "Comissão zero — 100% de cada venda é seu",
   "Até 20 coleções, 100 fotos cada, com nomes",
   "Galerias de entrega ilimitadas",
+  "Eventos de divulgação: fotos grátis, sem marca d'água",
   "Sua cor e sua capa, sem a marca clikou",
   "Métricas de visitas e cliques nos contatos",
   "Formulário de orçamento pra fechar trabalho",

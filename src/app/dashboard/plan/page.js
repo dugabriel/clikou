@@ -15,6 +15,7 @@ const PRO_PERKS = [
   "Comissão zero: fique com 100% de cada venda",
   "Portfólio por coleções (Casamentos, Corridas, Ensaios…)",
   `Até ${PLAN_LIMITS.pro.collections} coleções, ${PLAN_LIMITS.pro.photosPerCollection} fotos cada`,
+  "Eventos de divulgação: fotos grátis e sem marca d'água pra promover sua cobertura",
   "Página com a sua cara: cor e capa, sem marca clikou",
   "Métricas de visitas e cliques nos seus contatos",
   "Formulário de orçamento para receber contatos de trabalho",
