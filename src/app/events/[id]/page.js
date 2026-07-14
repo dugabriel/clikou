@@ -7,6 +7,7 @@ import Order from "@/models/Order";
 import "@/models/User";
 import { getSession } from "@/lib/auth";
 import PurchaseGallery from "@/components/PurchaseGallery";
+import ShareButtons from "@/components/ShareButtons";
 import mongoose from "mongoose";
 
 export const dynamic = "force-dynamic";
@@ -155,6 +156,15 @@ export default async function EventPage({ params }) {
     </p>
   );
 
+  const share = (
+    <div className="mt-5">
+      <ShareButtons
+        url={`${appUrl}/events/${id}`}
+        title={`Fotos de ${event.title} na clikou`}
+      />
+    </div>
+  );
+
   const promoBadge = event.promo && (
     <span className="mb-3 inline-block rounded-full border border-yellow-400/30 bg-yellow-400/10 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-yellow-400">
       Fotos grátis · divulgação
@@ -191,6 +201,7 @@ export default async function EventPage({ params }) {
                 {event.description}
               </p>
             )}
+            {share}
           </div>
         </div>
       ) : (
@@ -201,6 +212,7 @@ export default async function EventPage({ params }) {
           {event.description && (
             <p className="mt-3 max-w-2xl text-zinc-300">{event.description}</p>
           )}
+          {share}
         </div>
       )}
 
