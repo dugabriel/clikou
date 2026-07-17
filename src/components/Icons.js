@@ -66,6 +66,16 @@ export function CheckIcon(props) {
   );
 }
 
+export function MenuIcon(props) {
+  return (
+    <Base {...props}>
+      <path d="M4 7h16" />
+      <path d="M4 12h16" />
+      <path d="M4 17h16" />
+    </Base>
+  );
+}
+
 export function XIcon(props) {
   return (
     <Base {...props}>

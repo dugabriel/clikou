@@ -2,6 +2,7 @@ import Link from "next/link";
 import { getSession, isAdmin } from "@/lib/auth";
 import Logo from "@/components/Logo";
 import LinkPending from "@/components/LinkPending";
+import MobileMenu from "@/components/MobileMenu";
 
 export default async function Navbar() {
   const session = await getSession();
@@ -68,6 +69,7 @@ export default async function Navbar() {
               </form>
             </>
           )}
+          <MobileMenu loggedIn={!!session} admin={isAdmin(session)} />
         </div>
       </nav>
     </header>
