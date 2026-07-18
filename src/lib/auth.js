@@ -1,6 +1,7 @@
 import crypto from "crypto";
 import { SignJWT, jwtVerify } from "jose";
 import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 
 const secret = new TextEncoder().encode(
   process.env.AUTH_SECRET || "dev-secret-change-in-production"
@@ -138,4 +139,14 @@ const adminEmails = (process.env.ADMIN_EMAILS || "")
 
 export function isAdmin(session) {
   return !!session?.email && adminEmails.includes(session.email.toLowerCase());
+}
+
+// Toda página /admin chama isto no próprio page.js — o layout sozinho não
+// basta: com partial rendering o layout não re-renderiza a cada navegação,
+// então a checagem precisa ficar junto de quem busca os dados.
+export async function requireAdmin() {
+  const session = await getSession();
+  if (!session) redirect("/login?next=/admin");
+  if (!isAdmin(session)) redirect("/");
+  return session;
 }

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { requireAdmin } from "@/lib/auth";
 import { dbConnect } from "@/lib/db";
 import Order from "@/models/Order";
 import Withdrawal from "@/models/Withdrawal";
@@ -23,6 +24,7 @@ function Metric({ title, value, highlight = false }) {
 }
 
 export default async function AdminHome() {
+  await requireAdmin();
   await dbConnect();
 
   const [sales, pendingWithdrawals, latestSales] = await Promise.all([

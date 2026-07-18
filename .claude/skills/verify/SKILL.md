@@ -36,6 +36,10 @@ sobe tudo isolado (checkout MP e e-mail caem em modo dev; fotos vão para
 - Perfil de vendedor/plano: mais rápido gravar direto no mongo (driver
   `mongodb`): `cpf: "52998224725"`, `birthDate`, `phone`, `address {cep,street,
   number,city,state}`; `plan: "pro"` para recursos Pro.
+- Área /admin: incluir `ADMIN_EMAILS=<email do teste>` na env inline do dev
+  server e cadastrar esse e-mail via signup; sem a var ninguém é admin.
+  Inserts diretos no mongo: omitir `username` (o driver grava `undefined`
+  como `null` e colide com o índice único esparso).
 - Moderação de imagem sem credenciais cai em `blocked: false` (só loga erro).
 - Marca d'água dá pra verificar por pixel: subir imagem branca e medir a
   luminância da faixa inferior do preview (sem marca ≈ 255; com marca < 200,

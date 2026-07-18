@@ -1,11 +1,8 @@
-import { redirect } from "next/navigation";
-import { getSession, isAdmin } from "@/lib/auth";
+import { requireAdmin } from "@/lib/auth";
 import AdminNav from "@/components/AdminNav";
 
 export default async function AdminLayout({ children }) {
-  const session = await getSession();
-  if (!session) redirect("/login?next=/admin");
-  if (!isAdmin(session)) redirect("/");
+  await requireAdmin();
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-10">

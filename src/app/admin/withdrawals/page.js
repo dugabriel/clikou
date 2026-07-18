@@ -1,3 +1,4 @@
+import { requireAdmin } from "@/lib/auth";
 import { dbConnect } from "@/lib/db";
 import Withdrawal from "@/models/Withdrawal";
 import "@/models/User";
@@ -27,6 +28,7 @@ function WithdrawalRow({ withdrawal, children }) {
 }
 
 export default async function AdminWithdrawals() {
+  await requireAdmin();
   await dbConnect();
 
   const [pending, processed] = await Promise.all([
