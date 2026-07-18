@@ -90,8 +90,10 @@ export default async function RootLayout({ children }) {
                 >
                   <InstagramIcon size={20} />
                 </a>
+                {/* Página do Facebook em recuperação (previsão: ago/2026);
+                    até lá o ícone aponta para o Instagram. */}
                 <a
-                  href="https://www.facebook.com/clikou.click"
+                  href="https://www.instagram.com/clikou.click/"
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label="Facebook da clikou"
