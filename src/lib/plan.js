@@ -27,6 +27,13 @@ export const PLAN_LIMITS = {
   },
 };
 
+// Cadastro de clientes (mini-CRM): liberado para todos por ora — um CRM
+// populado é gancho de conversão. Para virar exclusivo do Pro, trocar o
+// retorno por isPro(user); a API, a página e os pickers já consultam aqui.
+export function canUseClients() {
+  return true;
+}
+
 // Assinante Pro com ciclo vigente. Sem planCurrentPeriodEnd (ativado no
 // modo dev) também vale, para não travar o fluxo enquanto o MP real não entra.
 export function isPro(user) {

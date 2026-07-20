@@ -18,11 +18,20 @@ const VARIANTS = {
   c: "[cç]",
 };
 
-export function accentInsensitiveRegex(text) {
-  const pattern = normalize(text)
+function accentInsensitivePattern(text) {
+  return normalize(text)
     .replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
     .replace(/[aeiouc]/g, (l) => VARIANTS[l]);
-  return new RegExp(pattern, "i");
+}
+
+export function accentInsensitiveRegex(text) {
+  return new RegExp(accentInsensitivePattern(text), "i");
+}
+
+// Casamento exato (ancorado) ignorando acentos: "joao" ≡ "João", mas "Ana"
+// não casa com "Mariana". Usado na checagem de cliente duplicado.
+export function accentInsensitiveExactRegex(text) {
+  return new RegExp(`^${accentInsensitivePattern(text)}$`, "i");
 }
 
 const STATE_BY_NAME = {

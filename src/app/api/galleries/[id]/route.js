@@ -5,6 +5,7 @@ import Gallery from "@/models/Gallery";
 import GalleryPhoto from "@/models/GalleryPhoto";
 import { getSession } from "@/lib/auth";
 import { deleteFile } from "@/lib/storage";
+import { ownedClientById } from "@/lib/clients";
 
 async function ownedGallery(id, session) {
   if (!mongoose.isValidObjectId(id)) return null;
@@ -37,6 +38,30 @@ export async function PATCH(req, ctx) {
   }
   if (typeof body.clientName === "string") {
     gallery.clientName = body.clientName.trim();
+  }
+  // Vínculo com o cliente do CRM: "" desvincula (o nome/e-mail denormalizados
+  // ficam); um id vincula e copia o nome — o e-mail só se a galeria não tiver
+  // um (o notify pode ter definido outro destinatário para esta entrega).
+  if (typeof body.clientId === "string") {
+    if (!body.clientId) {
+      gallery.client = undefined;
+    } else if (
+      !gallery.client ||
+      gallery.client.toString() !== body.clientId
+    ) {
+      const client = await ownedClientById(session.id, body.clientId);
+      if (!client) {
+        return NextResponse.json(
+          { error: "Cliente não encontrado." },
+          { status: 400 }
+        );
+      }
+      gallery.client = client._id;
+      gallery.clientName = client.name;
+      if (!gallery.clientEmail && client.email) {
+        gallery.clientEmail = client.email;
+      }
+    }
   }
   if (typeof body.pin === "string") {
     // Só dígitos, no máximo 8 — vazio remove o PIN.

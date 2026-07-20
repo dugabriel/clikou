@@ -4,6 +4,7 @@ import User from "@/models/User";
 import Gallery from "@/models/Gallery";
 import { getSession } from "@/lib/auth";
 import { planLimits } from "@/lib/plan";
+import { ownedClientById } from "@/lib/clients";
 
 // Cria uma galeria de entrega. Grátis pode ter 1; Pro, ilimitado.
 export async function POST(req) {
@@ -36,12 +37,27 @@ export async function POST(req) {
     );
   }
 
+  // Cliente do CRM (opcional): valida a posse e denormaliza nome/e-mail —
+  // clientName do body (texto livre) segue aceito para compatibilidade.
+  let client = null;
+  if (body.clientId) {
+    client = await ownedClientById(session.id, body.clientId);
+    if (!client) {
+      return NextResponse.json(
+        { error: "Cliente não encontrado." },
+        { status: 400 }
+      );
+    }
+  }
+
   // Opções da galeria vêm junto na criação (o fluxo pede antes do upload),
   // com a mesma sanitização do PATCH.
   const gallery = await Gallery.create({
     photographer: session.id,
     title: title.trim(),
-    clientName: (clientName || "").trim(),
+    client: client ? client._id : undefined,
+    clientName: client ? client.name : (clientName || "").trim(),
+    clientEmail: client ? client.email : "",
     pin:
       typeof body.pin === "string"
         ? body.pin.replace(/\D/g, "").slice(0, 8)

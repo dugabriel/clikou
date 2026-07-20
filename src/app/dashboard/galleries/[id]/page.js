@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import mongoose from "mongoose";
 import { dbConnect } from "@/lib/db";
+import Client from "@/models/Client";
 import Gallery from "@/models/Gallery";
 import GalleryPhoto from "@/models/GalleryPhoto";
 import { getSession } from "@/lib/auth";
@@ -52,16 +53,30 @@ export default async function ManageGallery({ params }) {
   const gallery = await Gallery.findById(id).lean();
   if (!gallery || gallery.photographer.toString() !== session.id) notFound();
 
-  const photos = await GalleryPhoto.find({ gallery: id })
-    .sort({ createdAt: -1 })
-    .select("favorited fileName fileSize")
-    .lean();
+  const [photos, clients] = await Promise.all([
+    GalleryPhoto.find({ gallery: id })
+      .sort({ createdAt: -1 })
+      .select("favorited fileName fileSize")
+      .lean(),
+    Client.find({ photographer: session.id })
+      .collation({ locale: "pt" })
+      .sort({ name: 1 })
+      .select("name")
+      .lean(),
+  ]);
+  const clientOptions = clients.map((c) => ({
+    id: c._id.toString(),
+    name: c.name,
+  }));
 
   const favorites = photos.filter((p) => p.favorited).length;
 
   const g = {
     id: id,
     slug: gallery.slug,
+    clientId: gallery.client ? gallery.client.toString() : "",
+    clientName: gallery.clientName || "",
+    clientEmail: gallery.clientEmail || "",
     pin: gallery.pin || "",
     expiresAt: gallery.expiresAt
       ? new Date(gallery.expiresAt).toISOString().slice(0, 10)
@@ -84,7 +99,20 @@ export default async function ManageGallery({ params }) {
         </Link>
         <h2 className="mt-1 text-xl font-bold">{gallery.title}</h2>
         <p className="flex items-center gap-1 text-sm text-zinc-400">
-          {gallery.clientName ? `${gallery.clientName} · ` : ""}
+          {gallery.clientName &&
+            (gallery.client ? (
+              <>
+                <Link
+                  href={`/dashboard/clients?q=${encodeURIComponent(gallery.clientName)}`}
+                  className="hover:text-yellow-400"
+                >
+                  {gallery.clientName}
+                </Link>
+                {" · "}
+              </>
+            ) : (
+              `${gallery.clientName} · `
+            ))}
           {photos.length} foto{photos.length === 1 ? "" : "s"}
           {favorites > 0 && (
             <>
@@ -188,7 +216,7 @@ export default async function ManageGallery({ params }) {
             <Chevron />
           </summary>
           <div className="border-t border-zinc-800 px-6 py-5">
-            <GallerySettings gallery={g} />
+            <GallerySettings gallery={g} clients={clientOptions} />
           </div>
         </details>
 

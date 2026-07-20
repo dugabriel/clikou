@@ -19,6 +19,15 @@ const GallerySchema = new mongoose.Schema(
       index: true,
     },
     title: { type: String, required: true, trim: true },
+    // Cliente do CRM (opcional). clientName/clientEmail abaixo continuam como
+    // denormalização: o nome sincroniza quando o cadastro é renomeado; o
+    // e-mail é copiado só no vínculo (se vazio) e pode ser sobrescrito por
+    // entrega no notify. Galerias antigas ficam só com o texto livre.
+    client: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Client",
+      index: true,
+    },
     clientName: { type: String, default: "" },
     // E-mail do cliente (para avisar que a galeria chegou). Opcional.
     clientEmail: { type: String, default: "" },

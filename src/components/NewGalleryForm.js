@@ -8,11 +8,17 @@ import { useRouter } from "next/navigation";
 // galeria nasce e o fotógrafo cai na tela de upload — assim as fotos já
 // entram com a configuração certa (a marca d'água só vale para fotos
 // enviadas depois de ativada).
-export default function NewGalleryForm() {
+//
+// `clients` vem do CRM: dá pra escolher um existente ou cadastrar um novo
+// ali mesmo ("+ Novo cliente" cria via /api/clients antes da galeria).
+export default function NewGalleryForm({ clients = [] }) {
   const router = useRouter();
   const [step, setStep] = useState(1);
   const [title, setTitle] = useState("");
-  const [clientName, setClientName] = useState("");
+  const [clientId, setClientId] = useState("");
+  const [newClientName, setNewClientName] = useState("");
+  const [newClientEmail, setNewClientEmail] = useState("");
+  const [newClientPhone, setNewClientPhone] = useState("");
   const [pin, setPin] = useState("");
   const [expiresAt, setExpiresAt] = useState("");
   const [downloadEnabled, setDownloadEnabled] = useState(true);
@@ -26,17 +32,42 @@ export default function NewGalleryForm() {
     e.preventDefault();
     if (step === 1) {
       if (!title.trim()) return;
+      if (clientId === "__new" && !newClientName.trim()) return;
       setStep(2);
       return;
     }
     setSubmitting(true);
     setError("");
+
+    // "+ Novo cliente": cadastra no CRM primeiro (reusa validação e checagem
+    // de duplicado de lá) e só então cria a galeria já vinculada.
+    let linkedClientId = clientId === "__new" ? "" : clientId;
+    if (clientId === "__new") {
+      const res = await fetch("/api/clients", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: newClientName,
+          email: newClientEmail,
+          phone: newClientPhone,
+        }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setError(data.error || "Erro ao cadastrar o cliente.");
+        setSubmitting(false);
+        setStep(1);
+        return;
+      }
+      linkedClientId = data.id;
+    }
+
     const res = await fetch("/api/galleries", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         title,
-        clientName,
+        clientId: linkedClientId,
         pin: pin.replace(/\D/g, "").slice(0, 8),
         expiresAt: expiresAt || null,
         downloadEnabled,
@@ -69,35 +100,91 @@ export default function NewGalleryForm() {
       </p>
 
       {step === 1 ? (
-        <div className="mt-3 flex flex-wrap items-end gap-4">
-          <div className="min-w-[220px] flex-1">
-            <label className="mb-1 block text-sm text-zinc-400">
-              Nome da galeria
-            </label>
-            <input
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder="Ex.: Casamento Ana &amp; João"
-              className={input}
-            />
+        <div className="mt-3">
+          <div className="flex flex-wrap items-end gap-4">
+            <div className="min-w-[220px] flex-1">
+              <label className="mb-1 block text-sm text-zinc-400">
+                Nome da galeria
+              </label>
+              <input
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                placeholder="Ex.: Casamento Ana &amp; João"
+                className={input}
+              />
+            </div>
+            <div className="min-w-[180px] flex-1">
+              <label className="mb-1 block text-sm text-zinc-400">
+                Cliente (opcional)
+              </label>
+              <select
+                value={clientId}
+                onChange={(e) => setClientId(e.target.value)}
+                className={input}
+              >
+                <option value="">Sem cliente</option>
+                {clients.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.name}
+                  </option>
+                ))}
+                <option value="__new">+ Novo cliente</option>
+              </select>
+            </div>
+            <button
+              disabled={
+                !title.trim() ||
+                (clientId === "__new" && !newClientName.trim())
+              }
+              className="rounded-lg bg-yellow-400 px-5 py-2.5 font-semibold text-zinc-950 hover:bg-yellow-300 disabled:opacity-50"
+            >
+              Continuar
+            </button>
           </div>
-          <div className="min-w-[180px] flex-1">
-            <label className="mb-1 block text-sm text-zinc-400">
-              Cliente (opcional)
-            </label>
-            <input
-              value={clientName}
-              onChange={(e) => setClientName(e.target.value)}
-              placeholder="Ex.: Ana Duarte"
-              className={input}
-            />
-          </div>
-          <button
-            disabled={!title.trim()}
-            className="rounded-lg bg-yellow-400 px-5 py-2.5 font-semibold text-zinc-950 hover:bg-yellow-300 disabled:opacity-50"
-          >
-            Continuar
-          </button>
+
+          {clientId === "__new" && (
+            <div className="mt-4 grid gap-4 sm:grid-cols-3">
+              <div>
+                <label className="mb-1 block text-sm text-zinc-400">
+                  Nome do cliente
+                </label>
+                <input
+                  value={newClientName}
+                  onChange={(e) => setNewClientName(e.target.value)}
+                  placeholder="Ex.: Ana Duarte"
+                  className={input}
+                />
+              </div>
+              <div>
+                <label className="mb-1 block text-sm text-zinc-400">
+                  E-mail (opcional)
+                </label>
+                <input
+                  type="email"
+                  value={newClientEmail}
+                  onChange={(e) => setNewClientEmail(e.target.value)}
+                  placeholder="ana@email.com"
+                  className={input}
+                />
+              </div>
+              <div>
+                <label className="mb-1 block text-sm text-zinc-400">
+                  Telefone (opcional)
+                </label>
+                <input
+                  value={newClientPhone}
+                  onChange={(e) => setNewClientPhone(e.target.value)}
+                  placeholder="(11) 99999-0000"
+                  className={input}
+                />
+              </div>
+              <p className="text-xs text-zinc-500 sm:col-span-3">
+                O cliente entra no seu cadastro em{" "}
+                <span className="text-zinc-400">Clientes</span> — endereço e
+                anotações podem ser preenchidos depois por lá.
+              </p>
+            </div>
+          )}
         </div>
       ) : (
         <div className="mt-3">

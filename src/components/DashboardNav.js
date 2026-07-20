@@ -10,6 +10,7 @@ import LinkPending from "@/components/LinkPending";
 const tabs = [
   { href: "/dashboard", label: "Início" },
   { href: "/dashboard/galleries", label: "Entregas" },
+  { href: "/dashboard/clients", label: "Clientes" },
   { href: "/dashboard/events", label: "Eventos" },
   { href: "/dashboard/profile", label: "Minha página" },
   { href: "/dashboard/marketing", label: "Divulgação" },

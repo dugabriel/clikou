@@ -3,11 +3,21 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
-// Opções da galeria: PIN, expiração, download, favoritos, marca d'água na
-// prova. Sem cartão nem título próprios — a página envolve num <details>
-// recolhido, já que tudo isso é configurado na criação e raramente muda.
-export default function GallerySettings({ gallery }) {
+// Opções da galeria: cliente vinculado, PIN, expiração, download, favoritos,
+// marca d'água na prova. Sem cartão nem título próprios — a página envolve
+// num <details> recolhido, já que tudo isso é configurado na criação e
+// raramente muda.
+export default function GallerySettings({ gallery, clients = [] }) {
   const router = useRouter();
+  const [clientId, setClientId] = useState(gallery.clientId || "");
+  // Galeria antiga com cliente em texto livre: o "+ Novo cliente" já vem
+  // preenchido com o que a galeria tem — vincular o legado vira 2 cliques.
+  const [newClientName, setNewClientName] = useState(
+    gallery.clientId ? "" : gallery.clientName || ""
+  );
+  const [newClientEmail, setNewClientEmail] = useState(
+    gallery.clientId ? "" : gallery.clientEmail || ""
+  );
   const [pin, setPin] = useState(gallery.pin);
   const [expiresAt, setExpiresAt] = useState(gallery.expiresAt);
   const [downloadEnabled, setDownloadEnabled] = useState(
@@ -27,10 +37,34 @@ export default function GallerySettings({ gallery }) {
     setSaving(true);
     setSaved(false);
     setError("");
+
+    // "+ Novo cliente": cadastra no CRM primeiro e vincula em seguida.
+    let linkedClientId = clientId === "__new" ? "" : clientId;
+    if (clientId === "__new") {
+      if (!newClientName.trim()) {
+        setError("Informe o nome do cliente.");
+        setSaving(false);
+        return;
+      }
+      const res = await fetch("/api/clients", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: newClientName, email: newClientEmail }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setError(data.error || "Não foi possível cadastrar o cliente.");
+        setSaving(false);
+        return;
+      }
+      linkedClientId = data.id;
+    }
+
     const res = await fetch(`/api/galleries/${gallery.id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
+        clientId: linkedClientId,
         pin: pin.replace(/\D/g, "").slice(0, 8),
         expiresAt: expiresAt || null,
         downloadEnabled,
@@ -44,6 +78,7 @@ export default function GallerySettings({ gallery }) {
       setError("Não foi possível salvar.");
       return;
     }
+    if (clientId === "__new") setClientId(linkedClientId);
     setSaved(true);
     router.refresh();
   }
@@ -51,8 +86,54 @@ export default function GallerySettings({ gallery }) {
   const checkbox =
     "h-4 w-4 rounded border-zinc-600 bg-zinc-900 accent-yellow-400";
 
+  const input =
+    "w-full rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2 outline-none focus:border-yellow-400";
+
   return (
     <form onSubmit={save}>
+      <div className="mb-5">
+        <label className="mb-1 block text-sm text-zinc-400">Cliente</label>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <select
+            value={clientId}
+            onChange={(e) => setClientId(e.target.value)}
+            className={input}
+          >
+            <option value="">Sem cliente</option>
+            {clients.map((c) => (
+              <option key={c.id} value={c.id}>
+                {c.name}
+              </option>
+            ))}
+            <option value="__new">+ Novo cliente</option>
+          </select>
+          {clientId === "__new" && (
+            <>
+              <input
+                value={newClientName}
+                onChange={(e) => setNewClientName(e.target.value)}
+                placeholder="Nome do cliente"
+                className={input}
+              />
+              <input
+                type="email"
+                value={newClientEmail}
+                onChange={(e) => setNewClientEmail(e.target.value)}
+                placeholder="E-mail (opcional)"
+                className={input}
+              />
+            </>
+          )}
+        </div>
+        {!clientId && gallery.clientName && (
+          <p className="mt-1 text-xs text-zinc-500">
+            Esta galeria mostra &ldquo;{gallery.clientName}&rdquo; como
+            cliente, mas sem vínculo com o cadastro — escolha &ldquo;+ Novo
+            cliente&rdquo; para cadastrá-lo.
+          </p>
+        )}
+      </div>
+
       <div className="grid gap-5 sm:grid-cols-2">
         <div>
           <label className="mb-1 block text-sm text-zinc-400">
