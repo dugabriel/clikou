@@ -372,7 +372,10 @@ export default function UploadProvider({ children }) {
               {failed.length > 0 && (
                 <div className="mt-2 max-h-36 space-y-1 overflow-y-auto">
                   {failed.map((i) => (
-                    <p key={i.id} className="truncate text-xs text-red-400">
+                    <p
+                      key={i.id}
+                      className="break-words text-xs text-red-400"
+                    >
                       {i.name}: {i.error}
                     </p>
                   ))}
