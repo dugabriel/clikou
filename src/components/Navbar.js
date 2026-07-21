@@ -21,6 +21,9 @@ export default async function Navbar() {
           <Link href="/about" className="transition hover:text-white">
             <LinkPending>Sobre</LinkPending>
           </Link>
+          <Link href="/parceria" className="transition hover:text-white">
+            <LinkPending>Parceria</LinkPending>
+          </Link>
         </div>
 
         <div className="ml-auto flex items-center gap-3 text-sm">

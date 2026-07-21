@@ -42,6 +42,9 @@ export default function MobileMenu({ loggedIn, admin }) {
             <Link href="/about" className={itemClass}>
               Sobre
             </Link>
+            <Link href="/parceria" className={itemClass}>
+              Parceria
+            </Link>
             {loggedIn && (
               <Link href="/my-purchases" className={itemClass}>
                 Minhas compras

@@ -253,3 +253,46 @@ export async function sendSupportTicketEmail({ user, category, message, page }) 
       </div>`,
   });
 }
+
+// Pedido de parceria (Pro grátis) vindo da landing de anúncio: vai pra caixa
+// do suporte com reply-to pro fotógrafo — a triagem/aprovação continua manual
+// em /admin/photographers (toggle "Pro · parceria").
+export async function sendPartnershipRequestEmail({
+  email,
+  instagram,
+  facebook,
+  website,
+  appUrl,
+}) {
+  const links = [
+    instagram && ["Instagram", instagram],
+    facebook && ["Facebook", facebook],
+    website && ["Site/portfólio", website],
+  ].filter(Boolean);
+  return sendEmail({
+    to: SUPPORT_EMAIL,
+    replyTo: email,
+    subject: `[Parceria] Pedido de Pro grátis — ${email}`,
+    html: `
+      <div style="font-family:sans-serif;max-width:520px">
+        <h2>Novo pedido de parceria</h2>
+        <p style="color:#71717a;font-size:13px">
+          E-mail de cadastro: <strong>${escapeHtml(email)}</strong>
+        </p>
+        <ul style="padding-left:18px">
+          ${links
+            .map(
+              ([label, value]) =>
+                `<li><strong>${label}:</strong> ${escapeHtml(value)}</li>`
+            )
+            .join("")}
+        </ul>
+        <p style="margin:24px 0">
+          <a href="${appUrl}/admin/photographers?q=${encodeURIComponent(email)}"
+             style="background:#facc15;color:#18181b;text-decoration:none;font-weight:bold;padding:12px 28px;border-radius:999px;display:inline-block">
+            Ver fotógrafo no admin
+          </a>
+        </p>
+      </div>`,
+  });
+}
