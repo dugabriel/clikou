@@ -5,7 +5,7 @@ export const metadata = {
   title: "Parceria clikou — Pro grátis para fotógrafos",
   description:
     "Fotógrafos com trabalho ativo no Instagram, Facebook ou portfólio podem pedir o plano Pro do clikou de graça: comissão zero, galerias ilimitadas e portfólio completo.",
-  alternates: { canonical: "/parceria" },
+  alternates: { canonical: "/partnership" },
 };
 
 const PERKS = [

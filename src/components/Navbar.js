@@ -21,7 +21,7 @@ export default async function Navbar() {
           <Link href="/about" className="transition hover:text-white">
             <LinkPending>Sobre</LinkPending>
           </Link>
-          <Link href="/parceria" className="transition hover:text-white">
+          <Link href="/partnership" className="transition hover:text-white">
             <LinkPending>Parceria</LinkPending>
           </Link>
         </div>

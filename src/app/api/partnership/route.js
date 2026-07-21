@@ -10,7 +10,7 @@ const EMAIL_RE = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
 // por IP + captcha (mesmo trio do cadastro).
 const IP_LIMIT = { limit: 5, windowMs: 10 * 60 * 1000 };
 
-// Pedido de parceria (Pro grátis) da landing /parceria: só notifica o
+// Pedido de parceria (Pro grátis) da landing /partnership: só notifica o
 // suporte por e-mail — a aprovação continua manual em /admin/photographers.
 export async function POST(req) {
   const { email, instagram, facebook, website, empresa, captcha, captchaToken } =
