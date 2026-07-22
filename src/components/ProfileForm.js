@@ -306,7 +306,7 @@ export default function ProfileForm({ profile, pro, limits, collections: initial
                     type="button"
                     onClick={removeCover}
                     title="Remover capa"
-                    className="absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-full bg-black/70 text-zinc-300 opacity-0 transition hover:text-white group-hover:opacity-100"
+                    className="absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-full bg-black/70 text-zinc-300 opacity-100 transition hover:text-white sm:opacity-0 sm:group-hover:opacity-100"
                   >
                     <XIcon size={14} />
                   </button>
@@ -640,7 +640,7 @@ function PhotoGrid({ photos, max, uploading, onUpload, onRemove }) {
             type="button"
             onClick={() => onRemove(key)}
             title="Remover"
-            className="absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-full bg-black/70 text-zinc-300 opacity-0 transition hover:text-white group-hover:opacity-100"
+            className="absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-full bg-black/70 text-zinc-300 opacity-100 transition hover:text-white sm:opacity-0 sm:group-hover:opacity-100"
           >
             <XIcon size={14} />
           </button>
