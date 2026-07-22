@@ -6,6 +6,7 @@ import Event from "@/models/Event";
 import Photo from "@/models/Photo";
 import EventCard from "@/components/EventCard";
 import LeadForm from "@/components/LeadForm";
+import PortfolioGallery from "@/components/PortfolioGallery";
 import { getSession } from "@/lib/auth";
 import { isPro, normalizedCollections } from "@/lib/plan";
 import { BrandIcon } from "@/components/Logo";
@@ -204,44 +205,19 @@ export default async function PublicProfile({ params }) {
                       {c.name}
                     </h3>
                   )}
-                  <div className="grid auto-rows-[160px] grid-cols-2 gap-3 sm:auto-rows-[200px] sm:grid-cols-4">
-                    {c.photos.map((key) => (
-                      <div
-                        key={key}
-                        className="overflow-hidden rounded-2xl border border-white/5"
-                      >
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img
-                          src={`/api/${key}`}
-                          alt={c.name || `Portfólio de ${profile.name}`}
-                          loading="lazy"
-                          className="h-full w-full object-cover transition duration-500 hover:scale-105"
-                        />
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="grid auto-rows-[160px] grid-cols-2 gap-3 sm:auto-rows-[200px] sm:grid-cols-4">
-              {collections[0].photos.map((key, i) => (
-                <div
-                  key={key}
-                  className={`overflow-hidden rounded-2xl border border-white/5 ${
-                    i === 0 ? "col-span-2 row-span-2" : ""
-                  }`}
-                >
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={`/api/${key}`}
-                    alt={`Portfólio de ${profile.name}`}
-                    loading="lazy"
-                    className="h-full w-full object-cover transition duration-500 hover:scale-105"
+                  <PortfolioGallery
+                    photos={c.photos}
+                    alt={c.name || `Portfólio de ${profile.name}`}
                   />
                 </div>
               ))}
             </div>
+          ) : (
+            <PortfolioGallery
+              photos={collections[0].photos}
+              alt={`Portfólio de ${profile.name}`}
+              spotlightFirst
+            />
           )}
         </section>
       )}
