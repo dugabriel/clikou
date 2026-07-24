@@ -35,7 +35,7 @@ steps:
       # cortava downloads longos no meio e o zip chegava corrompido.
       - --timeout=3600
       # Domínio mapeado no Cloud Run (domain mapping em us-central1)
-      - --set-env-vars=APP_URL=https://clikou.click,GCS_BUCKET=clikou-fotos-production,COMMISSION_PERCENT=10,ADMIN_EMAILS=eduardofranciscogabriel@gmail.com,EMAIL_FROM=nao-responda@clikou.click,GOOGLE_CLIENT_ID=405960783124-05d98dgpkdp9cfbdj2o5hmt9s34qolt3.apps.googleusercontent.com,SUBSCRIPTIONS_ENABLED=1
+      - --set-env-vars=APP_URL=https://clikou.click,GCS_BUCKET=clikou-fotos-production,COMMISSION_PERCENT=10,ADMIN_EMAILS=eduardofranciscogabriel@gmail.com,EMAIL_FROM=nao-responda@clikou.click,SUPPORT_EMAIL=contato@clikou.click,GOOGLE_CLIENT_ID=405960783124-05d98dgpkdp9cfbdj2o5hmt9s34qolt3.apps.googleusercontent.com,SUBSCRIPTIONS_ENABLED=1
       - --set-secrets=MONGODB_URI=clikou-production-mongodb-uri:latest,AUTH_SECRET=clikou-production-auth-secret:latest,MAILERSEND_TOKEN=clikou-production-mailersend-token:latest,GOOGLE_CLIENT_SECRET=clikou-production-google-client-secret:latest,MP_ACCESS_TOKEN=clikou-production-mp-access-token:latest,MP_CLIENT_ID=clikou-production-mp-client-id:latest,MP_CLIENT_SECRET=clikou-production-mp-client-secret:latest,MP_SUBSCRIPTION_ACCESS_TOKEN=clikou-production-mp-subscription-token:latest
 
 images:
